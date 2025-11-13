@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Lecture: Mastering Software Requirements & Modeling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Stone, Teal) -->
+    <!-- Application Structure Plan: A multi-section SPA with a sticky top navigation bar. Sections 1-3 cover the core lecture content (Principles, Process, Modeling) using interactive elements like accordions and tabs. Sections 4-6 provide practical application with Exercises, supportive Tips, and Evaluation Criteria to create a complete learning module. This structure guides the user from theory to practice in a logical, explorable flow and ensures compatibility with embedding platforms. -->
+    <!-- Visualization & Content Choices: Report Info: UML Diagrams (Use Case, Class, State) -> Goal: Organize & Inform -> Viz/Presentation Method: Recreated diagrams using structured HTML divs and Tailwind CSS for styling (borders, flexbox) to represent classes, actors, states, and relationships. -> Interaction: Static visual representation. -> Justification: This approach avoids SVG/image dependencies, keeps the app in a single file, and provides a clear visual model of the concepts without external libraries. Report Info: Code Examples -> Goal: Inform -> Presentation: Placed in styled <pre><code> blocks with interactive run buttons. -> Justification: Standard, clear way to present code while adding engagement. Report Info: Formal Use Case -> Goal: Organize & Inform -> Presentation: Structured HTML with a collapsible section. -> Interaction: User can click to expand/collapse details. -> Justification: Makes detailed text less overwhelming. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f4; /* stone-100 */
+            color: #292524; /* stone-800 */
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .nav-link.active {
+            color: #0d9488; /* teal-600 */
+            border-bottom-color: #0d9488;
+        }
+        .tab-button.active {
+            border-bottom-color: #0d9488; /* teal-600 */
+            color: #0d9488; /* teal-600 */
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .uml-actor {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .uml-actor::before {
+            content: '';
+            display: block;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #57534e; /* stone-600 */
+            margin-bottom: -2px;
+        }
+        .uml-actor::after {
+            content: '';
+            display: block;
+            width: 2px;
+            height: 20px;
+            background: #57534e; /* stone-600 */
+        }
+        .uml-actor-body {
+            position: relative;
+            width: 40px;
+            height: 2px;
+            background: #57534e; /* stone-600 */
+            margin-top: -12px;
+        }
+        .uml-actor-leg1 {
+            position: absolute;
+            width: 2px;
+            height: 20px;
+            background: #57534e; /* stone-600 */
+            transform: rotate(30deg);
+            left: 10px;
+            top: -8px;
+        }
+        .uml-actor-leg2 {
+            position: absolute;
+            width: 2px;
+            height: 20px;
+            background: #57534e; /* stone-600 */
+            transform: rotate(-30deg);
+            right: 10px;
+            top: -8px;
+        }
+        th, td {
+            padding: 12px 16px;
+            border: 1px solid #e7e5e4; /* stone-200 */
+        }
+        th {
+            background-color: #f5f5f4; /* stone-100 */
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <div class="container mx-auto px-4 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-lg md:text-xl font-bold text-teal-700">Software Requirements & Modeling</h1>
+                <nav class="hidden md:flex items-center space-x-6 lg:space-x-8" id="main-nav">
+                    <a data-target="principles" class="nav-link text-stone-600 font-medium pb-1 border-b-2 border-transparent hover:text-teal-600 hover:border-teal-600 active">Principles</a>
+                    <a data-target="process" class="nav-link text-stone-600 font-medium pb-1 border-b-2 border-transparent hover:text-teal-600 hover:border-teal-600">Process</a>
+                    <a data-target="modeling" class="nav-link text-stone-600 font-medium pb-1 border-b-2 border-transparent hover:text-teal-600 hover:border-teal-600">Modeling</a>
+                    <a data-target="exercises" class="nav-link text-stone-600 font-medium pb-1 border-b-2 border-transparent hover:text-teal-600 hover:border-teal-600">Exercises</a>
+                    <a data-target="tips" class="nav-link text-stone-600 font-medium pb-1 border-b-2 border-transparent hover:text-teal-600 hover:border-teal-600">Tips</a>
+                    <a data-target="evaluation" class="nav-link text-stone-600 font-medium pb-1 border-b-2 border-transparent hover:text-teal-600 hover:border-teal-600">Evaluation</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 lg:px-8 py-8 md:py-12">
+        <div class="md:hidden mb-6">
+            <select id="mobile-nav" class="w-full p-3 border rounded-lg bg-white shadow">
+                <option value="principles">1. Core Principles</option>
+                <option value="process">2. The Engineering Process</option>
+                <option value="modeling">3. Requirements Modeling</option>
+                <option value="exercises">4. Exercises</option>
+                <option value="tips">5. Tips & Resources</option>
+                <option value="evaluation">6. Evaluation Criteria</option>
+            </select>
+        </div>
+
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-stone-900">From Concept to Blueprint</h2>
+            <p class="text-lg text-stone-600 mt-2">An Interactive Guide to Mastering Software Requirements and Modeling</p>
+        </div>
+
+        <!-- Section 1: Core Principles -->
+        <section id="principles" class="scroll-mt-20">
+             <p class="mb-8 text-stone-700 leading-relaxed max-w-4xl mx-auto text-center">Before we build, we need a philosophy. These core principles are the universal constitution for software development, guiding both our strategic process and our daily technical practice. They are fundamental to creating high-quality software efficiently and effectively, regardless of the methodology you choose.</p>
+            <div class="space-y-4">
+                <div class="accordion-item bg-white p-6 rounded-lg shadow-md">
+                    <button class="accordion-header w-full text-left flex justify-between items-center">
+                        <h3 class="text-2xl font-semibold text-teal-700">Principles That Guide Our Process</h3>
+                        <span class="text-2xl font-light text-teal-600 transform transition-transform duration-300">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="pt-4 space-y-3 text-stone-600">
+                            <p><strong>1. Be Agile:</strong> A mindset of simplicity and local decision-making.</p>
+                            <p><strong>2. Focus on Quality at Every Step:</strong> Build quality in, don't test it in at the end.</p>
+                            <p><strong>3. Be Ready to Adapt:</strong> The process serves the project, not the other way around. Be flexible.</p>
+                            <p><strong>4. Build an Effective Team:</strong> Success hinges on people, trust, and communication.</p>
+                            <p><strong>5. Establish Mechanisms for Communication:</strong> Prevent information from getting lost.</p>
+                            <p><strong>6. Manage Change:</strong> Have a clear process for handling inevitable changes.</p>
+                            <p><strong>7. Assess Risk:</strong> Identify what can go wrong and plan for it.</p>
+                            <p><strong>8. Create Work Products That Provide Value:</strong> Every document should serve a clear purpose.</p>
+                        </div>
+                    </div>
+                </div>
+                 <div class="accordion-item bg-white p-6 rounded-lg shadow-md">
+                    <button class="accordion-header w-full text-left flex justify-between items-center">
+                        <h3 class="text-2xl font-semibold text-teal-700">Principles That Guide Our Practice</h3>
+                        <span class="text-2xl font-light text-teal-600 transform transition-transform duration-300">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="pt-4 space-y-3 text-stone-600">
+                            <p><strong>1. Divide and Conquer:</strong> Break complex problems into smaller, manageable pieces.</p>
+                            <p><strong>2. Understand Abstraction:</strong> Work at the right level of detail for the task.</p>
+                            <p><strong>3. Strive for Consistency:</strong> Consistent interfaces are easier to learn and use.</p>
+                            <p><strong>4. Focus on Information Transfer:</strong> Pay special attention to interfaces where errors occur.</p>
+                            <p><strong>5. Build Effective Modularity:</strong> Create loosely coupled components that do one thing well.</p>
+                            <p><strong>6. Look for Patterns:</strong> Reuse proven solutions to common problems.</p>
+                            <p><strong>7. Use Different Perspectives:</strong> Model the system from multiple viewpoints to uncover flaws.</p>
+                            <p><strong>8. Remember Maintenance:</strong> Write clear, maintainable code for the future.</p>
+                        </div>
+                        <div class="mt-6">
+                            <h4 class="text-lg font-semibold text-stone-700 mb-2">Code Example: Divide and Conquer</h4>
+                            <div class="bg-stone-800 rounded-lg shadow-md text-sm">
+                                <div class="flex justify-between items-center p-4 border-b border-stone-600">
+                                    <span class="text-stone-400 font-mono">recursive_sum.py</span>
+                                    <button class="run-python-btn bg-teal-600 hover:bg-teal-700 text-white font-bold py-1 px-4 rounded text-xs flex items-center gap-2" data-output-id="python-output-principles" data-output-text="The sum of [1, 2, 3, 4, 5] is: 15">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M10.804 8 5 4.633v6.734L10.804 8z"/><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm15 0A7 7 0 1 0 1 8a7 7 0 0 0 14 0z"/></svg>
+                                        Run
+                                    </button>
+                                </div>
+                                <div class="p-4 text-stone-300 font-mono">
+                                    <pre><code class="language-python"># This function sums a list by recursively
+# breaking it into smaller sub-problems.
+def sum_list(numbers):
+    # Base case: if the list is empty, the sum is 0.
+    if not numbers:
+        return 0
+    # Recursive step: sum the first element with
+    # the sum of the rest of the list.
+    else:
+        return numbers[0] + sum_list(numbers[1:])
+
+# --- Example Usage ---
+my_list = [1, 2, 3, 4, 5]
+total = sum_list(my_list)
+print(f"The sum of {my_list} is: {total}")</code></pre>
+                                </div>
+                                <div id="python-output-principles-container" class="p-4 border-t border-stone-600 font-mono text-stone-400 text-xs hidden">
+                                    <p class="font-semibold mb-2 text-teal-400">Output:</p>
+                                    <pre id="python-output-principles"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: The Engineering Process -->
+            <section id="process" class="mt-16 scroll-mt-20">
+                <h2 class="text-3xl font-bold text-stone-800 text-center">The Engineering Process</h2>
+                <p class="my-8 text-stone-700 leading-relaxed max-w-4xl mx-auto text-center">Requirements Engineering is the structured process of bridging the gap between stakeholder needs and the software solution. It's not a single event, but a series of interconnected tasks that ensure you are building the right product. Explore the seven tasks below to see how an idea for a "Smart Fridge" app evolves into a well-defined project.</p>
+                <div class="relative pl-8 border-l-2 border-teal-200 space-y-12">
+                    <div class="process-step">
+                        <div class="absolute w-6 h-6 bg-teal-600 rounded-full -left-3 border-4 border-white"></div>
+                        <h3 class="text-2xl font-semibold text-teal-800">1. Inception</h3>
+                        <p class="mt-2 text-stone-600">The project's beginning. Establish the basic problem, identify key stakeholders, and define the initial scope. For the Smart Fridge app, this was the meeting where the product manager stated, "We need a companion app to stay competitive."</p>
+                    </div>
+                    <div class="process-step">
+                        <div class="absolute w-6 h-6 bg-teal-600 rounded-full -left-3 border-4 border-white"></div>
+                        <h3 class="text-2xl font-semibold text-teal-800">2. Elicitation</h3>
+                        <p class="mt-2 text-stone-600">The gathering of requirements. Through workshops and interviews, the team discovers the users' true goals. For the fridge app, they learned users primarily want alerts for low inventory (e.g., milk).</p>
+                    </div>
+                    <div class="process-step">
+                        <div class="absolute w-6 h-6 bg-teal-600 rounded-full -left-3 border-4 border-white"></div>
+                        <h3 class="text-2xl font-semibold text-teal-800">3. Elaboration</h3>
+                        <p class="mt-2 text-stone-600">Refining and adding detail to raw requirements. The "low on milk" idea becomes a detailed scenario: "When the weight sensor detects less than 10% of milk, send a push notification."</p>
+                    </div>
+                    <div class="process-step">
+                        <div class="absolute w-6 h-6 bg-teal-600 rounded-full -left-3 border-4 border-white"></div>
+                        <h3 class="text-2xl font-semibold text-teal-800">4. Negotiation</h3>
+                        <p class="mt-2 text-stone-600">Reconciling conflicting needs and constraints to create a realistic plan. Marketing wanted social features in 3 months; engineering showed this was impossible. They negotiated to release core features first, achieving a "win-win."</p>
+                    </div>
+                    <div class="process-step">
+                        <div class="absolute w-6 h-6 bg-teal-600 rounded-full -left-3 border-4 border-white"></div>
+                        <h3 class="text-2xl font-semibold text-teal-800">5. Specification</h3>
+                        <p class="mt-2 text-stone-600">Formally documenting the requirements in a clear, unambiguous format. This includes written requirements ("MUST use WPA3 encryption"), use cases, and UML diagrams.</p>
+                    </div>
+                    <div class="process-step">
+                        <div class="absolute w-6 h-6 bg-teal-600 rounded-full -left-3 border-4 border-white"></div>
+                        <h3 class="text-2xl font-semibold text-teal-800">6. Validation</h3>
+                        <p class="mt-2 text-stone-600">Asking "Are we building the right product?" The specification is reviewed to find errors, omissions, and inconsistencies. A user pointed out the need to track multiple milk cartons, which was then added.</p>
+                    </div>
+                    <div class="process-step">
+                        <div class="absolute w-6 h-6 bg-teal-600 rounded-full -left-3 border-4 border-white"></div>
+                        <h3 class="text-2xl font-semibold text-teal-800">7. Requirements Management</h3>
+                        <p class="mt-2 text-stone-600">Controlling and tracking changes. When marketing requested integration with a grocery delivery API, the team used a formal change request process to analyze its impact before approval, ensuring the change was managed properly.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: Requirements Modeling -->
+            <section id="modeling" class="mt-16 scroll-mt-20">
+                <h2 class="text-3xl font-bold text-stone-800 text-center">Requirements Modeling</h2>
+                <p class="my-8 text-stone-700 leading-relaxed max-w-4xl mx-auto text-center">Modeling is how we translate gathered requirements into a technical blueprint. Using UML (Unified Modeling Language), we create various diagrams to represent the system from different perspectives, ensuring everyone shares a single, clear vision before construction begins. Use the tabs below to explore the three primary types of models.</p>
+                <div class="border-b border-stone-300 mb-6">
+                    <nav class="flex space-x-8 -mb-px justify-center" id="modeling-tabs">
+                        <button class="tab-button active py-4 px-1 border-b-2 font-medium text-lg border-transparent text-stone-500 hover:text-stone-700 hover:border-stone-400" data-tab="scenario">Scenario-Based</button>
+                        <button class="tab-button py-4 px-1 border-b-2 font-medium text-lg border-transparent text-stone-500 hover:text-stone-700 hover:border-stone-400" data-tab="class">Class-Based</button>
+                        <button class="tab-button py-4 px-1 border-b-2 font-medium text-lg border-transparent text-stone-500 hover:text-stone-700 hover:border-stone-400" data-tab="behavioral">Behavioral</button>
+                    </nav>
+                </div>
+
+                <div id="tab-content-container">
+                    <!-- Scenario-Based Content -->
+                    <div id="scenario" class="tab-content active space-y-8">
+                        <div>
+                            <h3 class="text-2xl font-semibold text-stone-800 mb-4 text-center">Formal Use Case: ATM Withdrawal</h3>
+                            <div class="bg-white p-6 rounded-lg shadow-md border border-stone-200 max-w-3xl mx-auto">
+                                <p><strong>Use Case:</strong> Withdraw Cash</p>
+                                <p><strong>Primary Actor:</strong> Customer</p>
+                                <p><strong>Goal:</strong> To withdraw a requested amount of cash from a bank account using an ATM.</p>
+                                <div class="mt-4 pt-4 border-t">
+                                    <p><strong>Scenario (Main Success Path):</strong></p>
+                                    <ol class="list-decimal list-inside text-stone-600 mt-2 space-y-1">
+                                        <li>Customer inserts bank card.</li>
+                                        <li>ATM prompts for PIN.</li>
+                                        <li>Customer enters PIN.</li>
+                                        <li>ATM validates PIN.</li>
+                                        <li>ATM displays main menu.</li>
+                                        <li>Customer selects "Withdraw Cash".</li>
+                                        <li>ATM prompts for account selection.</li>
+                                        <li>Customer selects account.</li>
+                                        <li>ATM prompts for amount.</li>
+                                        <li>Customer selects/enters amount.</li>
+                                        <li>ATM verifies sufficient funds.</li>
+                                        <li>ATM dispenses cash.</li>
+                                        <li>ATM asks about receipt.</li>
+                                        <li>Customer makes selection.</li>
+                                        <li>ATM prints receipt if requested.</li>
+                                        <li>ATM ejects card.</li>
+                                        <li>Customer takes cash, receipt, and card.</li>
+                                    </ol>
+                                </div>
+                                <div class="mt-4 pt-4 border-t">
+                                     <button class="accordion-header w-full text-left flex justify-between items-center">
+                                        <p class="font-semibold text-stone-700">Exceptions (Alternative Paths)</p>
+                                        <span class="text-xl font-light text-stone-600 transform transition-transform duration-300">+</span>
+                                    </button>
+                                     <div class="accordion-content">
+                                        <ul class="list-disc list-inside text-stone-600 mt-2 space-y-1">
+                                            <li>**Invalid PIN:** After 3 incorrect attempts, card is confiscated.</li>
+                                            <li>**Invalid Amount:** If not a multiple of $20, ATM displays an error.</li>
+                                            <li>**Insufficient Funds:** Transaction is denied and card is ejected.</li>
+                                            <li>**Cancel:** At any point, transaction is cancelled and card is returned.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-semibold text-stone-800 mb-4 text-center">UML Use Case Diagram</h3>
+                            <div class="bg-white p-6 rounded-lg shadow-md border border-stone-200">
+                                <div class="flex flex-col md:flex-row items-center justify-center gap-4">
+                                    <div class="flex flex-col items-center gap-2">
+                                        <div class="uml-actor">
+                                            <div class="uml-actor-body"><div class="uml-actor-leg1"></div><div class="uml-actor-leg2"></div></div>
+                                        </div>
+                                        <span class="font-medium">Customer</span>
+                                    </div>
+                                    <div class="w-px h-8 md:h-px md:flex-grow bg-stone-400"></div>
+                                    <div class="border-2 border-teal-500 rounded-lg p-6 text-center w-full max-w-xs">
+                                        <h4 class="font-bold text-lg mb-4">ATM System</h4>
+                                        <div class="space-y-2">
+                                            <div class="border border-stone-400 rounded-full px-4 py-1">Withdraw Cash</div>
+                                            <div class="border border-stone-400 rounded-full px-4 py-1">Deposit Funds</div>
+                                            <div class="border border-stone-400 rounded-full px-4 py-1">Check Balance</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Class-Based Content -->
+                    <div id="class" class="tab-content space-y-8">
+                        <div>
+                            <h3 class="text-2xl font-semibold text-stone-800 mb-4 text-center">UML Class Diagram</h3>
+                            <div class="bg-white p-6 rounded-lg shadow-md border border-stone-200">
+                                <div class="flex flex-col lg:flex-row justify-around items-center gap-4">
+                                    <!-- Customer Class -->
+                                    <div class="border-2 border-stone-600 w-64">
+                                        <div class="p-2 bg-stone-200 font-bold text-center">Customer</div>
+                                        <div class="p-2 border-t border-stone-600">- name: String<br>- address: String</div>
+                                        <div class="p-2 border-t border-stone-600">+ hasCard(): bool<br>+ makeSelection()</div>
+                                    </div>
+                                    <!-- Relationship -->
+                                    <div class="text-stone-600 font-mono text-center">1...1<br>--- uses ---&gt;<br>1...*</div>
+                                    <!-- Account Class -->
+                                    <div class="border-2 border-stone-600 w-64">
+                                        <div class="p-2 bg-stone-200 font-bold text-center">Account</div>
+                                        <div class="p-2 border-t border-stone-600">- accountNumber: String<br>- balance: float</div>
+                                        <div class="p-2 border-t border-stone-600">+ withdraw(amt)<br>+ deposit(amt)<br>+ getBalance()</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-semibold text-stone-800 mb-4 text-center">Example: Python Account Class</h3>
+                            <div class="bg-stone-800 rounded-lg shadow-md text-sm max-w-3xl mx-auto">
+                                <div class="flex justify-between items-center p-4 border-b border-stone-600">
+                                    <span class="text-stone-400 font-mono">account.py</span>
+                                    <button class="run-python-btn bg-teal-600 hover:bg-teal-700 text-white font-bold py-1 px-4 rounded text-xs flex items-center gap-2" data-output-id="python-output-class" data-output-text="Final Balance: $650.50">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M10.804 8 5 4.633v6.734L10.804 8z"/><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm15 0A7 7 0 1 0 1 8a7 7 0 0 0 14 0z"/></svg>
+                                        Run
+                                    </button>
+                                </div>
+                                <div class="p-4 text-stone-300 font-mono">
+                                    <pre><code class="language-python"># Define the Account class
+class Account:
+    def __init__(self, account_number, owner_name, balance=0.0):
+        # Initializes the account
+        self._account_number = account_number
+        self._owner_name = owner_name
+        self._balance = balance
+
+    def deposit(self, amount):
+        # Handles deposits if amount is positive
+        if amount > 0:
+            self._balance += amount
+            return True
+        return False
+
+    def withdraw(self, amount):
+        # Handles withdrawals if funds are sufficient
+        if amount > 0 and self._balance >= amount:
+            self._balance -= amount
+            return True
+        return False
+
+    def get_balance(self):
+        # Returns the current balance
+        return self._balance
+
+# ---- Example Usage ----
+my_account = Account("123456789", "John Doe", 500.00)
+my_account.deposit(150.50)
+print(f"Final Balance: ${my_account.get_balance():.2f}")</code></pre>
+                                </div>
+                                <div id="python-output-class-container" class="p-4 border-t border-stone-600 font-mono text-stone-400 text-xs hidden">
+                                    <p class="font-semibold mb-2 text-teal-400">Output:</p>
+                                    <pre id="python-output-class"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Behavioral Content -->
+                    <div id="behavioral" class="tab-content space-y-8">
+                        <div>
+                            <h3 class="text-2xl font-semibold text-stone-800 mb-4 text-center">UML State Diagram: ATM Session</h3>
+                            <div class="bg-white p-6 rounded-lg shadow-md border border-stone-200 text-center">
+                                <p class="mb-6 text-stone-600">This diagram models the lifecycle of an ATM session, showing how events trigger transitions between different states.</p>
+                                <div class="flex flex-col items-center space-y-2 font-mono text-sm">
+                                    <div class="border-2 border-stone-500 rounded-md p-3 w-48 bg-stone-100 font-semibold">Idle</div>
+                                    <div class="text-stone-500">↓ <span class="text-xs italic">card_inserted</span></div>
+                                    <div class="border-2 border-stone-500 rounded-md p-3 w-48 bg-stone-100 font-semibold">WaitingForPIN</div>
+                                    <div class="text-stone-500">↓ <span class="text-xs italic">correct_pin</span></div>
+                                    <div class="border-2 border-stone-500 rounded-md p-3 w-48 bg-stone-100 font-semibold">MainMenu</div>
+                                    <div class="text-stone-500">↓ <span class="text-xs italic">selection_made(withdraw)</span></div>
+                                    <div class="border-2 border-stone-500 rounded-md p-3 w-48 bg-stone-100 font-semibold">ProcessingTransaction</div>
+                                    <div class="text-stone-500">↓ <span class="text-xs italic">transaction_approved</span></div>
+                                    <div class="border-2 border-stone-500 rounded-md p-3 w-48 bg-stone-100 font-semibold">DispensingCash</div>
+                                    <div class="text-stone-500">↓ <span class="text-xs italic">card_ejected</span></div>
+                                    <div class="border-2 border-stone-500 rounded-md p-3 w-48 bg-stone-100 font-semibold">Idle</div>
+                                    <p class="text-xs italic text-stone-500 pt-4">(Note: Loops and error states like 'CardConfiscated' are omitted for simplicity)</p>
+                                </div>
+                            </div>
+                        </div>
+                         <div>
+                            <h3 class="text-2xl font-semibold text-stone-800 mb-4 text-center">Code Example: Simulating a State Machine</h3>
+                            <div class="bg-stone-800 rounded-lg shadow-md text-sm max-w-3xl mx-auto">
+                                <div class="flex justify-between items-center p-4 border-b border-stone-600">
+                                    <span class="text-stone-400 font-mono">simple_atm.py</span>
+                                    <button class="run-python-btn bg-teal-600 hover:bg-teal-700 text-white font-bold py-1 px-4 rounded text-xs flex items-center gap-2" data-output-id="python-output-behavioral" data-output-text="State: IDLE
+Event: card_inserted -> State: WAITING_FOR_PIN
+Event: correct_pin -> State: MAIN_MENU
+Event: selected_withdraw -> State: PROCESSING
+Event: transaction_complete -> State: IDLE">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M10.804 8 5 4.633v6.734L10.804 8z"/><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm15 0A7 7 0 1 0 1 8a7 7 0 0 0 14 0z"/></svg>
+                                        Run
+                                    </button>
+                                </div>
+                                <div class="p-4 text-stone-300 font-mono">
+                                    <pre><code class="language-python"># A simple class to simulate the ATM State Diagram
+class SimpleATM:
+    def __init__(self):
+        self.state = 'IDLE'
+        print(f"State: {self.state}")
+
+    def insert_card(self):
+        if self.state == 'IDLE':
+            self.state = 'WAITING_FOR_PIN'
+            print("Event: card_inserted -> State: WAITING_FOR_PIN")
+    
+    def enter_pin(self, pin_is_correct):
+        if self.state == 'WAITING_FOR_PIN':
+            if pin_is_correct:
+                self.state = 'MAIN_MENU'
+                print("Event: correct_pin -> State: MAIN_MENU")
+            else:
+                self.state = 'IDLE'
+                print("Event: incorrect_pin -> State: IDLE (ejecting card)")
+
+    def select_option(self, option):
+         if self.state == 'MAIN_MENU':
+            print(f"Event: selected_{option} -> State: PROCESSING")
+            self.state = 'IDLE' # Simplified for example
+            print("Event: transaction_complete -> State: IDLE")
+
+# --- Example Usage ---
+atm = SimpleATM()
+atm.insert_card()
+atm.enter_pin(pin_is_correct=True)
+atm.select_option("withdraw")</code></pre>
+                                </div>
+                                <div id="python-output-behavioral-container" class="p-4 border-t border-stone-600 font-mono text-stone-400 text-xs hidden">
+                                    <p class="font-semibold mb-2 text-teal-400">Output:</p>
+                                    <pre id="python-output-behavioral"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Section 4: Exercises -->
+            <section id="exercises" class="mt-16 scroll-mt-20">
+                <h2 class="text-3xl font-bold text-stone-800 text-center">Practical Exercises</h2>
+                <p class="my-8 text-stone-700 leading-relaxed max-w-4xl mx-auto text-center">Theory is best understood through practice. The following exercises are designed to help you apply the concepts of requirements engineering and modeling to a realistic scenario. Plan to spend approximately one hour on each exercise.</p>
+                <div class="space-y-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-semibold text-teal-700 mb-3">Exercise 1: Requirements for a Campus Event App (1 Hour)</h3>
+                        <p class="text-stone-600 mb-4">Imagine your university wants to create a mobile app to help students find and join campus events (clubs, sports, workshops, etc.). Your first task is to define the core requirements.</p>
+                        <ul class="list-disc list-inside space-y-2 text-stone-700">
+                            <li><strong>Task A - Identify Stakeholders & Actors:</strong> List at least three distinct types of users (actors) for this app (e.g., Student, Event Organizer, Faculty Advisor). For each actor, describe their primary goal.</li>
+                            <li><strong>Task B - Elicit Requirements:</strong> For the "Student" actor, write down five key functional requirements (what the app must *do*). Example: "The app must allow a student to search for events by date."</li>
+                            <li><strong>Task C - Create a Formal Use Case:</strong> Choose one of your functional requirements and expand it into a formal use case using the template from the "Scenario-Based Modeling" section. The use case should describe the main success scenario and at least two exceptions.</li>
+                        </ul>
+                    </div>
+                     <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-semibold text-teal-700 mb-3">Exercise 2: Modeling the Campus Event App (1 Hour)</h3>
+                        <p class="text-stone-600 mb-4">Using your work from Exercise 1, you will now create visual models to represent the app's structure and behavior. You can sketch these on paper or use a simple diagramming tool.</p>
+                         <ul class="list-disc list-inside space-y-2 text-stone-700">
+                            <li><strong>Task A - Class-Based Modeling:</strong> Based on your requirements, identify at least four main classes. Create a simple UML Class Diagram showing these classes, one key attribute for each, and the relationships between them (e.g., an Event Organizer *creates* an Event).</li>
+                            <li><strong>Task B - Behavioral Modeling:</strong> Think about the lifecycle of an "Event" object in the system. Create a simple UML State Diagram showing at least three states (e.g., 'Scheduled', 'In-Progress', 'Completed') and the events that cause transitions between them.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Section 5: Tips & Resources -->
+            <section id="tips" class="mt-16 scroll-mt-20">
+                <h2 class="text-3xl font-bold text-stone-800 text-center">Tips & Resources</h2>
+                <p class="my-8 text-stone-700 leading-relaxed max-w-4xl mx-auto text-center">These exercises require you to think like a software analyst. Here are some tips and resources to guide your thinking and help you create high-quality deliverables.</p>
+                <div class="bg-white p-6 rounded-lg shadow-md space-y-4">
+                    <h3 class="text-xl font-semibold text-teal-700">Tips for Success</h3>
+                    <ul class="list-disc list-inside space-y-2 text-stone-700">
+                        <li><strong>Think About Nouns and Verbs:</strong> When reading your requirements, nouns (Student, Event, Location) are often good candidates for *classes*. Verbs (searches, creates, joins) are often good candidates for *operations* or *use cases*.</li>
+                        <li><strong>Focus on the 'What', Not the 'How':</strong> Requirements and analysis models should describe *what* the system does, not *how* it will be implemented. Avoid implementation details like "store in a SQL database" or "use a blue button."</li>
+                        <li><strong>Keep Diagrams Simple:</strong> The goal of UML is communication. A clean, simple diagram that clearly shows the main ideas is better than a complex one that includes every minor detail.</li>
+                        <li><strong>Consider the Edge Cases:</strong> For use case exceptions, think about what could go wrong. What if a user enters invalid data? What if the network is unavailable? Good analysis considers these alternative paths.</li>
+                    </ul>
+                    <h3 class="text-xl font-semibold text-teal-700 pt-4 border-t mt-4">Helpful Resources</h3>
+                     <ul class="list-disc list-inside space-y-2 text-stone-700">
+                        <li><strong>Official UML Website:</strong> For definitive information on UML standards and diagram types. <a href="https://www.omg.org/spec/UML" target="_blank" class="text-teal-600 hover:underline">Object Management Group (UML)</a></li>
+                        <li><strong>A Guide to Use Cases:</strong> A practical article on writing effective use cases. <a href="https://www.visual-paradigm.com/guide/use-case/what-is-use-case/" target="_blank" class="text-teal-600 hover:underline">Visual Paradigm - What is a Use Case?</a></li>
+                        <li><strong>Online Diagramming Tool:</strong> A free, web-based tool for creating diagrams like those in the exercises. <a href="https://app.diagrams.net/" target="_blank" class="text-teal-600 hover:underline">diagrams.net (formerly draw.io)</a></li>
+                    </ul>
+                </div>
+            </section>
+            
+            <!-- Section 6: Evaluation Criteria -->
+            <section id="evaluation" class="mt-16 scroll-mt-20">
+                 <h2 class="text-3xl font-bold text-stone-800 text-center">Evaluation Criteria</h2>
+                <p class="my-8 text-stone-700 leading-relaxed max-w-4xl mx-auto text-center">Your work on the exercises will be evaluated based on your ability to apply the core concepts of requirements analysis and modeling. The following grid outlines the criteria and their weight, summing to a total of 100%.</p>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-stone-50">
+                            <tr>
+                                <th class="w-1/3">Criteria</th>
+                                <th class="w-1/6 text-center">Weighting</th>
+                                <th class="w-1/2">Description of Expectations</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-stone-700">
+                            <tr class="bg-teal-50"><td colspan="3" class="font-bold">Exercise 1: Requirements (50%)</td></tr>
+                            <tr>
+                                <td>Actor & Goal Identification</td>
+                                <td class="text-center">10%</td>
+                                <td>Actors are distinct and appropriate for the system. Goals are clear and user-focused.</td>
+                            </tr>
+                            <tr>
+                                <td>Functional Requirements</td>
+                                <td class="text-center">15%</td>
+                                <td>Requirements are clear, testable, and accurately describe essential system functions for the student actor.</td>
+                            </tr>
+                            <tr>
+                                <td>Formal Use Case Quality</td>
+                                <td class="text-center">25%</td>
+                                <td>The use case is well-structured, easy to follow, and includes a plausible main scenario and relevant exceptions.</td>
+                            </tr>
+                            <tr class="bg-teal-50"><td colspan="3" class="font-bold">Exercise 2: Modeling (50%)</td></tr>
+                             <tr>
+                                <td>Class Identification & Diagram</td>
+                                <td class="text-center">25%</td>
+                                <td>Classes are relevant to the problem domain. The UML diagram correctly shows classes, key attributes, and logical relationships.</td>
+                            </tr>
+                             <tr>
+                                <td>State Identification & Diagram</td>
+                                <td class="text-center">25%</td>
+                                <td>States for the 'Event' object are logical and distinct. The UML diagram correctly shows states and the events that trigger transitions between them.</td>
+                            </tr>
+                             <tr class="bg-stone-200 font-bold">
+                                <td>Total</td>
+                                <td class="text-center">100%</td>
+                                <td>Final evaluation based on the sum of all criteria.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mobileNav = document.getElementById('mobile-nav');
+            const sections = document.querySelectorAll('main > section');
+
+            function updateActiveNav(targetId) {
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.dataset.target === targetId);
+                });
+                if (mobileNav.value !== targetId) {
+                    mobileNav.value = targetId;
+                }
+            }
+            
+            document.getElementById('main-nav').addEventListener('click', (e) => {
+                if(e.target.matches('.nav-link')) {
+                    e.preventDefault();
+                    const targetId = e.target.dataset.target;
+                    const targetSection = document.getElementById(targetId);
+                    if (targetSection) {
+                        targetSection.scrollIntoView();
+                    }
+                }
+            });
+
+            mobileNav.addEventListener('change', (e) => {
+                const targetId = e.target.value;
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                   targetSection.scrollIntoView();
+                }
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        updateActiveNav(entry.target.id);
+                    }
+                });
+            }, { rootMargin: "-80px 0px -60% 0px" });
+
+            sections.forEach(section => observer.observe(section));
+
+            // Modeling Tabs
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            document.getElementById('modeling-tabs').addEventListener('click', (e) => {
+                if (e.target.classList.contains('tab-button')) {
+                    const tabId = e.target.dataset.tab;
+
+                    tabButtons.forEach(button => button.classList.remove('active'));
+                    e.target.classList.add('active');
+
+                    tabContents.forEach(content => {
+                        if (content.id === tabId) {
+                            content.classList.add('active');
+                        } else {
+                            content.classList.remove('active');
+                        }
+                    });
+                }
+            });
+
+            // Accordion
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const icon = header.querySelector('span');
+
+                header.addEventListener('click', () => {
+                    const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
+                    if (isOpen) {
+                        content.style.maxHeight = '0px';
+                        if(icon) icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        if(icon) icon.style.transform = 'rotate(45deg)';
+                    }
+                });
+            });
+            
+            // Python Sandbox Simulation
+            const runButtons = document.querySelectorAll('.run-python-btn');
+            runButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const outputId = button.dataset.outputId;
+                    const outputText = button.dataset.outputText;
+                    const outputContainer = document.getElementById(outputId + '-container');
+                    const outputEl = document.getElementById(outputId);
+
+                    if (outputContainer && outputEl) {
+                        const wasHidden = outputContainer.classList.contains('hidden');
+                        
+                        outputContainer.classList.remove('hidden');
+                        outputEl.textContent = 'Running...';
+
+                        if (wasHidden) {
+                            const parentAccordion = outputContainer.closest('.accordion-content');
+                            if (parentAccordion) {
+                                requestAnimationFrame(() => {
+                                    parentAccordion.style.maxHeight = parentAccordion.scrollHeight + 'px';
+                                });
+                            }
+                        }
+
+                        setTimeout(() => {
+                            outputEl.textContent = outputText;
+                        }, 500);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+

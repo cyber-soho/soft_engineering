@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Software Design Exercises</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral (Stone, Indigo Accent) -->
+    <!-- Application Structure Plan: The SPA uses a top-down, single-page layout to guide the user through a series of software design exercises. A central accordion component organizes the three main exercises, allowing users to focus on one task at a time. This mirrors the sequential nature of the source document and promotes a structured learning path. Interactive diagrams, created with HTML/CSS and JS, are used in place of static images to make the solutions more engaging and explorable, directly translating the design concepts into a tangible user experience. -->
+    <!-- Visualization & Content Choices: Report Info: Architectural Styles (Ex1) -> Goal: Compare -> Viz: Side-by-side HTML/CSS diagrams -> Interaction: Static comparison -> Justification: Clearly contrasts two solutions. | Report Info: Component Collaboration (Ex2) -> Goal: Organize/Relationships -> Viz: Interactive HTML/CSS diagram -> Interaction: Click on component to show details -> Justification: Encourages exploration and connects abstract components to their specific roles. | Report Info: Algorithmic Detail (Ex3) -> Goal: Inform -> Viz: Formatted <pre><code> block -> Interaction: None -> Justification: Provides a clear, readable representation of code logic. NO SVG/Mermaid confirmed. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f4; /* stone-100 */
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .accordion-button.active + .accordion-content {
+            max-height: 2500px; /* Adjust as needed */
+        }
+        .diagram-box {
+            border: 2px solid #e7e5e4; /* stone-200 */
+            padding: 1rem;
+            text-align: center;
+            font-weight: 500;
+            background-color: #fafaf9; /* stone-50 */
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s ease-in-out;
+        }
+        .diagram-box.layer {
+            border-color: #a5b4fc; /* indigo-300 */
+            background-color: #e0e7ff; /* indigo-100 */
+            color: #3730a3; /* indigo-800 */
+        }
+        .diagram-box.data-center {
+            border-color: #99f6e4; /* teal-200 */
+            background-color: #ccfbf1; /* teal-50 */
+            color: #134e4a; /* teal-900 */
+        }
+        .component-box {
+            border: 2px solid #a78bfa; /* violet-400 */
+            background-color: #f5f3ff; /* violet-50 */
+            color: #5b21b6; /* violet-800 */
+            cursor: pointer;
+        }
+        .component-box:hover {
+            transform: translateY(-px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .connector {
+            position: absolute;
+            border: 1px solid #7c3aed; /* violet-600 */
+            z-index: -1;
+        }
+        .arrowhead {
+            width: 0; 
+            height: 0; 
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-left: 8px solid #7c3aed; /* violet-600 */
+            position: absolute;
+        }
+        .modal {
+            transition: opacity 0.3s ease;
+        }
+        .answer-box {
+            min-height: 150px;
+            border: 1px solid #d6d3d1; /* stone-300 */
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            background-color: white;
+        }
+        .answer-box:focus {
+            outline: 2px solid #4f46e5; /* indigo-600 */
+            border-color: transparent;
+        }
+    </style>
+</head>
+<body class="text-stone-800">
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-5xl">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-indigo-700">Interactive Software Design Exercises</h1>
+            <p class="text-stone-600 mt-2 text-lg">Apply key design concepts to a practical scenario.</p>
+        </header>
+
+        <main>
+            <section id="scenario" class="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h2 class="text-2xl font-semibold text-indigo-600 mb-4">Scenario: University Course Registration System</h2>
+                <p class="mb-4 text-stone-700">A university needs a new web-based system to allow students to register for courses. Your goal is to design a robust architecture and component structure based on the following core requirements:</p>
+                <ul class="list-disc list-inside space-y-2 text-stone-600">
+                    <li>Students must be able to log in securely.</li>
+                    <li>Students can search for available courses by department, course code, or instructor name.</li>
+                    <li>The system must display course details, including prerequisites, available seats, and schedules.</li>
+                    <li>Students can add courses to a "shopping cart" before finalizing their registration.</li>
+                    <li>The system must check for prerequisites and schedule conflicts before allowing a student to register.</li>
+                    <li>Once registered, the student's schedule is updated, and the number of available seats in the course is decremented.</li>
+                    <li>Faculty members must be able to log in to see their course rosters.</li>
+                    <li>Administrative staff must be able to add/remove courses, manage course details, and override registration restrictions.</li>
+                </ul>
+            </section>
+
+            <section id="tips" class="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h2 class="text-2xl font-semibold text-indigo-600 mb-4">Tips for Success</h2>
+                <p class="mb-4 text-stone-700">Here are some tips to help you successfully complete the exercises. Refer to your lecture notes on Design Concepts, Architectural Design, and Component-Level Design.</p>
+                <ul class="list-disc list-inside space-y-3 text-stone-600">
+                    <li>
+                        <strong>Exercise 1 (Architectural Design):</strong> Think about the "big picture." How will the major parts of the system be organized? A <strong>Layered Architecture</strong> promotes separation of concerns, which is great for maintainability. A <strong>Data-Centered Architecture</strong> focuses on the central role of the database. For your justification, explain how the style's strengths align with the project's needs (e.g., "A layered approach is good here because the UI might change independently of the business rules.").
+                    </li>
+                    <li>
+                        <strong>Exercise 2 (Component Identification):</strong> Break down a user action into smaller, responsible parts. Aim for components with a single, clear purpose to achieve <strong>high cohesion</strong>. For example, a component just for validation is better than a giant "registration" component that does everything. Ensure components don't know too much about each other's internal workings to maintain <strong>low coupling</strong>. This makes your system easier to change later.
+                    </li>
+                    <li>
+                        <strong>Exercise 3 (Component-Level Elaboration):</strong> Now, zoom in on one component. Define its public "contract" (the interface) that other components will use to talk to it. Think about what information it needs to hold (attributes) and the step-by-step logic it follows (algorithm). Using pseudocode helps you focus on the logic without getting bogged down in programming language syntax.
+                    </li>
+                </ul>
+            </section>
+
+            <div id="accordion-container" class="space-y-4">
+                <!-- Exercise 1 -->
+                <div class="bg-white rounded-lg shadow-md">
+                    <button class="accordion-button w-full text-left p-5 text-xl font-semibold text-stone-800 flex justify-between items-center hover:bg-stone-50 transition-colors">
+                        <span>Exercise 1: Architectural Design</span>
+                        <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="px-5 pb-5 pt-2">
+                            <p class="mb-6 text-stone-600">Based on the system scenario, propose and describe <strong>two</strong> different architectural styles. For each, create a high-level diagram and write a brief justification explaining its suitability, benefits, and potential drawbacks.</p>
+                            
+                            <div class="grid md:grid-cols-2 gap-8">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-center mb-4 text-indigo-700">Option A: Layered Architecture</h3>
+                                    <div class="p-4 bg-stone-100 rounded-lg">
+                                        <div class="diagram-box layer">Presentation Layer (UI)</div>
+                                        <div class="text-center my-1">↓</div>
+                                        <div class="diagram-box layer">Business Logic Layer</div>
+                                        <div class="text-center my-1">↓</div>
+                                        <div class="diagram-box layer">Data Access Layer</div>
+                                        <div class="text-center my-1">↓</div>
+                                        <div class="diagram-box layer">Data Store Layer</div>
+                                    </div>
+                                    <p class="mt-4 text-sm text-stone-600">
+                                        A layered architecture is an excellent choice for this system due to its strong separation of concerns. The Presentation Layer handles all user interface logic, allowing the front-end to be developed and modified independently of the back-end. 
+                                        The Business Logic Layer encapsulates all the core rules of the system, such as prerequisite validation. This centralization of rules ensures consistency and makes the system easier to maintain. The main drawback is that simple requests must pass through multiple layers, which can introduce minor performance overhead, but the benefits in maintainability and scalability are significant.
+                                    </p>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-center mb-4 text-teal-800">Option B: Data-Centered Architecture</h3>
+                                    <div class="p-4 bg-stone-100 rounded-lg">
+                                        <div class="diagram-box data-center">University Database</div>
+                                        <div class="grid grid-cols-2 gap-2 mt-4">
+                                            <div class="diagram-box data-center text-xs">Student Client</div>
+                                            <div class="diagram-box data-center text-xs">Admin Client</div>
+                                            <div class="diagram-box data-center text-xs">Faculty Client</div>
+                                            <div class="diagram-box data-center text-xs">Search Client</div>
+                                        </div>
+                                    </div>
+                                    <p class="mt-4 text-sm text-stone-600">
+                                        A data-centered architecture is suitable because the system's primary function revolves around a shared, persistent data store. All major operations involve creating, reading, updating, or deleting data in this central repository, which promotes data integrity.
+                                        The key benefit is integrability; a new client component, such as a "Financial Aid System," could be added with relative ease. A potential weakness is that the data store can become a performance bottleneck if not designed carefully, and changes to the database schema could require modifications across multiple client components.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-8 border-t pt-6">
+                                <h3 class="text-lg font-semibold text-stone-700 mb-4">Your Answer for Exercise 1</h3>
+                                <div id="answer-box-1" contenteditable="true" class="answer-box w-full mb-4"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exercise 2 -->
+                <div class="bg-white rounded-lg shadow-md">
+                    <button class="accordion-button w-full text-left p-5 text-xl font-semibold text-stone-800 flex justify-between items-center hover:bg-stone-50 transition-colors">
+                        <span>Exercise 2: Component Identification & Analysis</span>
+                         <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="px-5 pb-5 pt-2">
+                            <p class="mb-6 text-stone-600">Focusing on the "Student Registers for a Course" use case within a Layered Architecture, identify key components, define their responsibilities, and explain how the structure promotes high cohesion and low coupling.</p>
+                            
+                            <div class="relative h-96 p-4 bg-stone-50 rounded-lg border-2 border-stone-200" id="component-diagram">
+                                <div id="comp-ui" class="diagram-box component-box absolute top-36 left-4 w-40" data-component="ui">UI / Client</div>
+                                <div id="comp-controller" class="diagram-box component-box absolute top-36 left-1/3 w-48" data-component="controller">Registration Controller</div>
+                                <div id="comp-validator" class="diagram-box component-box absolute top-8 right-1/4 w-48" data-component="validator">Course Validator</div>
+                                <div id="comp-profile" class="diagram-box component-box absolute top-36 right-1/4 w-48" data-component="profile">Student Profile Manager</div>
+                                <div id="comp-repo" class="diagram-box component-box absolute top-64 right-1/4 w-48" data-component="repo">Course Repository</div>
+                                <div id="comp-db" class="diagram-box component-box absolute top-36 right-4 w-40" data-component="db">Database</div>
+                                <p class="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-stone-500 italic">Click on any component box to see more details.</p>
+                            </div>
+                             <div class="mt-8 border-t pt-6">
+                                <h3 class="text-lg font-semibold text-stone-700 mb-4">Your Answer for Exercise 2</h3>
+                                <div id="answer-box-2" contenteditable="true" class="answer-box w-full mb-4"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exercise 3 -->
+                <div class="bg-white rounded-lg shadow-md">
+                    <button class="accordion-button w-full text-left p-5 text-xl font-semibold text-stone-800 flex justify-between items-center hover:bg-stone-50 transition-colors">
+                        <span>Exercise 3: Component-Level Elaboration</span>
+                         <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="px-5 pb-5 pt-2">
+                            <p class="mb-6 text-stone-600">Provide a detailed, component-level design for the <strong>Course Validator</strong> component. Define its interface, list its potential attributes, and write a pseudocode algorithm for a `checkAllRequirements` operation.</p>
+
+                             <div class="mt-8 border-t pt-6">
+                                <h3 class="text-lg font-semibold text-stone-700 mb-4">Your Answer for Exercise 3</h3>
+                                <div id="answer-box-3" contenteditable="true" class="answer-box w-full mb-4"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <section id="submission-instructions" class="bg-white p-6 rounded-lg shadow-md mt-8">
+                    <h2 class="text-2xl font-semibold text-indigo-600 mb-4">How to Submit Your Answers</h2>
+                    <p class="mb-4 text-stone-700">First, please enter your name and student ID below. Then, after completing the exercises, you can submit them in two ways:</p>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <input type="text" id="student-name-global" placeholder="Your Name" class="block w-full rounded-md border-0 py-1.5 px-3 text-stone-900 shadow-sm ring-1 ring-inset ring-stone-300">
+                        <input type="text" id="student-id-global" placeholder="Student ID" class="block w-full rounded-md border-0 py-1.5 px-3 text-stone-900 shadow-sm ring-1 ring-inset ring-stone-300">
+                    </div>
+                    <ul class="list-decimal list-inside space-y-3 text-stone-600">
+                        <li><strong>Primary Method (Send All Answers):</strong> Click the "Send All Answers" button to open your default email client with a pre-filled email containing all your answers.</li>
+                        <li><strong>Backup Method (Copy All):</strong> If the "Send" button does not open your email client, use the "Copy All Answers" button. This will copy all your information and answers to your clipboard. Then, open a new email, paste the content, and send it to <strong class="text-indigo-700">asennikolov.grozdanov@faculty.schiller.edu</strong>.</li>
+                    </ul>
+                    <div class="mt-6 flex justify-center gap-4">
+                        <button id="send-all-btn" class="rounded-md bg-indigo-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-indigo-500">Send All Answers</button>
+                        <button id="copy-all-btn" class="rounded-md bg-teal-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-teal-500">Copy All Answers to Clipboard</button>
+                    </div>
+                </section>
+
+                <!-- Evaluation Grid -->
+                <div class="bg-white rounded-lg shadow-md">
+                    <button class="accordion-button w-full text-left p-5 text-xl font-semibold text-stone-800 flex justify-between items-center hover:bg-stone-50 transition-colors">
+                        <span>Evaluation Grid</span>
+                        <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="px-5 pb-5 pt-2">
+                             <p class="mb-6 text-stone-600">The exercises will be evaluated based on the following criteria, totaling 100 points.</p>
+                             <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left text-stone-500">
+                                    <thead class="text-xs text-stone-700 uppercase bg-stone-100">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3">Criteria</th>
+                                            <th scope="col" class="px-6 py-3">Excellent</th>
+                                            <th scope="col" class="px-6 py-3">Good</th>
+                                            <th scope="col" class="px-6 py-3">Needs Improvement</th>
+                                            <th scope="col" class="px-6 py-3">Points</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="bg-white border-b"><td colspan="5" class="px-6 py-4 font-semibold text-stone-900">Exercise 1: Architectural Design (35 Points)</td></tr>
+                                        <tr class="bg-white border-b">
+                                            <td class="px-6 py-4">Style Selection & Justification</td>
+                                            <td class="px-6 py-4">Proposes two highly appropriate styles with clear, insightful justification tied to requirements.</td>
+                                            <td class="px-6 py-4">Proposes two appropriate styles with clear justification.</td>
+                                            <td class="px-6 py-4">Styles are inappropriate or justification is weak/missing.</td>
+                                            <td class="px-6 py-4">/ 15</td>
+                                        </tr>
+                                        <tr class="bg-white border-b">
+                                            <td class="px-6 py-4">Diagrams</td>
+                                            <td class="px-6 py-4">Diagrams are clear, accurate, and correctly identify primary components.</td>
+                                            <td class="px-6 py-4">Diagrams are mostly correct but may lack some clarity or detail.</td>
+                                            <td class="px-6 py-4">Diagrams are confusing, inaccurate, or missing.</td>
+                                            <td class="px-6 py-4">/ 10</td>
+                                        </tr>
+                                         <tr class="bg-white border-b"><td colspan="5" class="px-6 py-4 font-semibold text-stone-900">Exercise 2: Component Identification (35 Points)</td></tr>
+                                        <tr class="bg-white border-b">
+                                            <td class="px-6 py-4">Component Identification</td>
+                                            <td class="px-6 py-4">Identifies a logical and complete set of components with distinct, concise responsibilities.</td>
+                                            <td class="px-6 py-4">Identifies relevant components, but some overlap may exist.</td>
+                                            <td class="px-6 py-4">Components are illogical or have unclear responsibilities.</td>
+                                            <td class="px-6 py-4">/ 15</td>
+                                        </tr>
+                                        <tr class="bg-white border-b">
+                                            <td class="px-6 py-4">Cohesion & Coupling Analysis</td>
+                                            <td class="px-6 py-4">Provides a clear, accurate explanation using specific examples from their own design.</td>
+                                            <td class="px-6 py-4">Correctly defines concepts but struggles to apply them convincingly to their design.</td>
+                                            <td class="px-6 py-4">Demonstrates a poor understanding of the concepts.</td>
+                                            <td class="px-6 py-4">/ 15</td>
+                                        </tr>
+                                        <tr class="bg-white border-b"><td colspan="5" class="px-6 py-4 font-semibold text-stone-900">Exercise 3: Component Elaboration (30 Points)</td></tr>
+                                        <tr class="bg-white border-b">
+                                            <td class="px-6 py-4">Interface & Attributes</td>
+                                            <td class="px-6 py-4">Defines a complete and logical interface with clear operations, inputs, and outputs.</td>
+                                            <td class="px-6 py-4">Defines a reasonable interface, but some parts may be ambiguous.</td>
+                                            <td class="px-6 py-4">Interface is incomplete, illogical, or poorly defined.</td>
+                                            <td class="px-6 py-4">/ 15</td>
+                                        </tr>
+                                        <tr class="bg-white border-b">
+                                            <td class="px-6 py-4">Algorithmic Design</td>
+                                            <td class="px-6 py-4">Pseudocode/diagram is detailed, logically correct, and shows all key steps and interactions.</td>
+                                            <td class="px-6 py-4">Algorithm is mostly correct but may lack detail or contain minor flaws.</td>
+                                            <td class="px-6 py-4">Algorithm is simplistic, incorrect, or missing.</td>
+                                            <td class="px-6 py-4">/ 15</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Protected Answers -->
+                <div class="bg-white rounded-lg shadow-md">
+                    <button id="protected-answers-button" class="accordion-button w-full text-left p-5 text-xl font-semibold text-stone-800 flex justify-between items-center hover:bg-stone-50 transition-colors">
+                       <span>Protected Answers</span>
+                       <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                   </button>
+                   <div class="accordion-content">
+                       <div class="px-5 pb-5 pt-2">
+                           <div id="password-gate">
+                               <p class="mb-4 text-stone-600">This section is password protected. Please enter the password to view the answers.</p>
+                               <form id="password-form" class="flex items-center gap-2">
+                                   <input type="password" id="password-input" class="block w-full rounded-md border-0 py-1.5 px-3 text-stone-900 shadow-sm ring-1 ring-inset ring-stone-300 placeholder:text-stone-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="Password">
+                                   <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Unlock</button>
+                               </form>
+                               <p id="password-error" class="text-red-600 text-sm mt-2 hidden">Incorrect password. Please try again.</p>
+                           </div>
+                           <div id="answers-content" class="hidden">
+                               <h3 class="text-2xl font-semibold text-indigo-600 mb-4">Exercise Answers</h3>
+                               <div class="space-y-6">
+                                   <div>
+                                       <h4 class="text-xl font-semibold text-stone-800 border-b pb-2 mb-2">Exercise 1: Architectural Design</h4>
+                                       <p><strong>Option 1 (Layered Architecture) Justification:</strong> A layered architecture is a strong choice due to its separation of concerns. This allows for parallel development (UI team works on the Presentation Layer, backend team on Business/Data layers) and high maintainability. For example, if the university decides to create a mobile app later, the same Business and Data Access layers can be reused, requiring only a new Presentation Layer. This reduces future development costs and effort.</p>
+                                       <p class="mt-2"><strong>Option 2 (Data-Centered Architecture) Justification:</strong> This architecture is viable because the entire system is fundamentally about interacting with a central database of courses, students, and enrollments. This makes data consistency and integrity easier to manage. Its main advantage is extensibility; adding a new system (like a reporting tool) is straightforward as it just needs to connect to the central database. The main risk is the database becoming a bottleneck under heavy load.</p>
+                                   </div>
+                                   <div>
+                                       <h4 class="text-xl font-semibold text-stone-800 border-b pb-2 mb-2">Exercise 2: Component Identification</h4>
+                                       <p><strong>High Cohesion Example:</strong> The `CourseValidator` component is highly cohesive. Its single responsibility is to enforce business rules (prerequisites, time conflicts, seat availability). It doesn't handle user input or database writes. If the university changes its policy on prerequisite waivers, only the `CourseValidator` needs modification, leaving other components untouched.</p>
+                                       <p class="mt-2"><strong>Low Coupling Example:</strong> The `RegistrationController` is loosely coupled from the database. It communicates with the `CourseRepository` via a stable interface (`getCourseById`, `decrementSeatCount`). It has no knowledge of the underlying database technology (SQL, NoSQL, etc.) or the specific table structures. If the IT department migrates to a new database system, only the `CourseRepository` needs to be updated; the `RegistrationController` and the rest of the business logic remain unchanged, demonstrating a robust and maintainable design.</p>
+                                   </div>
+                                   <div>
+                                       <h4 class="text-xl font-semibold text-stone-800 border-b pb-2 mb-2">Exercise 3: Component-Level Elaboration</h4>
+                                       <p>A good answer for the <strong>Course Validator</strong> would look like this:</p>
+                                       <p><strong>Interface:</strong> <code>checkAllRequirements(student, course)</code> -> returns a result object (e.g., {status: "Success", message: ""}).</p>
+                                       <p><strong>Attributes:</strong> A reference to the Course Repository to check seat counts and a reference to the Student Profile Manager to check prerequisites.</p>
+                                       <p><strong>Pseudocode:</strong></p>
+                                       <pre class="bg-stone-800 text-white p-4 rounded-md mt-2 text-sm overflow-x-auto"><code>
+METHOD checkAllRequirements(student, course)
+  // Check seat availability
+  IF courseRepository.getSeatCount(course.id) <= 0 THEN
+    RETURN {status: "Failure", message: "Course is full."}
+  END IF
+
+  // Check prerequisites
+  FOR EACH prereq in course.prerequisites
+    IF studentProfileManager.hasCompletedCourse(student.id, prereq.id) is FALSE THEN
+      RETURN {status: "Failure", message: "Missing prerequisite: " + prereq.name}
+    END IF
+  END FOR
+
+  // Check schedule conflicts
+  FOR EACH existingCourse in student.schedule
+    IF isTimeConflict(existingCourse, course) is TRUE THEN
+      RETURN {status: "Failure", message: "Schedule conflict with " + existingCourse.name}
+    END IF
+  END FOR
+
+  RETURN {status: "Success", message: "All requirements met."}
+END METHOD
+                                       </code></pre>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for Component Details -->
+    <div id="component-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title" class="text-xl font-bold text-indigo-700">Component Details</h3>
+                <button id="modal-close" class="text-stone-500 hover:text-stone-800">&times;</button>
+            </div>
+            <div id="modal-content">
+                <h4 class="font-semibold text-stone-800">Responsibility:</h4>
+                <p id="modal-responsibility" class="mb-3 text-stone-600"></p>
+                <h4 class="font-semibold text-stone-800">Analysis:</h4>
+                <p id="modal-analysis" class="text-stone-600"></p>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const accordionButtons = document.querySelectorAll('.accordion-button');
+            accordionButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const currentlyActive = document.querySelector('.accordion-button.active');
+                    if (currentlyActive && currentlyActive !== button) {
+                        currentlyActive.classList.remove('active');
+                        currentlyActive.querySelector('svg').style.transform = '';
+                    }
+
+                    button.classList.toggle('active');
+                    const icon = button.querySelector('svg');
+                    if (button.classList.contains('active')) {
+                        icon.style.transform = 'rotate(180deg)';
+                    } else {
+                        icon.style.transform = '';
+                    }
+                });
+            });
+
+            const componentData = {
+                ui: {
+                    title: "UI / Client",
+                    responsibility: "To present data to the user and capture their input for registration.",
+                    analysis: "This component has high cohesion as it only deals with presentation logic. It's loosely coupled because it only communicates with the Controller, not with any backend business logic or data layers directly."
+                },
+                controller: {
+                    title: "Registration Controller",
+                    responsibility: "To receive a registration request from the UI and coordinate with other services to validate and complete it.",
+                    analysis: "High cohesion because it only orchestrates the registration workflow. Low coupling as it delegates tasks to specialized components (Validator, Profile Manager, Repository) without knowing their internal implementation."
+                },
+                validator: {
+                    title: "Course Validator",
+                    responsibility: "To check if a student meets all requirements (prerequisites, schedule conflicts, seat availability) to enroll in a course.",
+                    analysis: "Extremely high cohesion (single-minded purpose). Any change to validation rules only affects this component, minimizing ripple effects."
+                },
+                profile: {
+                    title: "Student Profile Manager",
+                    responsibility: "To retrieve and update a student's schedule and academic history.",
+                    analysis: "High cohesion, focusing solely on student data management. Loosely coupled with the controller, which requests updates but is not concerned with how those updates are persisted."
+                },
+                repo: {
+                    title: "Course Repository",
+                    responsibility: "To fetch course details and update the number of available seats in the database.",
+                    analysis: "High cohesion as it abstracts all data access logic for courses. This isolates the rest of the application from the specifics of the database, ensuring low coupling."
+                },
+                db: {
+                    title: "Database",
+                    responsibility: "To persistently store all application data (courses, students, enrollments).",
+                    analysis: "The database itself is a passive component. Low coupling is achieved by having components access it only through the Repository/Data Access Layer, never directly from the business logic."
+                }
+            };
+            
+            const modal = document.getElementById('component-modal');
+            const modalClose = document.getElementById('modal-close');
+            const modalTitle = document.getElementById('modal-title');
+            const modalResponsibility = document.getElementById('modal-responsibility');
+            const modalAnalysis = document.getElementById('modal-analysis');
+
+            document.querySelectorAll('.component-box').forEach(box => {
+                box.addEventListener('click', (e) => {
+                    const componentId = e.currentTarget.dataset.component;
+                    if (componentData[componentId]) {
+                        modalTitle.textContent = componentData[componentId].title;
+                        modalResponsibility.textContent = componentData[componentId].responsibility;
+                        modalAnalysis.textContent = componentData[componentId].analysis;
+                        modal.classList.remove('hidden');
+                        setTimeout(() => modal.classList.add('opacity-100'), 10);
+                    }
+                });
+            });
+
+            const closeModal = () => {
+                modal.classList.remove('opacity-100');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            };
+
+            modalClose.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+
+            function drawConnectors() {
+                const container = document.getElementById('component-diagram');
+                if (!container) return;
+                container.querySelectorAll('.connector, .arrowhead').forEach(el => el.remove());
+
+                const connections = [
+                    { from: 'comp-ui', to: 'comp-controller' },
+                    { from: 'comp-controller', to: 'comp-validator' },
+                    { from: 'comp-controller', to: 'comp-profile' },
+                    { from: 'comp-controller', to: 'comp-repo' },
+                    { from: 'comp-repo', to: 'comp-db' },
+                    { from: 'comp-profile', to: 'comp-db' },
+                ];
+                
+                connections.forEach(conn => {
+                    const fromEl = document.getElementById(conn.from);
+                    const toEl = document.getElementById(conn.to);
+                    if(!fromEl || !toEl) return;
+
+                    const fromRect = fromEl.getBoundingClientRect();
+                    const toRect = toEl.getBoundingClientRect();
+                    const containerRect = container.getBoundingClientRect();
+                    
+                    const fromX = fromRect.right - containerRect.left;
+                    const fromY = fromRect.top + fromRect.height / 2 - containerRect.top;
+                    
+                    const toX = toRect.left - containerRect.left;
+                    const toY = toRect.top + toRect.height / 2 - containerRect.top;
+                    
+                    const line = document.createElement('div');
+                    line.className = 'connector';
+                    line.style.left = `${fromX}px`;
+                    line.style.top = `${fromY}px`;
+                    line.style.width = `${toX - fromX}px`;
+                    line.style.height = '1px';
+                    if (conn.from === 'comp-controller' && (conn.to === 'comp-validator' || conn.to === 'comp-repo')) {
+                         const midX = fromX + (toX - fromX) / 2;
+                         const verticalLine = document.createElement('div');
+                         verticalLine.className = 'connector';
+                         verticalLine.style.left = `${midX}px`;
+                         verticalLine.style.top = `${Math.min(fromY, toY)}px`;
+                         verticalLine.style.width = '1px';
+                         verticalLine.style.height = `${Math.abs(fromY - toY)}px`;
+                         container.appendChild(verticalLine);
+
+                         const horiz1 = document.createElement('div');
+                         horiz1.className = 'connector';
+                         horiz1.style.left = `${fromX}px`;
+                         horiz1.style.top = `${fromY}px`;
+                         horiz1.style.width = `${midX - fromX}px`;
+                         container.appendChild(horiz1);
+                         
+                         const horiz2 = document.createElement('div');
+                         horiz2.className = 'connector';
+                         horiz2.style.left = `${midX}px`;
+                         horiz2.style.top = `${toY}px`;
+                         horiz2.style.width = `${toX - midX}px`;
+                         container.appendChild(horiz2);
+
+                    } else {
+                         container.appendChild(line);
+                    }
+                    
+                    const arrowhead = document.createElement('div');
+                    arrowhead.className = 'arrowhead';
+                    arrowhead.style.left = `${toX - 8}px`;
+                    arrowhead.style.top = `${toY - 6}px`;
+                    container.appendChild(arrowhead);
+                });
+            }
+            
+            // Password Protection Logic
+            const passwordForm = document.getElementById('password-form');
+            const passwordGate = document.getElementById('password-gate');
+            const answersContent = document.getElementById('answers-content');
+            const passwordError = document.getElementById('password-error');
+            const correctPassword = 'design2025';
+
+            // Check session storage on page load
+            if (sessionStorage.getItem('answersUnlocked') === 'true') {
+                passwordGate.classList.add('hidden');
+                answersContent.classList.remove('hidden');
+            }
+
+            if (passwordForm) {
+                passwordForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const passwordInput = document.getElementById('password-input');
+                    const enteredPassword = passwordInput.value;
+
+                    if (enteredPassword === correctPassword) {
+                        passwordGate.style.display = 'none';
+                        answersContent.classList.remove('hidden');
+                        passwordError.classList.add('hidden');
+                        // Store unlocked state in session storage
+                        sessionStorage.setItem('answersUnlocked', 'true');
+                    } else {
+                        passwordError.classList.remove('hidden');
+                        passwordInput.value = '';
+                    }
+                });
+            }
+
+            // Submission Logic
+            const teacherEmail = 'asennikolov.grozdanov@faculty.schiller.edu';
+            
+            function collectAllAnswers() {
+                const name = document.getElementById('student-name-global').value;
+                const studentId = document.getElementById('student-id-global').value;
+                let allContentHTML = `
+                    Student Name: ${name}<br>
+                    Student ID: ${studentId}<br>
+                    <hr><br>
+                `;
+                 let allContentText = `
+                    Student Name: ${name}\n
+                    Student ID: ${studentId}\n
+                    --------------------\n\n
+                `;
+
+                let hasAnswer = false;
+                for (let i = 1; i <= 3; i++) {
+                    const answerHTML = document.getElementById(`answer-box-${i}`).innerHTML;
+                    const answerText = document.getElementById(`answer-box-${i}`).innerText;
+                    if (answerText.trim()) {
+                        hasAnswer = true;
+                    }
+
+                    allContentHTML += `<h2>Exercise ${i} Answer:</h2>${answerHTML}<br><hr><br>`;
+                    allContentText += `==============================\n`;
+                    allContentText += `EXERCISE ${i} ANSWER\n`;
+                    allContentText += `==============================\n${answerText}\n\n`;
+                }
+                
+                return { name, studentId, allContentHTML, allContentText, hasAnswer };
+            }
+
+            document.getElementById('send-all-btn').addEventListener('click', () => {
+                const { name, studentId, allContentHTML, hasAnswer } = collectAllAnswers();
+
+                if (!name || !studentId) {
+                    alert('Please fill in your name and student ID before sending.');
+                    return;
+                }
+                if (!hasAnswer) {
+                     alert('Please provide an answer for at least one exercise.');
+                    return;
+                }
+
+                const subject = `Submission: Software Design Exercises - ${name}`;
+                
+                window.location.href = `mailto:${teacherEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(allContentHTML)}`;
+            });
+
+            document.getElementById('copy-all-btn').addEventListener('click', (e) => {
+                const { allContentText } = collectAllAnswers();
+
+                if (!allContentText.trim()) {
+                    alert('There is no content to copy.');
+                    return;
+                }
+                
+                const textarea = document.createElement('textarea');
+                textarea.value = allContentText;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    const originalText = e.target.textContent;
+                    e.target.textContent = 'Copied!';
+                    setTimeout(() => {
+                        e.target.textContent = originalText;
+                    }, 2000);
+                } catch (err) {
+                    alert('Failed to copy answers. Please copy them manually.');
+                }
+                document.body.removeChild(textarea);
+            });
+
+            drawConnectors();
+            window.addEventListener('resize', drawConnectors);
+        });
+    </script>
+</body>
+</html>
+

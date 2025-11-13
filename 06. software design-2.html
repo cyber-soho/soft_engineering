@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Design Lecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Solarized Light & Dark -->
+    <!-- Application Structure Plan: A single-page application (SPA) design controlled by a persistent top navigation menu. Clicking a menu item (e.g., 'Lecture', 'Exercises') reveals only the relevant content section, creating a clean, focused user experience. The 'Lecture' and other sections use collapsible cards ('details'/'summary' tags) managed by 'Expand/Collapse All' buttons to handle the large amount of information without overwhelming the user. This structure is chosen for its clarity, organization, and ability to let users navigate directly to the content they need without scrolling through irrelevant material. -->
+    <!-- Visualization & Content Choices: 1. Garrett's Elements & MVC Diagram: Goal=Organize/Relationships, Method=Embedded SVG, Interaction=CSS hover effects, Justification=SVG provides crisp, scalable, and theme-adaptable visuals superior to HTML/CSS for complex diagrams. 2. Mobile Lifecycle: Goal=Change/Process, Method=Interactive HTML timeline, Interaction=Click to highlight stages, Justification=Effectively shows the iterative process. 3. Exercises: Goal=Apply Knowledge, Method=contenteditable divs with file import, Interaction=Direct input and file drag/drop, Justification=Provides a rich, interactive way for students to complete and submit work directly within the application. -->
+    <!-- CONFIRMATION: NO external image links used. All graphics are embedded SVGs. NO Mermaid JS used. -->
+    <style>
+        :root {
+            --bg-base: #fdf6e3; /* base3 */
+            --bg-alt: #eee8d5; /* base2 */
+            --text-base: #657b83; /* base00 */
+            --text-heading: #586e75; /* base01 */
+            --text-accent: #b58900; /* yellow */
+            --border-color: #eee8d5; /* base2 */
+            --accent-blue: #268bd2;
+            --accent-green: #859900;
+            --accent-red: #dc322f;
+            --accent-purple: #6c71c4;
+            --code-bg: #f5f2f0;
+        }
+
+        html.dark {
+            --bg-base: #002b36; /* base03 */
+            --bg-alt: #073642; /* base02 */
+            --text-base: #839496; /* base0 */
+            --text-heading: #93a1a1; /* base1 */
+            --text-accent: #b58900; /* yellow */
+            --border-color: #073642; /* base02 */
+            --code-bg: #00252e;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-base);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        h1, h2, h3, h4, strong { color: var(--text-heading); }
+        a { color: var(--accent-blue); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        
+        .header, .main-nav { background-color: var(--bg-alt); border-bottom: 1px solid var(--border-color); }
+        .nav-btn { background-color: var(--bg-base); border: 1px solid var(--border-color); color: var(--text-base); }
+        .nav-btn:hover { background-color: var(--bg-alt); }
+        .main-nav button.active { background-color: var(--accent-blue); color: white; }
+        
+        details { background-color: var(--bg-base); border: 1px solid var(--border-color); border-radius: 0.5rem; margin-bottom: 1rem; }
+        summary { cursor: pointer; padding: 1rem; font-weight: 600; color: var(--text-heading); }
+        .details-content { padding: 0 1rem 1rem 1rem; }
+
+        .code-block-container { background-color: var(--code-bg); border: 1px solid var(--border-color); border-radius: 0.5rem; }
+        .code-block { background-color: transparent; white-space: pre-wrap; word-wrap: break-word; }
+        .code-output { min-height: 50px; background-color: var(--bg-base); border-top: 1px solid var(--border-color); }
+
+        /* Theme Toggle Switch */
+        .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent-blue); }
+        input:focus + .slider { box-shadow: 0 0 1px var(--accent-blue); }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        /* Password Modal */
+        .modal-bg { background-color: rgba(0,0,0,0.5); }
+        .modal-box { background-color: var(--bg-alt); }
+        
+        /* Rich text editor */
+        .answer-box {
+            min-height: 150px;
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            background-color: var(--bg-base);
+            outline: none;
+        }
+        .answer-box:focus-within { border-color: var(--accent-blue); box-shadow: 0 0 0 2px rgba(38, 139, 210, 0.4); }
+        .import-btn { background-color: var(--accent-green); color: white; }
+
+        .garrett-svg-layer { cursor: pointer; transition: opacity 0.2s ease-in-out; }
+        .garrett-svg-layer:hover { opacity: 0.8; }
+        .mvc-svg-component:hover > rect, .mvc-svg-component:hover > ellipse {
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+            stroke: var(--accent-blue);
+            stroke-width: 2px;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Controls -->
+    <header class="header sticky top-0 z-50 shadow-md">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl font-bold">Software Design Lecture</h1>
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <button id="expand-all" class="nav-btn px-3 py-2 rounded-md text-sm font-medium hidden sm:block">Expand All</button>
+                    <button id="collapse-all" class="nav-btn px-3 py-2 rounded-md text-sm font-medium hidden sm:block">Collapse All</button>
+                    <label class="switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Navigation -->
+    <nav class="main-nav sticky top-16 z-40 shadow-sm">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-center space-x-1 sm:space-x-4 overflow-x-auto py-2">
+                <button data-target="lecture-content" class="nav-btn px-3 py-2 rounded-md text-sm font-medium active">Lecture</button>
+                <button data-target="exercises-content" class="nav-btn px-3 py-2 rounded-md text-sm font-medium">Exercises</button>
+                <button data-target="tips-content" class="nav-btn px-3 py-2 rounded-md text-sm font-medium">Tips</button>
+                <button data-target="explanations-content" class="nav-btn px-3 py-2 rounded-md text-sm font-medium">Explanations</button>
+                <button data-target="answers-content" id="answers-btn" class="nav-btn px-3 py-2 rounded-md text-sm font-medium">Answers</button>
+                <button data-target="evaluation-content" class="nav-btn px-3 py-2 rounded-md text-sm font-medium">Evaluation Grid</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Lecture Content -->
+        <div id="lecture-content" class="content-section">
+            <details open>
+                <summary>Part 1: The Foundation - User Experience (UX) Design</summary>
+                <div class="details-content space-y-6">
+                    <h3 class="text-xl font-semibold">1.1 Introduction to User Experience (UX) Design</h3>
+                    <p>Welcome. Today, we delve into the core principles that separate mediocre software from exceptional software. It's not just about functionality anymore; it's about the entire experience a user has with a product. This is the realm of User Experience, or UX, design.</p>
+                    <p><a href="https://www.interaction-design.org/literature/topics/ux-design" target="_blank" rel="noopener noreferrer"><strong>What is UX Design?</strong></a> UX Design is the holistic process of enhancing user satisfaction by improving the usability, accessibility, and pleasure provided in the interaction between the user and a product. It's not just about how a product looks, but how it feels and how intuitive it is to use.</p>
+                    <div class="p-4 rounded-lg" style="background-color: var(--bg-alt);">
+                        <h4 class="text-lg font-semibold text-center mb-4">Garrett's Five Elements of UX Design</h4>
+                        <div class="w-full max-w-2xl mx-auto">
+                            <svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+                                <style>
+                                    .garrett-text { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; fill: white; text-anchor: middle; }
+                                    #garrett-desc-box { fill: var(--bg-base); stroke: var(--border-color); }
+                                    #garrett-desc-text { font-size: 8px; fill: var(--text-base); }
+                                </style>
+                                <g class="garrett-svg-layer" data-desc="Strategy: The foundation. Addresses core user needs and business goals.">
+                                    <rect x="20" y="100" width="260" height="25" fill="#268bd2" rx="5"/>
+                                    <text x="150" y="116" class="garrett-text">Strategy</text>
+                                </g>
+                                <g class="garrett-svg-layer" data-desc="Scope: Defines the functional and content requirements of the product.">
+                                    <rect x="40" y="75" width="220" height="25" fill="#859900" rx="5"/>
+                                    <text x="150" y="91" class="garrett-text">Scope</text>
+                                </g>
+                                <g class="garrett-svg-layer" data-desc="Structure: Defines how features fit together, including Information Architecture and Interaction Design.">
+                                    <rect x="60" y="50" width="180" height="25" fill="#b58900" rx="5"/>
+                                    <text x="150" y="66" class="garrett-text">Structure</text>
+                                </g>
+                                <g class="garrett-svg-layer" data-desc="Skeleton: The layout of buttons, controls, and blocks of text.">
+                                    <rect x="80" y="25" width="140" height="25" fill="#cb4b16" rx="5"/>
+                                    <text x="150" y="41" class="garrett-text">Skeleton</text>
+                                </g>
+                                <g class="garrett-svg-layer" data-desc="Surface: The visual design, colors, and typography.">
+                                    <rect x="100" y="0" width="100" height="25" fill="#dc322f" rx="5"/>
+                                    <text x="150" y="16" class="garrett-text">Surface</text>
+                                </g>
+                                <rect id="garrett-desc-box" x="20" y="140" width="260" height="30" rx="5" />
+                                <text id="garrett-desc-text" x="150" y="158" text-anchor="middle">Hover over a layer to learn more.</text>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <h3 class="text-xl font-semibold">1.2 The Golden Rules of Interface Design</h3>
+                    <p><a href="https://www.interaction-design.org/literature/article/user-control-and-freedom" target="_blank" rel="noopener noreferrer"><strong>Golden Rule 1: Place the User in Control.</strong></a> Users should feel like they are in charge. Provide flexibility, undo functionality, and direct manipulation.</p>
+                    <p><a href="https://www.interaction-design.org/literature/article/recognition-rather-than-recall" target="_blank" rel="noopener noreferrer"><strong>Golden Rule 2: Reduce the User's Memory Load.</strong></a> Don't make users remember information across screens. Use recognition over recall, provide meaningful defaults and shortcuts.</p>
+                    <p><a href="https://www.interaction-design.org/literature/article/consistency-and-standards-in-user-interface-design" target="_blank" rel="noopener noreferrer"><strong>Golden Rule 3: Make the Interface Consistent.</strong></a> Visual and functional consistency allows users to transfer knowledge, making the application intuitive.</p>
+                </div>
+            </details>
+            <details>
+                <summary>Part 2: Designing for Mobility</summary>
+                <div class="details-content space-y-6">
+                    <h3 class="text-xl font-semibold">2.1 The Unique Challenges of Mobile Design</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><strong>Multiple Platforms:</strong> Fragmented hardware (screen sizes) and software (iOS/Android).</li>
+                        <li><strong>UI Limitations:</strong> Less real estate requires prioritization of content.</li>
+                        <li><a href="https://www.interaction-design.org/literature/topics/context-aware-computing" target="_blank" rel="noopener noreferrer"><strong>Effective Use of Context:</strong></a> Leverage location, time, and sensors for personalized experiences.</li>
+                        <li><strong>Power Management:</strong> Design must be energy-efficient to conserve battery.</li>
+                        <li><strong>Intermittent Connectivity:</strong> Handle offline scenarios gracefully.</li>
+                    </ul>
+                    <h3 class="text-xl font-semibold">2.3 Mobile Architectures: The Power of the Cloud</h3>
+                    <p>Modern mobile apps offload heavy tasks to the <a href="https://en.wikipedia.org/wiki/Cloud_computing" target="_blank" rel="noopener noreferrer"><strong>cloud</strong></a>. The <a href="https://developer.mozilla.org/en-US/docs/Glossary/MVC" target="_blank" rel="noopener noreferrer"><strong>Model-View-Controller (MVC)</strong></a> pattern is a common architecture for this.</p>
+                     <div class="p-4 rounded-lg" style="background-color: var(--bg-alt);">
+                        <h4 class="text-lg font-semibold text-center mb-4">Model-View-Controller (MVC) Flow</h4>
+                        <div class="w-full max-w-lg mx-auto">
+                            <svg viewBox="0 0 350 120" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                                        <polygon points="0 0, 10 3.5, 0 7" fill="var(--accent-blue)" />
+                                    </marker>
+                                </defs>
+                                <style>.mvc-text{font-family:'Inter',sans-serif;font-size:12px;text-anchor:middle;fill:var(--text-heading);}.mvc-label{font-size:9px;fill:var(--text-base);text-anchor:middle;}</style>
+                                <g class="mvc-svg-component">
+                                    <rect x="10" y="40" width="80" height="40" rx="5" fill="var(--bg-base)" stroke="var(--border-color)"/>
+                                    <text x="50" y="65" class="mvc-text">View</text>
+                                </g>
+                                <g class="mvc-svg-component">
+                                    <ellipse cx="175" cy="60" rx="45" ry="25" fill="var(--bg-base)" stroke="var(--border-color)"/>
+                                    <text x="175" y="65" class="mvc-text">Controller</text>
+                                </g>
+                                <g class="mvc-svg-component">
+                                    <rect x="260" y="40" width="80" height="40" rx="5" fill="var(--bg-base)" stroke="var(--border-color)"/>
+                                    <text x="300" y="65" class="mvc-text">Model</text>
+                                </g>
+                                <path d="M 95,50 C 115,30 145,30 160,50" stroke="var(--accent-blue)" fill="none" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+                                <text x="128" y="35" class="mvc-label">User Actions</text>
+                                <path d="M 190,70 C 210,90 240,90 255,70" stroke="var(--accent-blue)" fill="none" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+                                <text x="222" y="95" class="mvc-label">Update Data</text>
+                                <path d="M 255,50 C 240,30 210,30 190,50" stroke="var(--accent-green)" fill="none" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+                                <text x="222" y="35" class="mvc-label">Get Data</text>
+                                <path d="M 160,70 C 145,90 115,90 95,70" stroke="var(--accent-green)" fill="none" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+                                <text x="128" y="95" class="mvc-label">Render UI</text>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="code-block-container mt-4 overflow-hidden">
+                        <div class="p-4">
+                            <h4 class="font-semibold" style="color: var(--text-heading);">Python Example: Simple MVC To-Do List</h4>
+                            <pre class="code-block font-mono text-sm mt-2"><code># Model: Manages data and business logic
+class TaskModel:
+    def __init__(self): self.tasks = []
+    def add_task(self, name): self.tasks.append({"name": name, "completed": False})
+    def get_tasks(self): return self.tasks
+    def mark_task_complete(self, index): self.tasks[index]["completed"] = True
+
+# View: Displays data
+class TaskView:
+    def show_tasks(self, tasks):
+        output = "\\n--- Your To-Do List ---\\n"
+        if not tasks: output += "No tasks yet. Add one!\\n"
+        else:
+            for i, task in enumerate(tasks):
+                status = "[x]" if task["completed"] else "[ ]"
+                output += f"{i+1}. {status} {task['name']}\\n"
+        output += "-----------------------\\n"
+        return output
+
+# Controller: Handles user input
+class TaskController:
+    def __init__(self):
+        self.model = TaskModel()
+        self.view = TaskView()
+        self.model.add_task("Learn MVC Pattern")
+        self.model.add_task("Build an interactive lecture")
+    def run_simulation(self):
+        # Simulate adding a task and completing one
+        output = self.view.show_tasks(self.model.get_tasks())
+        output += "Simulating: Mark task 1 as complete.\\n"
+        self.model.mark_task_complete(0)
+        output += self.view.show_tasks(self.model.get_tasks())
+        return output</code></pre>
+                        </div>
+                        <div class="p-2 flex items-center space-x-2 border-t" style="border-color: var(--border-color);">
+                            <button class="run-py-sim nav-btn text-sm px-3 py-1 rounded" data-script="mvc">Run</button>
+                            <button class="reset-py-sim nav-btn text-sm px-3 py-1 rounded" data-script="mvc">Reset</button>
+                        </div>
+                        <div class="code-output p-4 font-mono text-sm" id="mvc-output"></div>
+                    </div>
+                </div>
+            </details>
+            <details>
+                <summary>Part 3: Pattern-Based Design</summary>
+                 <div class="details-content space-y-6">
+                    <h3 class="text-xl font-semibold">3.1 What are Design Patterns?</h3>
+                    <p>A <a href="https://en.wikipedia.org/wiki/Software_design_pattern" target="_blank" rel="noopener noreferrer"><strong>design pattern</strong></a> is a general, reusable solution to a commonly occurring problem in software design. They are proven templates that speed up development and lead to more robust, elegant code.</p>
+                    <h3 class="text-xl font-semibold">3.2 Kinds of Patterns</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><strong>Creational Patterns:</strong> For object creation (e.g., Factory Method).</li>
+                        <li><strong>Structural Patterns:</strong> For object composition (e.g., Adapter).</li>
+                        <li><strong>Behavioral Patterns:</strong> For object interaction and responsibility (e.g., Iterator).</li>
+                    </ul>
+                     <div class="code-block-container mt-4 overflow-hidden">
+                        <div class="p-4">
+                            <h4 class="font-semibold" style="color: var(--text-heading);">Python Example: The Adapter Pattern</h4>
+                            <pre class="code-block font-mono text-sm mt-2"><code># Incompatible third-party class
+class ThirdPartyLogger:
+    def write_log(self, level, message):
+        return f"[3rd Party Log - {level.upper()}]: {message}"
+
+# Target interface our app expects
+class Logger:
+    def log_message(self, message): raise NotImplementedError
+
+# The Adapter
+class LoggerAdapter(Logger):
+    def __init__(self, third_party_logger):
+        self._third_party_logger = third_party_logger
+    def log_message(self, message):
+        return self._third_party_logger.write_log("info", message)
+
+# Client code
+def client_code(logger_instance):
+    return logger_instance.log_message("This works via the Adapter!")
+</code></pre>
+                        </div>
+                        <div class="p-2 flex items-center space-x-2 border-t" style="border-color: var(--border-color);">
+                            <button class="run-py-sim nav-btn text-sm px-3 py-1 rounded" data-script="adapter">Run</button>
+                            <button class="reset-py-sim nav-btn text-sm px-3 py-1 rounded" data-script="adapter">Reset</button>
+                        </div>
+                        <div class="code-output p-4 font-mono text-sm" id="adapter-output"></div>
+                    </div>
+                    <h3 class="text-xl font-semibold">3.3 The Flip Side: Anti-Patterns</h3>
+                    <p>An <strong>anti-pattern</strong> is a common "solution" that is actually bad practice. Recognizing them is crucial for avoiding pitfalls. A common example is <a href="https://en.wikipedia.org/wiki/God_object" target="_blank" rel="noopener noreferrer"><strong>The Blob (or God Object)</strong></a>, a single massive class that does too much work, violating the single responsibility principle.</p>
+                 </div>
+            </details>
+        </div>
+
+        <!-- Exercises Content -->
+        <div id="exercises-content" class="content-section hidden">
+            <h2 class="text-2xl font-bold mb-4">Exercises</h2>
+            <details>
+                <summary>Exercise 1: UX Golden Rules Analysis</summary>
+                <div class="details-content">
+                    <p class="mb-4">Analyze a website or application you use frequently. Identify and describe one specific example for each of the three Golden Rules of Interface Design in action.</p>
+                    <div class="answer-box-container">
+                        <div class="answer-box" contenteditable="true" data-exercise="1"></div>
+                        <button class="import-btn mt-2 px-3 py-1 text-sm rounded">Import Content</button>
+                    </div>
+                </div>
+            </details>
+            <details>
+                <summary>Exercise 2: Mobile Design Challenge</summary>
+                <div class="details-content">
+                    <p class="mb-4">Sketch a simple user interface for the "social sharing" feature of the "FitPath" fitness app mentioned in the lecture. Consider the constraints of a mobile screen. You can describe your sketch or import an image of it.</p>
+                    <div class="answer-box-container">
+                        <div class="answer-box" contenteditable="true" data-exercise="2"></div>
+                        <button class="import-btn mt-2 px-3 py-1 text-sm rounded">Import Content</button>
+                    </div>
+                </div>
+            </details>
+            <details>
+                <summary>Exercise 3: Identifying Patterns</summary>
+                <div class="details-content">
+                    <p class="mb-4">Describe a real-world scenario (not from the lecture) where the Adapter design pattern would be a useful solution. Explain what two incompatible systems you are trying to connect.</p>
+                    <div class="answer-box-container">
+                        <div class="answer-box" contenteditable="true" data-exercise="3"></div>
+                        <button class="import-btn mt-2 px-3 py-1 text-sm rounded">Import Content</button>
+                    </div>
+                </div>
+            </details>
+            
+            <!-- Submit Your Work Section -->
+            <div id="submit-work" class="mt-12 p-6 rounded-lg border" style="border-color: var(--border-color); background-color: var(--bg-alt);">
+                <h2 class="text-2xl font-bold mb-4">Submit Your Work</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="student-name" class="block text-sm font-medium mb-1">Name</label>
+                        <input type="text" id="student-name" class="w-full p-2 rounded border" style="background-color: var(--bg-base); border-color: var(--border-color);">
+                    </div>
+                    <div>
+                        <label for="student-id" class="block text-sm font-medium mb-1">Student ID</label>
+                        <input type="text" id="student-id" class="w-full p-2 rounded border" style="background-color: var(--bg-base); border-color: var(--border-color);">
+                    </div>
+                </div>
+                <div class="mt-6 flex flex-col sm:flex-row gap-4">
+                    <button id="send-email" class="w-full sm:w-auto px-6 py-2 rounded-md text-white font-semibold" style="background-color: var(--accent-blue);">Send Answers via Email</button>
+                    <button id="copy-download" class="w-full sm:w-auto px-6 py-2 rounded-md text-white font-semibold" style="background-color: var(--accent-green);">Copy & Download Answers (.txt)</button>
+                </div>
+                <div class="mt-6 p-4 rounded-md text-sm" style="background-color: var(--bg-base);">
+                    <h4 class="font-semibold">How to Submit:</h4>
+                    <p class="mt-2">Click "Send Answers via Email" to open your default mail client with your answers pre-filled. If this doesn't work, please use "Copy & Download Answers (.txt)" to save a text file of your work. You can then manually attach this file to an email and send it to <strong>asennikolov.grozdanov@faculty.schiller.edu</strong>.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tips Content -->
+        <div id="tips-content" class="content-section hidden">
+            <h2 class="text-2xl font-bold mb-4">Tips</h2>
+            <details>
+                <summary>Tip for Exercise 1</summary>
+                <div class="details-content">
+                    <p>Think about what makes a website easy versus frustrating. Look for "undo" buttons (Control), pre-filled forms (Memory), and consistent navigation menus (Consistency).</p>
+                </div>
+            </details>
+            <details>
+                <summary>Tip for Exercise 2</summary>
+                <div class="details-content">
+                    <p>Focus on simplicity. A mobile share screen should have large, clear buttons for major social networks and a simple way to add a comment before posting.</p>
+                </div>
+            </details>
+            <details>
+                <summary>Tip for Exercise 3</summary>
+                <div class="details-content">
+                     <p>Consider legacy systems. For example, adapting a modern JSON-based payment API to an old system that only understands XML-formatted data.</p>
+                </div>
+            </details>
+        </div>
+        
+        <!-- Explanations Content -->
+        <div id="explanations-content" class="content-section hidden">
+            <h2 class="text-2xl font-bold mb-4">Explanations</h2>
+             <details>
+                <summary>Explanation for Exercise 1</summary>
+                <div class="details-content">
+                    <p>This exercise tests your ability to apply the core theoretical principles of UX design to real-world applications, moving from abstract rules to concrete examples.</p>
+                </div>
+            </details>
+             <details>
+                <summary>Explanation for Exercise 2</summary>
+                <div class="details-content">
+                    <p>This task assesses your understanding of mobile design constraints, forcing you to prioritize functionality and create a user-friendly interface on limited screen real estate.</p>
+                </div>
+            </details>
+             <details>
+                <summary>Explanation for Exercise 3</summary>
+                <div class="details-content">
+                    <p>This question evaluates your deeper understanding of design patterns by asking you to identify a problem that a specific pattern solves, demonstrating you know when and why to use it.</p>
+                </div>
+            </details>
+        </div>
+
+        <!-- Answers Content (Protected) -->
+        <div id="answers-content" class="content-section hidden">
+            <h2 class="text-2xl font-bold mb-4">Answers</h2>
+            <details>
+                <summary>Answer for Exercise 1</summary>
+                <div class="details-content">
+                    <p><strong>Example:</strong> On Amazon, when you add an item to your cart, the site remembers your address and payment info (Reduces Memory Load). The search bar and account links are always in the top-right (Consistency). You can easily remove items from your cart before purchasing (User in Control).</p>
+                </div>
+            </details>
+            <details>
+                <summary>Answer for Exercise 2</summary>
+                <div class="details-content">
+                    <p><strong>Example:</strong> A good sketch would show a preview of the run map, a text field for a comment, and large icons for sharing to platforms like Facebook, X (Twitter), and Instagram, along with a prominent "Post" button.</p>
+                </div>
+            </details>
+            <details>
+                <summary>Answer for Exercise 3</summary>
+                <div class="details-content">
+                    <p><strong>Example:</strong> A new inventory management system outputs stock levels as a JSON API. An older accounting system needs to import this data but only accepts CSV files. An "Adapter" could be a script that fetches the JSON data, converts it into CSV format, and presents it to the accounting system, making the two incompatible systems work together without modifying either one.</p>
+                </div>
+            </details>
+        </div>
+
+        <!-- Evaluation Grid Content -->
+        <div id="evaluation-content" class="content-section hidden">
+             <h2 class="text-2xl font-bold mb-4">Evaluation Grid</h2>
+             <div class="overflow-x-auto">
+                 <table class="w-full text-left border-collapse">
+                    <thead style="background-color: var(--bg-alt);">
+                        <tr>
+                            <th class="p-3 font-semibold border" style="border-color: var(--border-color);">Criteria</th>
+                            <th class="p-3 font-semibold border" style="border-color: var(--border-color);">Exercise 1 (UX)</th>
+                            <th class="p-3 font-semibold border" style="border-color: var(--border-color);">Exercise 2 (Mobility)</th>
+                            <th class="p-3 font-semibold border" style="border-color: var(--border-color);">Exercise 3 (Patterns)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border" style="border-color: var(--border-color);">
+                            <td class="p-3 font-semibold">Clarity of Explanation (40%)</td>
+                            <td class="p-3">Clear identification of all three rules with relevant examples.</td>
+                            <td class="p-3">Description or sketch is easy to understand and addresses the core task.</td>
+                            <td class="p-3">The problem and the role of the adapter are clearly explained.</td>
+                        </tr>
+                        <tr class="border" style="border-color: var(--border-color); background-color: var(--bg-alt);">
+                            <td class="p-3 font-semibold">Correct Application of Concepts (40%)</td>
+                            <td class="p-3">Examples correctly demonstrate the chosen UX principles.</td>
+                            <td class="p-3">Design considers mobile constraints (e.g., touch targets, screen size).</td>
+                            <td class="p-3">The scenario is a valid and appropriate use case for the Adapter pattern.</td>
+                        </tr>
+                         <tr class="border" style="border-color: var(--border-color);">
+                            <td class="p-3 font-semibold">Detail and Depth (20%)</td>
+                            <td class="p-3">Goes beyond obvious examples and provides thoughtful analysis.</td>
+                            <td class="p-3">Includes considerations for user flow or potential edge cases.</td>
+                            <td class="p-3">Provides sufficient detail about the "incompatible" systems.</td>
+                        </tr>
+                    </tbody>
+                 </table>
+             </div>
+        </div>
+    </main>
+
+    <!-- Password Modal -->
+    <div id="password-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-bg">
+        <div class="modal-box w-full max-w-md p-6 rounded-lg shadow-xl">
+            <h3 class="text-lg font-bold text-center" style="color: var(--text-heading);">Password Required</h3>
+            <p class="text-sm text-center mt-2">Please enter the password to view the answers.<br>If you want to Cancel the action, click outside this box.<br>You can see the entered password by clicking on the "eye" icon.</p>
+            <div class="relative mt-4">
+                <input type="password" id="password-input" class="w-full p-2 pr-10 rounded border" style="background-color: var(--bg-base); border-color: var(--border-color);">
+                <button id="toggle-password" class="absolute inset-y-0 right-0 px-3 flex items-center">
+                    <svg id="eye-open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.522 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                    <svg id="eye-closed" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.523l8.367 8.367zm1.414-1.414L6.523 5.11A6 6 0 0114.89 13.477zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+            <p id="password-error" class="text-sm text-center mt-2" style="color: var(--accent-red);">&nbsp;</p>
+            <button id="submit-password" class="w-full mt-2 px-4 py-2 rounded-md text-white font-semibold" style="background-color: var(--accent-blue);">Submit</button>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const themeToggle = document.getElementById('theme-toggle');
+        const expandAllBtn = document.getElementById('expand-all');
+        const collapseAllBtn = document.getElementById('collapse-all');
+        const mainNavButtons = document.querySelectorAll('.main-nav button');
+        const contentSections = document.querySelectorAll('.content-section');
+        
+        // --- Theme Management ---
+        const userPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (sessionStorage.getItem('theme') === 'dark' || (!sessionStorage.getItem('theme') && userPrefersDark)) {
+            document.documentElement.classList.add('dark');
+            themeToggle.checked = true;
+        }
+        themeToggle.addEventListener('change', () => {
+            if (themeToggle.checked) {
+                document.documentElement.classList.add('dark');
+                sessionStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                sessionStorage.setItem('theme', 'light');
+            }
+        });
+
+        // --- Main SPA Navigation ---
+        mainNavButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.dataset.target;
+                
+                if (targetId === 'answers-content' && sessionStorage.getItem('answersUnlocked') !== 'true') {
+                    showPasswordModal();
+                    return;
+                }
+
+                mainNavButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                contentSections.forEach(section => {
+                    section.classList.add('hidden');
+                    if (section.id === targetId) {
+                        section.classList.remove('hidden');
+                    }
+                });
+            });
+        });
+
+        // --- Expand/Collapse Controls ---
+        function setAllDetails(open) {
+            const visibleSection = document.querySelector('.content-section:not(.hidden)');
+            if (visibleSection) {
+                visibleSection.querySelectorAll('details').forEach(detail => detail.open = open);
+            }
+        }
+        expandAllBtn.addEventListener('click', () => setAllDetails(true));
+        collapseAllBtn.addEventListener('click', () => setAllDetails(false));
+        
+        // --- SVG Interactivity ---
+        const garrettLayers = document.querySelectorAll('.garrett-svg-layer');
+        const garrettDescText = document.getElementById('garrett-desc-text');
+        garrettLayers.forEach(layer => {
+            layer.addEventListener('mouseover', () => {
+                garrettDescText.textContent = layer.dataset.desc;
+            });
+            layer.addEventListener('mouseout', () => {
+                 garrettDescText.textContent = 'Hover over a layer to learn more.';
+            });
+        });
+
+        // --- Password Protection ---
+        const passwordModal = document.getElementById('password-modal');
+        const passwordInput = document.getElementById('password-input');
+        const submitPasswordBtn = document.getElementById('submit-password');
+        const passwordError = document.getElementById('password-error');
+        const togglePasswordBtn = document.getElementById('toggle-password');
+        const eyeOpen = document.getElementById('eye-open');
+        const eyeClosed = document.getElementById('eye-closed');
+
+        function showPasswordModal() {
+            passwordModal.style.display = 'flex';
+            passwordInput.focus();
+        }
+
+        function hidePasswordModal() {
+            passwordModal.style.display = 'none';
+            passwordInput.value = '';
+            passwordError.innerHTML = '&nbsp;';
+        }
+
+        submitPasswordBtn.addEventListener('click', () => {
+            if (passwordInput.value === 'student-2025') {
+                sessionStorage.setItem('answersUnlocked', 'true');
+                hidePasswordModal();
+                document.querySelector('button[data-target="answers-content"]').click();
+            } else {
+                passwordError.textContent = 'Incorrect password. Please try again.';
+            }
+        });
+
+        togglePasswordBtn.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            eyeOpen.classList.toggle('hidden', isPassword);
+            eyeClosed.classList.toggle('hidden', !isPassword);
+        });
+
+        passwordModal.addEventListener('click', (e) => {
+            if (e.target === passwordModal) {
+                hidePasswordModal();
+            }
+        });
+
+        // --- Python Simulators ---
+        const pySims = {
+            mvc: () => {
+                class TaskModel {
+                    constructor() { this.tasks = []; }
+                    addTask(name) { this.tasks.push({ name: name, completed: false }); }
+                    getTasks() { return this.tasks; }
+                    markTaskComplete(index) { if(this.tasks[index]) this.tasks[index].completed = true; }
+                }
+                class TaskView {
+                    show_tasks(tasks) {
+                        let output = "\n--- Your To-Do List ---\n";
+                        if (!tasks || tasks.length === 0) { output += "No tasks yet. Add one!\n"; }
+                        else {
+                            tasks.forEach((task, i) => {
+                                const status = task.completed ? "[x]" : "[ ]";
+                                output += `${i+1}. ${status} ${task.name}\n`;
+                            });
+                        }
+                        output += "-----------------------\n";
+                        return output;
+                    }
+                }
+                const model = new TaskModel();
+                const view = new TaskView();
+                model.addTask("Learn MVC Pattern");
+                model.addTask("Build an interactive lecture");
+                
+                let output = view.show_tasks(model.getTasks());
+                output += "Simulating: Mark task 1 as complete.\n";
+                model.markTaskComplete(0);
+                output += view.show_tasks(model.getTasks());
+                return output;
+            },
+            adapter: () => {
+                 class ThirdPartyLogger {
+                    write_log(level, message) { return `[3rd Party Log - ${level.toUpperCase()}]: ${message}`; }
+                }
+                class LoggerAdapter {
+                    constructor(third_party_logger) { this._third_party_logger = third_party_logger; }
+                    log_message(message) { return this._third_party_logger.write_log("info", message); }
+                }
+                function client_code(logger_instance) {
+                    return logger_instance.log_message("This works via the Adapter!");
+                }
+                const incompatible_logger = new ThirdPartyLogger();
+                const adapter = new LoggerAdapter(incompatible_logger);
+                return client_code(adapter);
+            }
+        };
+
+        document.querySelectorAll('.run-py-sim').forEach(button => {
+            button.addEventListener('click', () => {
+                const scriptId = button.dataset.script;
+                const outputDiv = document.getElementById(`${scriptId}-output`);
+                if (pySims[scriptId]) {
+                    outputDiv.textContent = pySims[scriptId]();
+                }
+            });
+        });
+
+        document.querySelectorAll('.reset-py-sim').forEach(button => {
+            button.addEventListener('click', () => {
+                const scriptId = button.dataset.script;
+                document.getElementById(`${scriptId}-output`).textContent = '';
+            });
+});
+
+        // --- Exercise and Submission Logic ---
+        function sanitizeHtml(html) {
+            const template = document.createElement('template');
+            template.innerHTML = html;
+            const sanitized = template.content;
+            sanitized.querySelectorAll('script, style, link').forEach(el => el.remove());
+            sanitized.querySelectorAll('*').forEach(el => {
+                for (const attr of el.attributes) {
+                    if (attr.name.startsWith('on')) {
+                        el.removeAttribute(attr.name);
+                    }
+                }
+            });
+            return new XMLSerializer().serializeToString(sanitized);
+        }
+
+        document.querySelectorAll('.import-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const answerBox = button.previousElementSibling;
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = 'text/plain, text/markdown, text/html, image/*';
+                fileInput.onchange = e => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        if (file.type.startsWith('image/')) {
+                            reader.onload = function(event) {
+                                const img = document.createElement('img');
+                                img.src = event.target.result;
+                                img.style.maxWidth = '100%';
+                                img.style.borderRadius = '0.25rem';
+                                answerBox.appendChild(img);
+                            };
+                            reader.readAsDataURL(file);
+                        } else {
+                            reader.onload = function(event) {
+                                let content = event.target.result;
+                                if(file.type === 'text/html'){
+                                    content = sanitizeHtml(content);
+                                }
+                                const p = document.createElement('p');
+                                p.innerHTML = content.replace(/\n/g, '<br>');
+                                answerBox.appendChild(p);
+                            };
+                            reader.readAsText(file);
+                        }
+                    }
+                };
+                fileInput.click();
+            });
+        });
+
+        document.getElementById('copy-download').addEventListener('click', () => {
+            let fullContent = `Name: ${document.getElementById('student-name').value}\n`;
+            fullContent += `Student ID: ${document.getElementById('student-id').value}\n\n`;
+            document.querySelectorAll('.answer-box').forEach(box => {
+                const exerciseNum = box.dataset.exercise;
+                fullContent += `--- Exercise ${exerciseNum} ---\n`;
+                fullContent += box.innerText + '\n\n';
+            });
+
+            const blob = new Blob([fullContent], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'copied_content.txt';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+        });
+
+        document.getElementById('send-email').addEventListener('click', () => {
+            const name = document.getElementById('student-name').value;
+            const id = document.getElementById('student-id').value;
+            let body = `Name: ${name}\nStudent ID: ${id}\n\n`;
+             document.querySelectorAll('.answer-box').forEach(box => {
+                const exerciseNum = box.dataset.exercise;
+                body += `--- Exercise ${exerciseNum} ---\n`;
+                body += box.innerText + '\n\n';
+            });
+            const subject = `Software Design Submission - ${name}`;
+            window.location.href = `mailto:asennikolov.grozdanov@faculty.schiller.edu?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        });
+    });
+    </script>
+</body>
+</html>
+

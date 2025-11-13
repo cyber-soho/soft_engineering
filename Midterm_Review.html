@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Midterm Review: Software Engineering</title>
+    <!-- Importing Tailwind CSS from CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Setting up the Inter font family -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth; /* For smooth scrolling */
+            padding-top: 64px; /* Offset for sticky nav */
+        }
+        /* Custom styles for code blocks */
+        code {
+            background-color: #f3f4f6; /* gray-100 */
+            color: #1d4ed8; /* blue-700 */
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        /* Style for the active navigation link */
+        .nav-link.active-nav-link {
+            color: #2563eb; /* blue-600 */
+            font-weight: 600;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 2px;
+        }
+        
+        /* --- New Sub-Accordion Styles --- */
+        .sub-accordion-toggle {
+            cursor: pointer;
+            padding: 1rem; /* 16px */
+            border-radius: 8px; /* rounded-lg */
+            transition: background-color 0.2s ease-in-out;
+            position: relative; /* For the icon */
+        }
+        .sub-accordion-toggle:hover {
+            background-color: #f9fafb; /* gray-50 */
+        }
+        .sub-accordion-toggle::after {
+            content: '+';
+            position: absolute;
+            right: 1rem; /* 16px */
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem; /* 24px */
+            font-weight: 700;
+            color: #3b82f6; /* blue-500 */
+            transition: transform 0.3s ease;
+        }
+        .sub-accordion-toggle.active::after {
+            content: '−'; /* Minus sign */
+        }
+        .sub-accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            padding-left: 1rem; /* Indent sub-content slightly */
+            border-left: 2px solid #e5e7eb; /* gray-200 */
+            margin-left: 0.75rem; /* ml-3 */
+        }
+        .sub-accordion-content.open {
+            max-height: 10000px; /* Large value */
+            padding-top: 0.5rem;
+            padding-bottom: 1rem;
+            padding-right: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Top Navigation Menu -->
+    <nav class="bg-white/95 backdrop-blur-sm shadow-md fixed top-0 left-0 right-0 z-50">
+        <!-- ... existing nav html ... -->
+        <div class="max-w-5xl mx-auto px-4 sm:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Home/Logo -->
+                <div>
+                    <a href="#" class="nav-link text-lg font-bold text-blue-700" data-page="page-home">S.E. Review</a>
+                </div>
+                <!-- Page Links -->
+                <div class="flex items-center space-x-4 sm:space-x-6">
+                    <a href="#" class="nav-link text-gray-600 hover:text-blue-600 transition-colors duration-150" data-page="page-1">Topic 1</a>
+                    <a href="#" class="nav-link text-gray-600 hover:text-blue-600 transition-colors duration-150" data-page="page-2">Topic 2</a>
+                    <a href="#" class="nav-link text-gray-600 hover:text-blue-600 transition-colors duration-150" data-page="page-3">Topic 3</a>
+                    <a href="#" class="nav-link text-gray-600 hover:text-blue-600 transition-colors duration-150" data-page="page-4">Topic 4</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main id="content-start" class="max-w-5xl mx-auto my-12 p-8 sm:p-12 bg-white rounded-xl shadow-2xl">
+
+        <!-- Page: Home (Title) -->
+        <div id="page-home" class="page-content">
+            <!-- ... existing home page html ... -->
+            <header class="border-b-2 border-gray-200 pb-6 mb-10">
+                <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">
+                    Comprehensive Midterm Review: Software Engineering Principles & Practice
+                </h1>
+                <p class="text-lg text-gray-600">
+                    This review guide synthesizes the core concepts from your lectures, structured according to the main topics for your midterm. Use the menu above to navigate between topics.
+                </p>
+            </header>
+            <p class="text-center text-gray-500">Select a topic from the navigation bar to begin.</p>
+        </div>
+
+        <!-- Page: Topic 1: Foundations & Overview -->
+        <div id="page-1" class="page-content hidden">
+            <h2 class="text-2xl md:text-3xl font-bold text-blue-800 mb-6 border-b-2 border-blue-200 pb-3">
+                Topic 1: Foundations & Overview
+            </h2>
+            <p class="text-md text-gray-600 italic mb-8">
+                This topic covers the fundamental nature of software, the principles of engineering it, and the professional and ethical duties of a software engineer.
+            </p>
+            
+            <div> 
+                <!-- Sub-topic 1.1 -->
+                <h3 class="text-xl md:text-2xl font-semibold text-gray-800 mt-8 mb-4 sub-accordion-toggle">
+                    Foundations of Software Engineering (Chapter 1)
+                </h3>
+                <div class="sub-accordion-content">
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">The Nature of Software</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        Software is a logical, not physical, element. It doesn't "wear out" like hardware, but it can "deteriorate" as changes and bug fixes are applied over time, degrading its structure and introducing new faults.
+                    </p>
+
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Layered Technology Model</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        Software engineering is a layered technology:
+                    </p>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">A Quality Focus (Bedrock):</strong> The foundation is a commitment to quality, such as Total Quality Management (<code><a href="https://asq.org/quality-resources/total-quality-management" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">TQM</a></code>).</li>
+                <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Think!</strong> Clear thought before action produces better results.</li>
+            </ul>
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Core Process Principles (from Practice and Requirements)</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        These principles guide the <em class="text-gray-600">roadmap</em> and <em class="text-gray-600">flow</em> of a project.
+                    </p>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Be Agile:</strong> A mindset of simplicity and adapting to change.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Focus on Quality at Every Step:</strong> Quality is an exit condition for every task, not an afterthought.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Be Ready to Adapt:</strong> The process is a guide, not a rigid set of rules.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Build an Effective Team:</strong> A team built on trust and respect is the key to success.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Establish Mechanisms for Communication:</strong> Information must flow freely.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Manage Change:</strong> Have a defined process for handling inevitable changes.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Assess Risk:</strong> Identify potential risks early and have contingency plans.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Create Work Products That Provide Value:</strong> Don't create documents for the sake of it.</li>
+                    </ul>
+                </div>
+
+                <!-- Sub-topic 1.2 -->
+                <h3 class="text-xl md:text-2xl font-semibold text-gray-800 mt-8 mb-4 sub-accordion-toggle">
+                    Professional, Ethical, and Social Responsibility (Chapter 5, 30)
+                </h3>
+                <div class="sub-accordion-content">
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        This is built on three interconnected pillars:
+                    </p>
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Professional Responsibility</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        The obligation to deliver high-quality, competent work.
+                    </p>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                    <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Competence:</strong> A commitment to lifelong learning to stay current (e.g., not using broken crypto like <code><a href="https://en.wikipedia.org/wiki/MD5" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">MD5</a></code> for passwords).</li>
+                    <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Quality & Due Diligence:</strong> Ensuring Reliability, Security, Usability, and Maintainability. A failure of due diligence can be catastrophic (e.g., the <a href="https://en.wikipedia.org/wiki/Therac-25" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Therac-25</a> tragedy).</li>
+                    <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Honesty & Integrity:</strong> Respecting Intellectual Property (<code>IP</code>) and being truthful about project status.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Accountability:</strong> Taking ownership of mistakes and using tools like <em class="text-gray-600">Blameless Post-mortems</em> to fix <em class="text-gray-600">systems</em>, not blame <em class="text-gray-600">people</em>.</li>
+                    </ul>
+
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Ethical Responsibility</h4>
+                <p class="text-base text-gray-700 leading-relaxed mb-4">
+                    The moral compass that guides our decisions, best summarized by the <a href="https://ethics.acm.org/code-of-ethics/software-engineering-code/" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">ACM/IEEE-CS Software Engineering Code of Ethics</a>.
+                </p>
+                <ol class="list-decimal list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Principle 1: PUBLIC:</strong> Act consistently with the public interest. This is the highest priority.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Principle 2: CLIENT AND EMPLOYER:</strong> Act in the best interests of your client and employer, <em class="text-gray-600">consistent with the public interest</em>.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Principle 3: PRODUCT:</strong> Ensure products meet the highest professional standards.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Principle 4: JUDGMENT:</strong> Maintain integrity and independence in your professional judgment (e.g., by disclosing a Conflict of Interest).</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Principle 5: MANAGEMENT:</strong> Promote an ethical approach to management, including setting realistic goals and fostering psychological safety.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Principle 6: PROFESSION:</strong> Advance the integrity and reputation of the profession.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Principle 7: COLLEAGUES:</strong> Be fair to and supportive of your colleagues (e.g., giving constructive code reviews).</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Principle 8: SELF:</strong> Participate in lifelong learning to grow your competence and ethical understanding.</li>
+                    </ol>
+
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Social Responsibility</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        Awareness of the broader impact of our work on society.
+                    </p>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                    <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Privacy:</strong> Being a good steward of user data. This includes <em class="text-gray-600">Informed Consent</em>, <em class="text-gray-600">Data Minimization</em>, and complying with regulations like the <code><a href="https://gdpr-info.eu/" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">GDPR</a></code> (General Data Protection Regulation).</li>
+                    <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Bias and Fairness:</strong> Understanding that algorithms are not automatically objective. Systems trained on biased data will produce biased results (e.g., Amazon's AI recruiting tool).</li>
+                    <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Accessibility (<code>a11y</code>):</strong> Designing software that can be used by people with disabilities (e.g., by following <code><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">WCAG</a></code> (Web Content Accessibility Guidelines)).</li>
+                    <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Environmental Impact:</strong> Recognizing that software runs on hardware that consumes energy. <a href="https://greensoftware.foundation/" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer"><em class="text-gray-600">Green Software Engineering</em></a> aims to build sustainable software.</li>
+                </ul>
+            </div>
+            </div>
+        </div>
+
+        <!-- Page: Topic 2: Software Processes & Standards -->
+        <div id="page-2" class="page-content hidden">
+            <h2 class="text-2xl md:text-3xl font-bold text-blue-800 mb-6 border-b-2 border-blue-200 pb-3">
+                Topic 2: Software Processes & Standards
+            </h2>
+            <p class="text-md text-gray-600 italic mb-8">
+                This topic covers the "road maps" or frameworks we use to build software.
+            </p>
+            
+            <div> 
+                <!-- Sub-topic 2.1 -->
+                <h3 class="text-xl md:text-2xl font-semibold text-gray-800 mt-8 mb-4 sub-accordion-toggle">
+                    Generic Process Framework
+                </h3>
+                <div class="sub-accordion-content">
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        The five core activities present in all software development.
+                    </p>
+                    <ol class="list-decimal list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Communication:</strong> Collaborating with the customer to gather requirements.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Planning:</strong> Creating the "map" for the project (tasks, risks, schedule).</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Modeling:</strong> Creating models (like sketches or diagrams) to understand requirements and design a solution.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Construction:</strong> Writing code and testing it.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Deployment:</strong> Delivering the software to the customer and getting feedback.</li>
+                    </ol>
+                </div>
+                
+                <!-- Sub-topic 2.2 -->
+                <h3 class="text-xl md:text-2xl font-semibold text-gray-800 mt-8 mb-4 sub-accordion-toggle">
+                    Process Models (Chapter 2, 3)
+                </h3>
+                <div class="sub-accordion-content">
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Prescriptive Models</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        Advocate for an orderly, sequential approach.
+                    </p>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                        <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Waterfall Model:</strong> A sequential model where one phase must be completed before the next begins (Communication -> Planning -> Modeling -> Construction -> Deployment).
+                            <ul class="list-circle list-outside pl-6 mt-2 space-y-1">
+                                <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Pros:</strong> Simple, enforces discipline, good for projects with stable, well-understood requirements (e.g., safety-critical systems).</li>
+                                <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Cons:</strong> Inflexible, cannot handle changing requirements, customer gets no feedback until the very end.</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Evolutionary Models</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        Produce increasingly complete versions of the software iteratively.
+                    </p>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Prototyping Model:</strong> A model where a "mock-up" (prototype) is built quickly, shown to the customer for feedback, and then refined. This is excellent for clarifying uncertain requirements.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Spiral Model:</strong> Combines the iterative nature of prototyping with the systematic control of the waterfall model. Its defining feature is that it explicitly incorporates <em class="text-gray-600">risk assessment</em> in each loop of the spiral.</li>
+                    </ul>
+
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Agile Development (Chapter 3)</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        A philosophy that emphasizes flexibility, communication, and speed. It <a href="https://agilemanifesto.org/" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">values</a>:
+                    </p>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Individuals and interactions</strong> over processes and tools</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Working software</strong> over comprehensive documentation</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Customer collaboration</strong> over contract negotiation</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Responding to change</strong> over following a plan</li>
+                    </ul>
+
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Agile Frameworks</h4>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                        <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://www.scrum.org/" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Scrum</a>:</strong> An agile framework where work is done in short, time-boxed iterations called <em class="text-gray-600">Sprints</em> (typically 1-4 weeks).
+                            <ul class="list-circle list-outside pl-6 mt-2 space-y-1">
+                                <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Product Backlog:</strong> A prioritized list of all features.</li>
+                                <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Sprint Backlog:</strong> The set of features the team commits to building in one sprint.</li>
+                                <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Daily Scrum:</strong> A short daily meeting (What I did, What I'll do, What's blocking me).</li>
+                                <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Sprint Review:</strong> Demonstrating the working software to stakeholders at the end of the sprint.</li>
+                            </ul>
+                        </li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://www.atlassian.com/agile/kanban" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Kanban</a>:</strong> A method focused on visualizing work and maximizing flow. It uses a <em class="text-gray-600">Kanban Board</em> (e.g., To Do, In Progress, Done) and a key principle of <em class="text-gray-600">Limiting Work in Progress (WIP)</em> to prevent bottlenecks.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://www.atlassian.com/devops" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">DevOps</a>:</strong> While not a single framework, DevOps is a culture and set of practices (referenced in Chapter 3.5) that combines software development (Dev) and IT operations (Ops). It aims to shorten the development life cycle and provide continuous delivery with high software quality, heavily relying on automation for <code><a href="https://www.atlassian.com/continuous-delivery/principles/continuous-integration-vs-delivery-vs-deployment" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">CI/CD</a></code> (Continuous Integration/Continuous Deployment).</li>
+                    </ul>
+                </div>
+
+                <!-- Sub-topic 2.3 -->
+                <h3 class="text-xl md:text-2xl font-semibold text-gray-800 mt-8 mb-4 sub-accordion-toggle">
+                    Software Process Improvement (Chapter 28)
+                </h3>
+                <div class="sub-accordion-content">
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        This is a dedicated activity (referenced in Chapter 28) focused on assessing and improving the <em class="text-gray-600">maturity</em> and <em class="text-gray-600">effectiveness</em> of your team's software development processes.
+                    </p>
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">CMMI (Capability Maturity Model Integration)</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        This is the most well-known process improvement model (referenced in 28.3). It provides a framework for organizations to measure their process maturity against a scale of five levels:
+                    </p>
+                    <ol class="list-decimal list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Initial:</strong> Processes are chaotic, unpredictable, and reactive.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Managed:</strong> Basic project management practices are established.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Defined:</strong> Processes are standardized and documented across the organization.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Quantitatively Managed:</strong> The organization controls its processes using statistical and quantitative data.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Optimizing:</strong> The organization uses data to drive continuous process improvement.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Page: Topic 3: Software Development Phases -->
+        <div id="page-3" class="page-content hidden">
+            <h2 class="text-2xl md:text-3xl font-bold text-blue-800 mb-6 border-b-2 border-blue-200 pb-3">
+                Topic 3: Software Development Phases
+            </h2>
+            <p class="text-md text-gray-600 italic mb-8">
+                This topic details the "how-to" of analysis, design, and construction.
+            </p>
+
+            <div> 
+                <!-- Sub-topic 3.1 -->
+                <h3 class="text-xl md:text-2xl font-semibold text-gray-800 mt-8 mb-4 sub-accordion-toggle">
+                    Requirements & Analysis (Chapter 7, 8)
+                </h3>
+                <div class="sub-accordion-content">
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Requirements Engineering</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        The 7-task process for understanding what needs to be built.
+                    </p>
+                    <ol class="list-decimal list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Inception:</strong> The start of the project; establishing a basic understanding.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Elicitation:</strong> Gathering requirements from stakeholders (this is hard!).</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Elaboration:</strong> Refining the raw requirements into a detailed model.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Negotiation:</strong> Reconciling conflicts and prioritizing requirements (e.g., trading features for time).</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Specification:</strong> Formally documenting the requirements (e.g., in a <a href="https://en.wikipedia.org/wiki/Software_requirements_specification" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Software Requirements Specification (<code>SRS</code>)</a> document).</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Validation:</strong> Reviewing the specification to ensure it's correct and complete. (Asks: "Are we building the <em class="text-gray-600">right</em> product?")</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Requirements Management:</strong> Identifying, controlling, and tracking changes to requirements.</li>
+                    </ol>
+                    
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Requirements Modeling</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        Creating models to understand requirements.
+                    </p>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                        <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Scenario-Based Models:</strong> Describe the system from the user's point of view.
+                            <ul class="list-circle list-outside pl-6 mt-2 space-y-1">
+                                <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://www.visual-paradigm.com/guide/uml-unified-modeling-language/what-is-use-case-diagram/" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Use Cases</a>:</strong> Tell a "story" of how an actor achieves a goal (e.g., "Withdraw Cash").</li>
+                                <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Actors:</strong> A role (person or system) that interacts with the system.</li>
+                            </ul>
+                        </li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Class-Based Models:</strong> Describe the "things" (objects) in the system and their relationships.
+                            <ul class="list-circle list-outside pl-6 mt-2 space-y-1">
+                                <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://www.visual-paradigm.com/guide/uml-unified-modeling-language/what-is-class-diagram/" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Class Diagrams</a>:</strong> Show classes, their attributes (data), and their operations (methods).</li>
+                            </ul>
+                        </li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Behavioral Models:</strong> Describe how the system responds to events over time.
+                            <ul class="list-circle list-outside pl-6 mt-2 space-y-1">
+                                <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://www.visual-paradigm.com/guide/uml-unified-modeling-language/what-is-state-machine-diagram/" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">State Diagrams</a>:</strong> Show the different states an object can be in and the events that trigger a transition from one state to another.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Sub-topic 3.2 -->
+                <h3 class="text-xl md:text-2xl font-semibold text-gray-800 mt-8 mb-4 sub-accordion-toggle">
+                    Software Design (Chapter 9-14)
+                </h3>
+                <div class="sub-accordion-content">
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Design Concepts</h4>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://martinfowler.com/bliki/TechnicalDebt.html" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Technical Debt</a>:</strong> The implied cost of rework caused by choosing an easy, limited solution now instead of a better approach that would take longer.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Abstraction:</strong> Hiding complexity to expose only essential features (e.g., a "save" button hides the complexity of file I/O).</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Modularity:</strong> Breaking a system into discrete components (modules) to manage complexity.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="httpsNB://en.wikipedia.org/wiki/Separation_of_concerns" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Separation of Concerns (SoC)</a>:</strong> A design principle for separating a program into distinct sections, each addressing a separate concern (e.g., separating UI logic from business logic).</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Information Hiding:</strong> Hiding the internal implementation details of a module from other modules.</li>
+                        <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Functional Independence:</strong> The goal of good design, measured by:
+                            <ul class="list-circle list-outside pl-6 mt-2 space-y-1">
+                                <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://en.wikipedia.org/wiki/Cohesion_(computer_science)" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Cohesion</a> (High is good):</strong> The degree to which the elements inside a module belong together (i.e., it does one thing well).</li>
+                                <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://en.wikipedia.org/wiki/Coupling_(computer_science)" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Coupling</a> (Low is good):</strong> The degree of interdependence between modules.</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Architectural Design</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        High-level strategic decisions about the system's structure.
+                    </p>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Data-Centered:</strong> A central data store (e.g., a database) that other components interact with.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Data-Flow (<a href="https://en.wikipedia.org/wiki/Pipeline_(computing)" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Pipe and Filter</a>):</strong> Data is transformed by a series of components (filters) connected by "pipes."</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://en.wikipedia.org/wiki/Multitier_architecture" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Layered Architecture</a>:</strong> Organizes the system into layers, each providing services to the layer above it (e.g., Presentation Layer, Business Logic Layer, Data Access Layer).</li>
+                        <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://developer.mozilla.org/en-US/docs/Glossary/MVC" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Model-View-Controller (MVC)</a>:</strong> A pattern that separates concerns:
+                            <ul class="list-circle list-outside pl-6 mt-2 space-y-1">
+                                <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Model:</strong> Manages the data and business logic.</li>
+                                <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">View:</strong> The user interface that displays the data.</li>
+                                <li class="p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Controller:</strong> Handles user input and updates the Model and View.</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Component-Level Design</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        Detailed design of individual components, often guided by the <code><a href="https://en.wikipedia.org/wiki/SOLID" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">SOLID</a></code> principles:
+                    </p>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://en.wikipedia.org/wiki/Open-closed_principle" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Open-Closed Principle (OCP)</a>:</strong> A component should be "open for extension, but closed for modification." (You should be ableD to add new features without changing existing code).</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://en.wikipedia.org/wiki/Liskov_substitution_principle" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Liskov Substitution Principle (LSP)</a>:</strong> Subclasses should be substitutable for their base classes.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://en.wikipedia.org/wiki/Interface_segregation_principle" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Interface Segregation Principle (ISP)</a>:</strong> Many client-specific interfaces are better than one general-purpose interface (don't force a class to implement methods it doesn't need).</li>
+                    </ul>
+
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">User Experience (UX) Design</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        Designing for the user's entire experience.
+                    </p>
+                    <h5 class="text-md font-semibold text-gray-700 mt-4 mb-2">Golden Rules of Interface Design:</h5>
+                    <ol class="list-decimal list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Place the User in Control:</strong> Provide undo, flexible interaction, etc.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Reduce the User's Memory Load:</strong> Use defaults, "remember" information, and provide visual cues.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Make the Interface Consistent:</strong> Visual and functional consistency allows users to transfer knowledge.</li>
+                    </ol>
+
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Design Patterns</h4>
+                <p class="text-base text-gray-700 leading-relaxed mb-4">
+                    A general, reusable solution to a commonly occurring problem (e.g., <em class="text-gray-600">Adapter</em>, <em class="text-gray-600">Factory</em>, <em class="text-gray-600">Iterator</em>).
+                </p>
+                <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Anti-Patterns</h4>
+                <p class="text-base text-gray-700 leading-relaxed mb-4">
+                    A common "solution" that is ineffective or counterproductive (e.g., <em class="text-gray-600">The Blob/God Object</em>, <em class="text-gray-600">Spaghetti Code</em>).
+                </p>
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Anti-Patterns</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        A common "solution" that is ineffective or counterproductive (e.g., <em class="text-gray-600">The Blob/God Object</em>, <em class="text-gray-600">Spaghetti Code</em>).
+                    </p>
+                </div>
+
+                <!-- Sub-topic 3.3 -->
+                <h3 class="text-xl md:text-2xl font-semibold text-gray-800 mt-8 mb-4 sub-accordion-toggle">
+                    Software Coding & Security Principles (Chapter 6, 18)
+                </h3>
+                <div class="sub-accordion-content">
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Construction Principles</h4>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Preparation:</strong> Understand the design <em class="text-gray-600">before</em> writing code.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Coding:</strong> Use structured programming, write clear code.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Validation:</strong> Conduct code reviews and unit tests.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://refactoring.guru/" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Refactoring</a>:</strong> Cleaning up code to improve its quality <em class="text-gray-600">after</em> it works. This is a key activity in software maintenance.</li>
+                    </ul>
+
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Secure Coding Principles</h4>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Minimize Attack Surface:</strong> Every new feature (<code>API</code>, form, port) is a potential entry point for an attacker.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Validate Input:</strong> <em class="text-gray-600">Never trust user input.</em> This is the #1 rule. Failure leads to attacks like <em class="text-gray-600"><a href="https://owasp.org/www-community/attacks/SQL_Injection" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">SQL Injection (<code>SQLi</code>)</a></em>. Use <em class="text-gray-600"><a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html#prepared-statements-with-parameterized-queries" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">parameterized queries</a></em> (prepared statements) to fix this.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Sanitize Output:</strong> Clean data before sending it to another system (like a user's browser). This prevents <em class="text-gray-600"><a href="https://owasp.org/www-community/attacks/Cross-Site_Scripting_(XSS)" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Cross-Site Scripting (<code>XSS</code>)</a></em>.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Default Deny:</strong> By default, a user should have <em class="text-gray-600">no</em> permissions. They must be explicitly granted.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://en.wikipedia.org/wiki/Principle_of_least_privilege" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Principle of Least Privilege</a>:</strong> A process or user should only have the bare minimum permissions necessary to do its job.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Defense in Depth:</strong> Use multiple, overlapping layers of security (e.g., firewall, app logic, encrypted data).</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://owasp.org/www-project-top-ten/2017/A8_2017-Insecure_Deserialization" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Insecure Deserialization</a>:</strong> A dangerous vulnerability. Never use unsafe formats like Python's <a href="httpsC://docs.python.org/3/library/pickle.html#security" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer"><em class="text-gray-600">pickle</em></a> on untrusted data. Use data-only formats like <code><a href="https://www.json.org/json-en.html" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">JSON</a></code>.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page: Topic 4: Supporting & Cross-Cutting Activities -->
+        <div id="page-4" class="page-content hidden">
+            <h2 class="text-2xl md:text-3xl font-bold text-blue-800 mb-6 border-b-2 border-blue-200 pb-3">
+                Topic 4: Supporting & Cross-Cutting Activities
+            </h2>
+            <p class="text-md text-gray-600 italic mb-8">
+                This topic covers "Umbrella Activities" that are applied throughout the entire software process.
+            </p>
+
+            <div> 
+                <!-- Sub-topic 4.1 -->
+                <h3 class="text-xl md:text-2xl font-semibold text-gray-800 mt-8 mb-4 sub-accordion-toggle">
+                    Software Quality Assurance (SQA) (Chapter 15, 16, 17)
+                </h3>
+                <div class="sub-accordion-content">
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        <code><a href="https://en.wikipedia.org/wiki/Software_quality_assurance" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">SQA</a></code> is an umbrella activity that defines and conducts activities to ensure the product meets quality standards.
+                    </p>
+
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">The Quality Assurance Funnel</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        A typical QA process includes multiple levels of testing:
+                    </p>
+                    <ol class="list-decimal list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://en.wikipedia.org/wiki/Unit_testing" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Unit Testing</a>:</strong> Testing individual functions or methods in isolation.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://en.wikipedia.org/wiki/Integration_testing" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Integration Testing</a>:</strong> Testing how different modules interact with each other.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://en.wikipedia.org/wiki/System_testing" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">System Testing</a>:</strong> Testing the complete, integrated system as a whole to verify it meets requirements.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://en.wikipedia.org/wiki/Acceptance_testing" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">User Acceptance Testing (UAT)</a>:</strong> Real users test the software to see if it meets their needs.</li>
+                    </ol>
+
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Technical Reviews</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        Assessing work products (like documents or code) to uncover and remove errors early, <em class="text-gray-600">before</em> they are passed to the next phase.
+                    </p>
+                </div>
+
+                <!-- Sub-topic 4.2 -->
+                <h3 class="text-xl md:text-2xl font-semibold text-gray-800 mt-8 mb-4 sub-accordion-toggle">
+                    Software Configuration Management (SCM) (Chapter 22)
+                </h3>
+                <div class="sub-accordion-content">
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        <code><a href="https://en.wikipedia.org/wiki/Software_configuration_management" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">SCM</a></code> is an umbrella activity that manages the effects of change throughout the software process.
+                    </p>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        Its goal is to answer: What changes were made? Who made them? When were they made? Why were they made?
+                    </p>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        This includes concepts like:
+                    </p>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Version Control</a>:</strong> Managing different versions of code and other artifacts.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Change Management:</strong> A defined process for how changes are requested, assessed, approved, and implemented (as seen in the "Smart Fridge" app example).</li>
+                    </ul>
+                </div>
+
+                <!-- Sub-topic 4.3 -->
+                <h3 class="text-xl md:text-2xl font-semibold text-gray-800 mt-8 mb-4 sub-accordion-toggle">
+                    System Documentation (Chapter 8, 9-14, 21)
+                </h3>
+                <div class="sub-accordion-content">
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        Documentation is not a separate phase but a continuous work product.
+                    </p>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Requirements Documentation:</strong> Includes the <code>SRS</code>, Use Cases, and analysis models.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Design Documentation:</strong> Includes architectural diagrams (e.g., Layered, <code>MVC</code>), Class Diagrams, and State Diagrams.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Testing Documentation:</strong> Includes test plans and test cases.</li>
+                    </ul>
+                </div>
+
+                <!-- Sub-topic 4.4 -->
+                <h3 class="text-xl md:text-2xl font-semibold text-gray-800 mt-8 mb-4 sub-accordion-toggle">
+                    Software Maintenance (Chapter 27)
+                </h3>
+                <div class="sub-accordion-content">
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        Software maintenance is the process of modifying a software product <em class="text-gray-600">after</em> it has been delivered to the customer.
+                    </p>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Software Evolution:</strong> Software must change and evolve to remain useful.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="httpsD://refactoring.guru/" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">Refactoring</a>:</strong> A key part of maintenance. It is the process of restructuring existing computer code—changing the factoring—without changing its external behavior. This is done to improve non-functional attributes, reduce complexity, and make the code easier to maintain.</li>
+                    </ul>
+                </div>
+
+                <!-- Sub-topic 4.5 -->
+                <h3 class="text-xl md:text-2xl font-semibold text-gray-800 mt-8 mb-4 sub-accordion-toggle">
+                    Cross-Cutting Security Activities
+                </h3>
+                <div class="sub-accordion-content">
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Microsoft Security Development Lifecycle (SDL)</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        A formal process for building security into every phase of development.
+                    </p>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Secure by Design:</strong> Security is part of the architecture.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Secure by Default:</strong> The out-of-the-box configuration is the most secure one (e.g., features off).</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">Secure in Deployment:</strong> Provides tools and guides for secure deployment.</li>
+                    </ul>
+
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Threat Modeling</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        A <a href="https://owasp.org/www-community/Threat_Modeling" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">structured approach</a> to identifying threats during the design phase.
+                    </p>
+                    <h5 class="text-md font-semibold text-gray-700 mt-4 mb-2">STRIDE:</h5>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        A <a href="httpsNB://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool-threats" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">mnemonic</a> for the six threat categories:
+                    </p>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">S</strong>poofing (Impersonating someone)</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">T</strong>ampering (Modifying data)</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">R</strong>epudiation (Denying an action)</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">I</strong>nformation Disclosure (Exposing data)</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">D</strong>enial of Service (Making the system unavailable)</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900">E</strong>levation of Privilege (Gaining unauthorized permissions)</li>
+                    </ul>
+
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Security Risk Analysis</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        Prioritizing what to fix. A common framework is the <strong class="text-gray-900"><a href="https://csrc.nist.gov/projects/risk-management-framework-rmf" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">NIST Risk Management Framework (<code>RMF</code>)</a></strong>.
+                    </p>
+
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Security-Focused Testing (Part of SQA)</h4>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://owasp.org/www-community/SAST" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">SAST (Static Analysis Security Testing)</a>:</strong> Tools that scan your <em class="text-gray-600">source code</em> for known vulnerability patterns.</li>
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-1A50"><strong class="text-gray-900"><a href="https://owasp.org/www-community/DAST" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">DAST (Dynamic Analysis Security Testing)</a>:</strong> Tools that attack your <em class="text-gray-600">running application</em> to find flaws.</li>
+                    </ul>
+
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Security Maturity Models</h4>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4">
+                        Ways to measure and improve your organization's security practices.
+                    </p>
+                    <ul class="list-disc list-outside pl-6 mb-4 space-y-2">
+                        <li class="text-gray-700 leading-relaxed p-2 rounded hover:bg-gray-50 transition-colors duration-150"><strong class="text-gray-900"><a href="https://owaspsamm.org/" class="text-blue-600 hover:text-blue-800 hover:underline font-medium" target="_blank" rel="noopener noreferrer">OWASP SAMM (Software Assurance Maturity Model)</a>:</strong> A prescriptive model that provides a concrete roadmap for "leveling up" security.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Back to Top Button -->
+    <button id="backToTopBtn" class="hidden fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" title="Go to top">
+        <!-- ... existing button svg ... -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+        </svg>
+    </button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const pages = document.querySelectorAll('.page-content');
+            const mainContent = document.getElementById('content-start');
+
+            // Function to show a page and update nav
+            function showPage(pageId) {
+                // Hide all pages
+                pages.forEach(page => {
+                    page.classList.add('hidden');
+                });
+
+                // Show the target page
+                const targetPage = document.getElementById(pageId);
+                if (targetPage) {
+                    targetPage.classList.remove('hidden');
+                }
+
+                // Update active state in nav
+                navLinks.forEach(link => {
+                    link.classList.remove('active-nav-link');
+                    if (link.dataset.page === pageId) {
+                        link.classList.add('active-nav-link');
+                    }
+                });
+
+                // Scroll to the top of the main content card
+                if (mainContent) {
+                    mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+
+                // NEW: Close all sub-accordions when switching pages
+                const allSubToggles = document.querySelectorAll('.sub-accordion-toggle');
+                const allSubContents = document.querySelectorAll('.sub-accordion-content');
+                allSubToggles.forEach(t => t.classList.remove('active'));
+                allSubContents.forEach(c => c.classList.remove('open'));
+            }
+
+            // Add click listeners to nav links
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const pageId = this.dataset.page;
+                    showPage(pageId);
+                });
+            });
+
+            // Show the home page by default
+            showPage('page-home');
+
+            // --- Back to Top Button Logic ---
+            const backToTopBtn = document.getElementById('backToTopBtn');
+
+            window.addEventListener('scroll', function () {
+                if (window.scrollY > 300) {
+                    backToTopBtn.classList.remove('hidden');
+                } else {
+                    backToTopBtn.classList.add('hidden');
+                }
+            });
+
+            backToTopBtn.addEventListener('click', function () {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+
+            // --- NEW Sub-Accordion Logic ---
+            const subAccordionToggles = document.querySelectorAll('.sub-accordion-toggle');
+
+            subAccordionToggles.forEach(toggle => {
+                toggle.addEventListener('click', function () {
+                    this.classList.toggle('active');
+                    
+                    // The content is the next element sibling
+                    let content = this.nextElementSibling;
+
+                    if (content && content.classList.contains('sub-accordion-content')) {
+                        content.classList.toggle('open');
+                    }
+                });
+            });
+
+        });
+    </script>
+
+</body>
+</html>
+
+
+

@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Lecture: Software Engineering Responsibility</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The application is now designed as a single-page with a fixed top navigation bar and a main content area. This provides a modern, familiar user experience. The navigation is responsive, collapsing into a hamburger menu on smaller screens. Content remains broken into interactive, expandable cards, allowing users to get a high-level overview and then dive into specific topics of interest. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: The 3 pillars of responsibility -> Goal: Organize/Navigate -> Presentation: Fixed Top Menu -> Interaction: Click to switch content -> Justification: Provides clear, persistent app structure that is common in modern web design.
+        - Report Info: The 8 ACM/IEEE Principles -> Goal: Inform/Organize -> Presentation: Interactive Grid of Cards -> Interaction: Click to reveal details in a modal -> Justification: Breaks a dense list into a visually appealing, explorable interface.
+        - Report Info: QA Funnel & Bias Pipeline -> Goal: Organize/Explain Process -> Presentation: HTML/CSS Diagrams -> Interaction: Hover for tooltips on Bias Pipeline -> Justification: Visually represents complex workflows, making them easier to understand than text alone.
+        - Report Info: AI Carbon Footprint data -> Goal: Compare/Impact -> Presentation: Bar Chart -> Interaction: Hover over bars for exact values -> Justification: Creates a powerful visual impact by showing the scale of CO2 emissions, which is more effective than text alone. (Library: Chart.js)
+        - Report Info: Code Examples -> Goal: Inform/Demonstrate -> Presentation: Formatted code blocks -> Interaction: Copy-to-clipboard button -> Justification: Improves usability for developers who want to use the examples.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        .content-card {
+            transition: all 0.3s ease-in-out;
+        }
+        .content-card .content-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+        }
+        .content-card.open .content-body {
+            max-height: 4000px; /* Large enough for content */
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container { height: 400px; }
+        }
+        .code-block {
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: #4a5568;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+        .code-block:hover .copy-btn {
+            opacity: 1;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #2d3748;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <!-- Top Navigation -->
+    <nav class="bg-white border-b border-stone-200 p-4 shadow-sm fixed top-0 left-0 right-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <!-- Brand/Logo -->
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-sky-800">Software Engineering</h1>
+                <h2 class="text-sm md:text-lg font-semibold text-stone-600">Responsibility</h2>
+            </div>
+
+            <!-- Hamburger Menu Button -->
+            <button id="menu-btn" class="md:hidden block text-stone-800 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+            
+            <!-- Menu Links -->
+            <div id="menu-links" class="hidden md:block">
+                 <ul class="flex flex-col md:flex-row md:space-x-1 absolute md:static top-20 left-0 w-full md:w-auto bg-white md:bg-transparent shadow-md md:shadow-none p-4 md:p-0 rounded-b-lg">
+                    <li><a href="#" class="nav-link active-link text-lg font-semibold px-3 py-2 rounded-lg block bg-sky-100 text-sky-800" data-target="professional">1. Professional</a></li>
+                    <li><a href="#" class="nav-link text-lg font-semibold px-3 py-2 rounded-lg block hover:bg-sky-100 hover:text-sky-800 text-stone-600" data-target="ethical">2. Ethical</a></li>
+                    <li><a href="#" class="nav-link text-lg font-semibold px-3 py-2 rounded-lg block hover:bg-sky-100 hover:text-sky-800 text-stone-600" data-target="social">3. Social</a></li>
+                    <li><a href="#" class="nav-link text-lg font-semibold px-3 py-2 rounded-lg block hover:bg-sky-100 hover:text-sky-800 text-stone-600" data-target="exercises">4. Exercises</a></li>
+                    <li><a href="#" class="nav-link text-lg font-semibold px-3 py-2 rounded-lg block hover:bg-sky-100 hover:text-sky-800 text-stone-600" data-target="answers">5. Answers</a></li>
+                    <li><a href="#" class="nav-link text-lg font-semibold px-3 py-2 rounded-lg block hover:bg-sky-100 hover:text-sky-800 text-stone-600" data-target="evaluation">6. Evaluation</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="container mx-auto p-4 md:p-10 mt-28"> <!-- Added margin-top to offset fixed nav -->
+        <div id="professional" class="content-section">
+            <h2 class="text-4xl font-bold text-stone-900 mb-4">Part 1: The Bedrock - Professional Responsibility</h2>
+            <p class="text-lg text-stone-600 mb-8">
+                Professional responsibility is the foundation upon which trust is built. It's our commitment to apply our skills with competence, diligence, and integrity. This section explores the core duties that ensure our technical solutions are robust, reliable, and trustworthy, preventing financial loss, reputational damage, and even physical harm.
+            </p>
+
+            <div class="space-y-6">
+                <div class="content-card bg-white rounded-xl shadow-sm border border-stone-200 cursor-pointer">
+                    <div class="p-6">
+                        <h3 class="text-2xl font-semibold text-sky-800">1.1 Competence & Continuous Learning</h3>
+                        <p class="text-stone-600 mt-2">The field of software engineering is in a constant state of flux. Relying on outdated knowledge is a form of negligence. A core professional duty is the commitment to lifelong learning to avoid security breaches, poor performance, and unmaintainable code.</p>
+                    </div>
+                    <div class="content-body bg-stone-50 rounded-b-xl px-6">
+                        <h4 class="text-xl font-semibold mb-4">Example: The Danger of Deprecated Libraries</h4>
+                        <p class="text-stone-700 mb-4">A developer implements password storage using the old MD5 hashing algorithm. A senior developer spots this in a code review, explaining that MD5 is cryptographically broken and can be reversed in seconds using "rainbow tables." This is a failure of competence. The professional standard is to use strong, salted, and adaptive hashing functions like bcrypt.</p>
+                        <div class="code-block bg-gray-800 text-white p-4 rounded-lg overflow-x-auto">
+                            <button class="copy-btn">Copy</button>
+                            <pre><code class="language-python">
+import hashlib
+import bcrypt
+
+# --- INSECURE METHOD ---
+def insecure_hash_password(password):
+    # NEVER USE THIS IN PRODUCTION.
+    # Hashes a password using the broken MD5 algorithm.
+    password_bytes = password.encode('utf-8')
+    md5_hash_object = hashlib.md5(password_bytes)
+    return md5_hash_object.hexdigest()
+
+# --- SECURE METHOD ---
+def secure_hash_password(password):
+    # SECURE METHOD. Hashes a password using bcrypt.
+    password_bytes = password.encode('utf-8')
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(password_bytes, salt)
+    return hashed_password
+                            </code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                 <div class="content-card bg-white rounded-xl shadow-sm border border-stone-200 cursor-pointer">
+                    <div class="p-6">
+                        <h3 class="text-2xl font-semibold text-sky-800">1.2 Quality & Due Diligence</h3>
+                        <p class="text-stone-600 mt-2">Quality isn't just the absence of bugs; it's reliability, efficiency, security, usability, and maintainability. Due diligence means taking reasonable steps—like thorough testing and code reviews—to ensure this quality.</p>
+                    </div>
+                    <div class="content-body bg-stone-50 rounded-b-xl px-6">
+                        <h4 class="text-xl font-semibold mb-4">Example: The Therac-25 Radiation Tragedy</h4>
+                        <p class="text-stone-700 mb-4">Between 1985-1987, a medical accelerator delivered massive radiation overdoses, killing or injuring patients. The cause was a "perfect storm" of professional failures: a software race condition, removal of hardware safety interlocks, inadequate testing, and cryptic error messages. This case is a tragic reminder that due diligence can be a matter of life and death.</p>
+                        <h4 class="text-xl font-semibold my-4">Schematic: The QA Funnel</h4>
+                         <div class="w-full max-w-md mx-auto p-4 space-y-2">
+                            <div class="bg-sky-200 text-sky-900 p-3 rounded-lg text-center font-semibold">Development & Idea</div>
+                            <div class="text-center text-2xl text-stone-400">↓</div>
+                            <div class="border border-stone-300 p-3 rounded-lg">
+                                <h5 class="font-bold text-center">Level 1: Unit Testing</h5>
+                                <p class="text-sm text-center text-stone-600">Developers test individual functions in isolation.</p>
+                            </div>
+                            <div class="text-center text-2xl text-stone-400">↓</div>
+                            <div class="border border-stone-300 p-3 rounded-lg">
+                                <h5 class="font-bold text-center">Level 2: Integration Testing</h5>
+                                <p class="text-sm text-center text-stone-600">Verify that different modules work together correctly.</p>
+                            </div>
+                            <div class="text-center text-2xl text-stone-400">↓</div>
+                            <div class="border border-stone-300 p-3 rounded-lg">
+                                <h5 class="font-bold text-center">Level 3: System Testing</h5>
+                                <p class="text-sm text-center text-stone-600">The QA team tests the complete system against requirements.</p>
+                            </div>
+                            <div class="text-center text-2xl text-stone-400">↓</div>
+                            <div class="border border-stone-300 p-3 rounded-lg">
+                                <h5 class="font-bold text-center">Level 4: User Acceptance Testing (UAT)</h5>
+                                <p class="text-sm text-center text-stone-600">End-users validate the software in a real-world scenario.</p>
+                            </div>
+                            <div class="text-center text-2xl text-stone-400">↓</div>
+                            <div class="bg-green-200 text-green-900 p-3 rounded-lg text-center font-semibold">Product Release</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="content-card bg-white rounded-xl shadow-sm border border-stone-200 cursor-pointer">
+                    <div class="p-6">
+                        <h3 class="text-2xl font-semibold text-sky-800">1.3 Honesty & Integrity</h3>
+                        <p class="text-stone-600 mt-2">Integrity means being truthful about project status, respecting intellectual property, and not misrepresenting your skills or your software's capabilities. Hiding problems only makes them worse.</p>
+                    </div>
+                    <div class="content-body bg-stone-50 rounded-b-xl px-6">
+                        <h4 class="text-xl font-semibold mb-4">Example: The "Green" Status Report</h4>
+                        <p class="text-stone-700 mb-4">A project manager pressures a team to report their significantly delayed project as "on track." Management, believing everything is fine, makes business commitments based on the original deadline. When the truth inevitably comes out, the result is a crisis, shattered trust, and financial damage. Honesty would have turned a manageable problem into a new plan; dishonesty turned it into a disaster.</p>
+                    </div>
+                </div>
+                
+                 <div class="content-card bg-white rounded-xl shadow-sm border border-stone-200 cursor-pointer">
+                    <div class="p-6">
+                        <h3 class="text-2xl font-semibold text-sky-800">1.4 Accountability</h3>
+                        <p class="text-stone-600 mt-2">Accountability means taking ownership of your actions. It involves "blameless post-mortems" where the goal is not to find who to blame, but to understand what in the process allowed a failure to occur.</p>
+                    </div>
+                    <div class="content-body bg-stone-50 rounded-b-xl px-6">
+                       <h4 class="text-xl font-semibold mb-4">Example: The Knight Capital Trading Glitch</h4>
+                        <p class="text-stone-700 mb-4">In 2012, a deployment error caused Knight Capital's trading algorithm to run amok, losing the company $440 million in 45 minutes. A technician deployed new code to 7 of 8 servers, leaving old code on the last one, which caused chaos. The company took full accountability, transparently explaining the technology failure in their deployment process. This honest response was crucial in retaining some market trust and led to stricter deployment processes across the industry.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="ethical" class="content-section hidden">
+            <h2 class="text-4xl font-bold text-stone-900 mb-4">Part 2: The Compass - Ethical Responsibility</h2>
+            <p class="text-lg text-stone-600 mb-8">
+                If professional responsibility is about doing things *right*, ethical responsibility is about doing the *right thing*. Ethics provides a framework for decision-making when the rules are not clear. This section explores the eight principles of the ACM/IEEE-CS Software Engineering Code of Ethics, the single most important ethical guide for our profession.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="ethical-principle-card bg-white p-6 rounded-xl shadow-sm border border-stone-200 text-center cursor-pointer hover:shadow-md hover:border-sky-300 transition-all" data-principle="1">
+                    <div class="text-4xl mb-3">🌍</div>
+                    <h3 class="text-xl font-bold text-sky-800">1. Public</h3>
+                    <p class="text-stone-600 mt-2">Act consistently with the public interest.</p>
+                </div>
+                <div class="ethical-principle-card bg-white p-6 rounded-xl shadow-sm border border-stone-200 text-center cursor-pointer hover:shadow-md hover:border-sky-300 transition-all" data-principle="2">
+                    <div class="text-4xl mb-3">🤝</div>
+                    <h3 class="text-xl font-bold text-sky-800">2. Client & Employer</h3>
+                    <p class="text-stone-600 mt-2">Act in the best interests of your client and employer.</p>
+                </div>
+                <div class="ethical-principle-card bg-white p-6 rounded-xl shadow-sm border border-stone-200 text-center cursor-pointer hover:shadow-md hover:border-sky-300 transition-all" data-principle="3">
+                    <div class="text-4xl mb-3">📦</div>
+                    <h3 class="text-xl font-bold text-sky-800">3. Product</h3>
+                    <p class="text-stone-600 mt-2">Ensure products meet the highest professional standards.</p>
+                </div>
+                <div class="ethical-principle-card bg-white p-6 rounded-xl shadow-sm border border-stone-200 text-center cursor-pointer hover:shadow-md hover:border-sky-300 transition-all" data-principle="4">
+                    <div class="text-4xl mb-3">🧠</div>
+                    <h3 class="text-xl font-bold text-sky-800">4. Judgment</h3>
+                    <p class="text-stone-600 mt-2">Maintain integrity and independence in your judgment.</p>
+                </div>
+                <div class="ethical-principle-card bg-white p-6 rounded-xl shadow-sm border border-stone-200 text-center cursor-pointer hover:shadow-md hover:border-sky-300 transition-all" data-principle="5">
+                    <div class="text-4xl mb-3">📈</div>
+                    <h3 class="text-xl font-bold text-sky-800">5. Management</h3>
+                    <p class="text-stone-600 mt-2">Promote an ethical approach in management.</p>
+                </div>
+                <div class="ethical-principle-card bg-white p-6 rounded-xl shadow-sm border border-stone-200 text-center cursor-pointer hover:shadow-md hover:border-sky-300 transition-all" data-principle="6">
+                    <div class="text-4xl mb-3">🏆</div>
+                    <h3 class="text-xl font-bold text-sky-800">6. Profession</h3>
+                    <p class="text-stone-600 mt-2">Advance the integrity of the profession.</p>
+                </div>
+                <div class="ethical-principle-card bg-white p-6 rounded-xl shadow-sm border border-stone-200 text-center cursor-pointer hover:shadow-md hover:border-sky-300 transition-all" data-principle="7">
+                    <div class="text-4xl mb-3">🧑‍🤝‍🧑</div>
+                    <h3 class="text-xl font-bold text-sky-800">7. Colleagues</h3>
+                    <p class="text-stone-600 mt-2">Be fair to and supportive of your colleagues.</p>
+                </div>
+                <div class="ethical-principle-card bg-white p-6 rounded-xl shadow-sm border border-stone-200 text-center cursor-pointer hover:shadow-md hover:border-sky-300 transition-all" data-principle="8">
+                    <div class="text-4xl mb-3">🌱</div>
+                    <h3 class="text-xl font-bold text-sky-800">8. Self</h3>
+                    <p class="text-stone-600 mt-2">Participate in lifelong learning.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="social" class="content-section hidden">
+            <h2 class="text-4xl font-bold text-stone-900 mb-4">Part 3: The Impact - Social Responsibility</h2>
+            <p class="text-lg text-stone-600 mb-8">
+                Our work doesn't just affect our clients; it shapes society. Social responsibility requires us to look beyond immediate project requirements and consider the broader consequences. This section examines our duty to protect user privacy, ensure algorithmic fairness, build accessible products for everyone, and consider the environmental impact of our code.
+            </p>
+
+            <div class="space-y-6">
+                <div class="content-card bg-white rounded-xl shadow-sm border border-stone-200 cursor-pointer">
+                    <div class="p-6">
+                        <h3 class="text-2xl font-semibold text-sky-800">3.1 Privacy in the Digital Age</h3>
+                        <p class="text-stone-600 mt-2">We have a profound social responsibility to be stewards of user data. This includes practicing data minimization, ensuring informed consent, and complying with regulations like GDPR.</p>
+                    </div>
+                    <div class="content-body bg-stone-50 rounded-b-xl px-6">
+                        <h4 class="text-xl font-semibold mb-4">Example: The Facebook-Cambridge Analytica Scandal</h4>
+                        <p class="text-stone-700 mb-4">A quiz app on Facebook harvested data not just from users, but from all their friends without their consent. This data, from up to 87 million people, was sold to a political firm to build psychological profiles for targeted ads. This was a severe failure of social responsibility, enabled by platform rules that did not protect user privacy. It sparked a global outcry and highlighted how personal data could be weaponized to influence elections.</p>
+                    </div>
+                </div>
+                
+                <div class="content-card bg-white rounded-xl shadow-sm border border-stone-200 cursor-pointer">
+                    <div class="p-6">
+                        <h3 class="text-2xl font-semibold text-sky-800">3.2 Bias & Fairness in Algorithms</h3>
+                        <p class="text-stone-600 mt-2">An algorithm is not automatically objective. It will learn the biases present in its training data. Our responsibility is to proactively audit our data and models for bias to design fair and equitable systems.</p>
+                    </div>
+                    <div class="content-body bg-stone-50 rounded-b-xl px-6">
+                        <h4 class="text-xl font-semibold mb-4">Example: Amazon's AI Recruiting Tool</h4>
+                        <p class="text-stone-700 mb-4">In 2014, Amazon trained an AI to screen resumes based on 10 years of their hiring data. The AI taught itself that male candidates were preferable because the historical data reflected the tech industry's gender bias. It penalized resumes containing "women's" and downgraded graduates from all-women's colleges. Amazon scrapped the project, providing a critical warning about the dangers of using unaudited AI for life-changing decisions.</p>
+                        <h4 class="text-xl font-semibold my-4">Schematic: The Algorithmic Bias Pipeline</h4>
+                        <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-2 text-center p-4">
+                            <div class="tooltip w-40 p-3 bg-white border rounded-lg shadow-sm">
+                                <h5 class="font-bold">1. Real World</h5>
+                                <span class="tooltiptext">Society has existing historical biases (e.g., sexism, racism).</span>
+                            </div>
+                            <div class="text-2xl text-stone-400">→</div>
+                            <div class="tooltip w-40 p-3 bg-white border rounded-lg shadow-sm">
+                                <h5 class="font-bold">2. Data Collection</h5>
+                                <span class="tooltiptext">Data is collected that reflects and digitizes these real-world biases.</span>
+                            </div>
+                            <div class="text-2xl text-stone-400">→</div>
+                            <div class="tooltip w-40 p-3 bg-white border rounded-lg shadow-sm">
+                                <h5 class="font-bold">3. ML Model</h5>
+                                <span class="tooltiptext">The algorithm learns patterns from the biased data, without understanding context.</span>
+                            </div>
+                            <div class="text-2xl text-stone-400">→</div>
+                            <div class="tooltip w-40 p-3 bg-white border rounded-lg shadow-sm">
+                                <h5 class="font-bold">4. Prediction</h5>
+                                <span class="tooltiptext">The model applies learned biases to new data, making unfair predictions.</span>
+                            </div>
+                            <div class="text-2xl text-stone-400">→</div>
+                            <div class="tooltip w-40 p-3 bg-white border rounded-lg shadow-sm">
+                                <h5 class="font-bold">5. Impact</h5>
+                                <span class="tooltiptext">The biased predictions create real-world harm and generate more biased data, creating a feedback loop.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card bg-white rounded-xl shadow-sm border border-stone-200 cursor-pointer">
+                    <div class="p-6">
+                        <h3 class="text-2xl font-semibold text-sky-800">3.3 Accessibility (a11y)</h3>
+                        <p class="text-stone-600 mt-2">Accessibility is the practice of designing software so that the 15% of the world's population with disabilities can use it. Excluding them is the modern equivalent of a library with no ramp.</p>
+                    </div>
+                    <div class="content-body bg-stone-50 rounded-b-xl px-6">
+                        <h4 class="text-xl font-semibold mb-4">Example: Inaccessible Government Website</h4>
+                        <p class="text-stone-700 mb-4">A state launches a new website for unemployment benefits, but neglects accessibility. Images lack alt-text, making them unusable for screen readers. The site can't be navigated by keyboard, blocking users with motor impairments. Poor color contrast makes it unreadable for people with low vision. This is a severe failure of social responsibility, as it denies a critical public service to citizens with disabilities.</p>
+                    </div>
+                </div>
+                
+                <div class="content-card bg-white rounded-xl shadow-sm border border-stone-200 cursor-pointer">
+                    <div class="p-6">
+                        <h3 class="text-2xl font-semibold text-sky-800">3.4 Environmental Impact</h3>
+                        <p class="text-stone-600 mt-2">Software runs on hardware that consumes electricity. We have a responsibility to write efficient code and be mindful of the significant carbon footprint of data centers and large-scale AI models.</p>
+                    </div>
+                    <div class="content-body bg-stone-50 rounded-b-xl px-6">
+                        <h4 class="text-xl font-semibold mb-4">Example: The Carbon Footprint of AI Training</h4>
+                        <p class="text-stone-700 mb-4">A 2019 study found that training a single large AI model could emit over 626,000 pounds of CO2, nearly five times the lifetime emissions of an average car. This was a wake-up call that computation is not "free." Engineers have a responsibility to explore more efficient algorithms and question the necessity of ever-larger models.</p>
+                        <div class="chart-container">
+                            <canvas id="emissionsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="exercises" class="content-section hidden">
+            <h2 class="text-4xl font-bold text-stone-900 mb-4">Practical Exercises</h2>
+            <p class="text-lg text-stone-600 mb-8">
+                Apply the concepts from the lecture to the following real-world scenarios. These exercises are designed to test your understanding of professional, ethical, and social responsibilities in software engineering.
+            </p>
+
+            <div class="space-y-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="text-2xl font-semibold text-sky-800 mb-3">Exercise 1: The Ethical Dilemma (Case Study Analysis)</h3>
+                    <p class="text-stone-700 mb-4">
+                        You are a software engineer at a social media company. Your manager asks you to work on a new feature that uses machine learning to analyze user posts and photos to determine their "emotional state" and sell this data to advertisers for highly targeted ads (e.g., targeting users identified as "unhappy" with ads for anti-depressants or gambling apps). The user agreement, which is 40 pages long, has a clause that vaguely permits this. Your manager tells you this feature is critical for meeting the quarter's revenue targets.
+                    </p>
+                    <p class="text-stone-700 font-semibold mb-2">Your Task:</p>
+                    <ul class="list-disc list-inside text-stone-700 space-y-2">
+                        <li>Identify at least three principles from the ACM/IEEE-CS Code of Ethics that are relevant to this situation.</li>
+                        <li>For each principle, explain how it applies to the dilemma.</li>
+                        <li>Describe a course of action you would take, justifying it with the principles you identified. What are the potential consequences of your action?</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="text-2xl font-semibold text-sky-800 mb-3">Exercise 2: The Biased Algorithm (Technical & Social Audit)</h3>
+                    <p class="text-stone-700 mb-4">
+                        Your team has developed an AI tool for a city to predict which restaurants are most likely to have health code violations. The goal is to help inspectors prioritize their visits. The model was trained on 10 years of historical inspection data. After deployment, you notice the model disproportionately recommends inspections for restaurants in low-income and immigrant neighborhoods, even for those with a clean history.
+                    </p>
+                    <p class="text-stone-700 font-semibold mb-2">Your Task:</p>
+                    <ul class="list-disc list-inside text-stone-700 space-y-2">
+                        <li>Explain the most likely reason for the model's biased output. Relate this to the concepts of social responsibility discussed in the lecture.</li>
+                        <li>What professional responsibilities (e.g., quality, due diligence) were potentially overlooked during the development process?</li>
+                        <li>Propose at least three concrete steps the team could take to mitigate the bias in the algorithm and create a fairer system.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div id="answers" class="content-section hidden">
+            <h2 class="text-4xl font-bold text-stone-900 mb-4">Answers</h2>
+            <p class="text-lg text-stone-600 mb-8">
+                Here are the suggested answers for the practical exercises. These provide a framework for evaluating the ethical and professional considerations in each scenario.
+            </p>
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h4 class="text-xl font-semibold text-sky-800 mb-2">Exercise 1: Possible Answer</h4>
+                    <p class="text-stone-700 mb-4"><strong>1. Relevant Principles:</strong><br>
+                        - <strong>Principle 1 (PUBLIC):</strong> The paramount principle. The feature could harm vulnerable users by exploiting their emotional state for profit, which is not in the public interest.<br>
+                        - <strong>Principle 2 (CLIENT AND EMPLOYER):</strong> While the feature serves the employer's financial interest, it must be "consistent with the public interest." This creates a direct conflict.<br>
+                        - <strong>Principle 3 (PRODUCT):</strong> A product that is ethically flawed and potentially harmful does not meet the "highest professional standards." Informed consent is not meaningfully obtained with a 40-page legal document.<br>
+                        - <strong>Principle 4 (JUDGMENT):</strong> The manager's pressure to meet revenue targets is an attempt to compromise the engineer's independent professional judgment about the product's ethical implications.
+                    </p>
+                    <p class="text-stone-700 mb-4"><strong>2. Course of Action:</strong><br>
+                        First, I would raise my concerns directly and professionally with my manager, citing the specific ethical principles, particularly the conflict with the public interest. I would suggest alternative, less invasive ways to achieve advertising goals. If the manager insists, I would escalate the issue through the company's official channels, such as an ethics board or a more senior manager, documenting my concerns in writing. As a last resort, if the company decides to proceed, I would have to refuse to work on the project, even if it meant risking my job.
+                    </p>
+                    <p class="text-stone-700"><strong>3. Potential Consequences:</strong><br>
+                        This could lead to friction with my manager, a negative performance review, or even termination. However, participating would make me complicit in building a harmful product, which could damage my professional reputation and violate my ethical duties. By speaking up, I uphold the integrity of the profession.
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h4 class="text-xl font-semibold text-sky-800 mb-2">Exercise 2: Possible Answer</h4>
+                    <p class="text-stone-700 mb-4"><strong>1. Reason for Bias:</strong><br>
+                    The most likely reason is <strong>data bias</strong>. The historical data probably reflects systemic biases. For example, inspectors may have historically targeted these neighborhoods more frequently, leading to more violation data being recorded there, regardless of actual violation rates. The AI learned this correlation and is now perpetuating and amplifying it through a feedback loop. This is a failure of social responsibility, as the tool is unfairly penalizing certain communities.
+                    </p>
+                    <p class="text-stone-700 mb-4"><strong>2. Overlooked Professional Responsibilities:</strong><br>
+                    The team likely failed in its <strong>due diligence</strong> and commitment to <strong>product quality</strong>. A quality product is not just accurate; it is also fair. The team should have performed a bias audit on the training data *before* building the model and on the model's predictions *before* deployment. They failed to consider the foreseeable negative social impact of their work.
+                    </p>
+                    <p class="text-stone-700"><strong>3. Mitigation Steps:</strong><br>
+                        - <strong>Data Auditing and Re-balancing:</strong> Analyze the training data for demographic skews. They could attempt to re-balance the dataset or use techniques like stratified sampling to ensure fairer representation.<br>
+                        - <strong>Incorporate More Features:</strong> Add features that are better predictors of violations than just location, such as restaurant size, age of the building, or type of cuisine, which may reduce the model's reliance on biased location data.<br>
+                        - <strong>Implement Fairness Metrics:</strong> Redefine the project's success criteria to include fairness metrics (e.g., demographic parity, equalized odds) alongside prediction accuracy. The model should be optimized for both, and its recommendations should be audited for fairness before being sent to inspectors.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="evaluation" class="content-section hidden">
+            <h2 class="text-4xl font-bold text-stone-900 mb-4">Evaluation Grid (100%)</h2>
+            <p class="text-lg text-stone-600 mb-8">
+                Use this grid to evaluate the responses to the exercises based on the defined criteria and their respective weights.
+            </p>
+            <div class="bg-white p-6 rounded-xl shadow-sm overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="p-2 font-semibold text-sky-800">Criteria</th>
+                            <th class="p-2 font-semibold text-sky-800">Weight</th>
+                            <th class="p-2 font-semibold text-sky-800">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b bg-stone-50">
+                            <td colspan="3" class="p-2 font-bold text-stone-700">Exercise 1: Ethical Dilemma (50%)</td>
+                        </tr>
+                        <tr class="border-b">
+                            <td class="p-2">Identification of Principles</td>
+                            <td class="p-2">15%</td>
+                            <td class="p-2">Correctly identifies 3+ relevant principles from the Code of Ethics.</td>
+                        </tr>
+                        <tr class="border-b">
+                            <td class="p-2">Application & Explanation</td>
+                            <td class="p-2">20%</td>
+                            <td class="p-2">Clearly and accurately explains *how* each principle applies to the specifics of the case.</td>
+                        </tr>
+                        <tr class="border-b">
+                            <td class="p-2">Proposed Action & Justification</td>
+                            <td class="p-2">15%</td>
+                            <td class="p-2">Proposes a clear, ethical, and practical course of action that is well-justified by the chosen principles.</td>
+                        </tr>
+                        <tr class="border-b bg-stone-50">
+                            <td colspan="3" class="p-2 font-bold text-stone-700">Exercise 2: Algorithmic Bias (50%)</td>
+                        </tr>
+                        <tr class="border-b">
+                            <td class="p-2">Explanation of Bias</td>
+                            <td class="p-2">15%</td>
+                            <td class="p-2">Correctly identifies data bias as the root cause and connects it to social responsibility concepts.</td>
+                        </tr>
+                         <tr class="border-b">
+                            <td class="p-2">Identification of Professional Failures</td>
+                            <td class="p-2">15%</td>
+                            <td class="p-2">Identifies overlooked responsibilities like due diligence and quality assurance.</td>
+                        </tr>
+                        <tr class="border-b">
+                            <td class="p-2">Proposed Mitigation Steps</td>
+                            <td class="p-2">20%</td>
+                            <td class="p-2">Suggests at least three concrete, relevant, and practical steps to address and mitigate the bias.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal for Ethical Principles -->
+    <div id="ethical-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div id="modal-content" class="p-8">
+            </div>
+            <div class="p-4 bg-stone-100 border-t text-right">
+                 <button id="modal-close-btn" class="bg-sky-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-sky-800 transition-colors">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Modal -->
+    <div id="password-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm">
+            <form id="password-form" class="p-8">
+                <h2 class="text-2xl font-bold text-sky-800 mb-4">Password Required</h2>
+                <p class="text-stone-600 mb-4">Please enter the password to view the answers.</p>
+                <input type="password" id="password-input" class="w-full border border-stone-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                <p id="password-error" class="text-red-500 text-sm mt-2 hidden">Incorrect password. Please try again.</p>
+                <div class="mt-6 text-right space-x-2">
+                    <button type="button" id="password-cancel-btn" class="bg-stone-200 text-stone-800 font-bold py-2 px-6 rounded-lg hover:bg-stone-300 transition-colors">Cancel</button>
+                    <button type="submit" class="bg-sky-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-sky-800 transition-colors">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const navLinks = document.querySelectorAll('.nav-link');
+        const contentSections = document.querySelectorAll('.content-section');
+        const contentCards = document.querySelectorAll('.content-card');
+        const ethicalPrincipleCards = document.querySelectorAll('.ethical-principle-card');
+        const modal = document.getElementById('ethical-modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const menuBtn = document.getElementById('menu-btn');
+        const menuLinks = document.getElementById('menu-links');
+        
+        // Password Protection Elements
+        const passwordModal = document.getElementById('password-modal');
+        const passwordForm = document.getElementById('password-form');
+        const passwordInput = document.getElementById('password-input');
+        const passwordError = document.getElementById('password-error');
+        const passwordCancelBtn = document.getElementById('password-cancel-btn');
+
+        // Toggle mobile menu
+        menuBtn.addEventListener('click', () => {
+            menuLinks.classList.toggle('hidden');
+        });
+
+        const ethicalPrinciplesData = {
+            '1': { 
+                title: 'Principle 1: PUBLIC',
+                description: 'Software engineers shall act consistently with the public interest. This is the paramount principle, stating that ultimate loyalty is to the public good (safety, privacy, health).',
+                exampleTitle: 'Example: The Volkswagen Emissions Scandal',
+                example: 'Between 2009-2015, VW engineers programmed diesel engines with a "defeat device" to cheat on emissions tests. The software detected lab testing and switched to a low-emissions mode, but on the road, it emitted up to 40 times the legal limit of pollutants. This was a deliberate act against the public interest, prioritizing profit over public health and environmental law.'
+            },
+            '2': { 
+                title: 'Principle 2: CLIENT AND EMPLOYER',
+                description: 'Software engineers shall act in a manner that is in the best interests of their client and employer, consistent with the public interest. This duty is secondary to the public good.',
+                exampleTitle: 'Example: Protecting Confidential Information',
+                example: 'An engineer leaving for a competitor is tempted to copy the source code for a proprietary algorithm. Adhering to the code, they refrain, understanding the code is the intellectual property of their employer. Taking it would be theft and a profound breach of professional trust.'
+            },
+             '3': { 
+                title: 'Principle 3: PRODUCT',
+                description: 'Software engineers shall ensure that their products and related modifications meet the highest professional standards possible. It is an ethical imperative to strive for high-quality products.',
+                exampleTitle: 'Example: Pushing Back Against a Rushed Deadline',
+                example: 'Management pressures a team to ship a new feature with known, serious security vulnerabilities to meet a client deadline. The lead engineer, citing this principle, refuses to approve the release. They document the risks and argue that releasing a flawed product would violate professional standards and cause more long-term harm than a short delay.'
+            },
+            '4': { 
+                title: 'Principle 4: JUDGMENT',
+                description: 'Software engineers shall maintain integrity and independence in their professional judgment. Your professional judgment must not be compromised by undue pressure or conflicts of interest.',
+                exampleTitle: 'Example: Conflict of Interest in Vendor Selection',
+                example: 'An engineer leading a team to select a new cloud provider has a spouse who works for one of the vendors. That vendor also offers them an expensive trip. To maintain integrity, the engineer must immediately disclose the conflict, decline the trip, and likely recuse themselves from making the final decision.'
+            },
+            '5': { 
+                title: 'Principle 5: MANAGEMENT',
+                description: 'Software engineering managers and leaders shall subscribe to and promote an ethical approach to the management of software development. They must create an environment where ethical conduct is encouraged and protected.',
+                exampleTitle: 'Example: Fostering Psychological Safety',
+                example: 'A manager creates an environment where a junior engineer feels safe to report a potential but hard-to-prove security flaw without fear of blame. The manager listens, thanks them, and assigns resources to investigate. This promotes ethical behavior and protects the product and the public.'
+            },
+            '6': { 
+                title: 'Principle 6: PROFESSION',
+                description: 'Software engineers shall advance the integrity and reputation of the profession consistent with the public interest. The actions of one engineer can reflect on all of us.',
+                exampleTitle: 'Example: Responsible AI Communication',
+                example: 'When asked by a journalist if a new AI diagnostic tool will "replace doctors," an engineer gives a nuanced, honest answer: "It acts as a powerful assistant to augment a doctor\'s skills, not replace them. The final diagnosis must always be made by a human expert." This manages expectations and enhances the profession\'s reputation for being responsible.'
+            },
+             '7': { 
+                title: 'Principle 7: COLLEAGUES',
+                description: 'Software engineers shall be fair to and supportive of their colleagues. This requires treating colleagues with respect, sharing knowledge, and fostering a collaborative environment.',
+                exampleTitle: 'Example: Constructive Code Review',
+                example: 'Instead of leaving demeaning comments like "This is garbage," a senior engineer provides supportive feedback to a junior: "Good start. Have you considered using a hash map here to improve efficiency? Let\'s chat about it." This approach respects the colleague, educates them, and improves the code.'
+            },
+            '8': { 
+                title: 'Principle 8: SELF',
+                description: 'Software engineers shall participate in lifelong learning regarding the practice of their profession and shall promote an ethical approach to the practice of the profession. This is a commitment to our own professional and ethical growth.',
+                exampleTitle: 'Example: Staying Informed on Facial Recognition',
+                example: 'An engineer assigned to a facial recognition project takes personal time to research the technology\'s known biases and ethical implications. Armed with this knowledge, they can ask informed questions during team meetings, such as, "Have we tested our model\'s accuracy across different demographic groups?" This commitment to self-education is a core professional duty.'
+            }
+        };
+
+        // --- Simplified Password Logic ---
+        const correctPassword = 'prof_ethics';
+        let isAnswersUnlocked = false;
+        
+        function showSection(targetId) {
+             navLinks.forEach(l => {
+                l.classList.remove('active-link', 'bg-sky-100', 'text-sky-800');
+                l.classList.add('hover:bg-sky-100', 'hover:text-sky-800', 'text-stone-600');
+            });
+            
+            const activeLink = document.querySelector(`.nav-link[data-target="${targetId}"]`);
+            if(activeLink) {
+                 activeLink.classList.add('active-link', 'bg-sky-100', 'text-sky-800');
+                 activeLink.classList.remove('hover:bg-sky-100', 'hover:text-sky-800', 'text-stone-600');
+            }
+
+            contentSections.forEach(section => {
+                if (section.id === targetId) {
+                    section.classList.remove('hidden');
+                } else {
+                    section.classList.add('hidden');
+                }
+            });
+        }
+
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.dataset.target;
+
+                if (targetId === 'answers' && !isAnswersUnlocked) {
+                    passwordModal.classList.remove('hidden');
+                    passwordInput.focus();
+                    return;
+                }
+                
+                showSection(targetId);
+
+                // Hide mobile menu on link click
+                if (window.innerWidth < 768) {
+                    menuLinks.classList.add('hidden');
+                }
+            });
+        });
+        
+        passwordForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const enteredPassword = passwordInput.value.trim();
+
+            if (enteredPassword === correctPassword) {
+                isAnswersUnlocked = true;
+                passwordModal.classList.add('hidden');
+                passwordInput.value = '';
+                passwordError.classList.add('hidden');
+                showSection('answers');
+            } else {
+                passwordError.classList.remove('hidden');
+                passwordInput.value = '';
+            }
+        });
+
+        passwordCancelBtn.addEventListener('click', () => {
+             passwordModal.classList.add('hidden');
+             passwordInput.value = '';
+             passwordError.classList.add('hidden');
+        });
+
+
+        contentCards.forEach(card => {
+            card.addEventListener('click', () => {
+                card.classList.toggle('open');
+            });
+        });
+
+        ethicalPrincipleCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const principleId = card.dataset.principle;
+                const data = ethicalPrinciplesData[principleId];
+
+                modalContent.innerHTML = `
+                    <h2 class="text-3xl font-bold text-sky-800 mb-4">${data.title}</h2>
+                    <p class="text-lg text-stone-700 mb-6">${data.description}</p>
+                    <div class="bg-stone-100 p-4 rounded-lg">
+                         <h3 class="text-xl font-semibold text-stone-800 mb-2">${data.exampleTitle}</h3>
+                         <p class="text-stone-600">${data.example}</p>
+                    </div>
+                `;
+                modal.classList.remove('hidden');
+            });
+        });
+
+        modalCloseBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+
+        document.querySelectorAll('.copy-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                const code = button.nextElementSibling.querySelector('code').innerText;
+                
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = code;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                try {
+                    document.execCommand('copy');
+                     button.innerText = 'Copied!';
+                } catch (err) {
+                     button.innerText = 'Failed';
+                }
+                document.body.removeChild(tempTextArea);
+
+                setTimeout(() => {
+                    button.innerText = 'Copy';
+                }, 2000);
+            });
+        });
+
+        const ctx = document.getElementById('emissionsChart');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Average Car (Lifetime)', 'Round-trip Flight (NY-SF)', 'One Human (1 Year)', 'AI Model Training'],
+                    datasets: [{
+                        label: 'Pounds of CO2 Equivalent',
+                        data: [126000, 1984, 11023, 626155],
+                        backgroundColor: [
+                            'rgba(56, 189, 248, 0.6)',
+                            'rgba(167, 139, 250, 0.6)',
+                            'rgba(251, 146, 60, 0.6)',
+                            'rgba(239, 68, 68, 0.6)',
+                        ],
+                        borderColor: [
+                            'rgba(56, 189, 248, 1)',
+                            'rgba(167, 139, 250, 1)',
+                            'rgba(251, 146, 60, 1)',
+                            'rgba(239, 68, 68, 1)',
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                             title: {
+                                display: true,
+                                text: 'Pounds of CO2 Equivalent'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('en-US').format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+    </script>
+</body>
+</html>
+

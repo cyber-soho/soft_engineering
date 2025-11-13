@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Lecture: Foundations of Software Engineering</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Academic Blue & Neutrals -->
+    <!-- Application Structure Plan: The SPA is designed as an interactive study guide, not a linear document. The structure is thematic, with a persistent navigation bar allowing users to jump between core concepts. This non-linear approach encourages exploration and comparison, which is more effective for learning than passive reading. Key interactive features include: 1) A toggleable chart comparing hardware vs. software failure curves. 2) An interactive diagram of the engineering layers. 3) A core "Process Model Comparator" tool that allows users to select different models (Waterfall, Scrum, etc.) and see their flows, strengths, weaknesses, and ideal use-cases update dynamically. This is the centerpiece, designed to make abstract models tangible and comparable. This structure was chosen to transform a static lecture into an active learning experience. -->
+    <!-- Visualization & Content Choices: 1. Software vs. Hardware Failure: Goal is to compare. A toggleable Line Chart (Chart.js/Canvas) is used to visually contrast the "bathtub" curve with the "deterioration" curve. Interaction is toggling datasets. Justification: A direct visual comparison is more impactful than two separate static images. 2. Engineering Layers: Goal is to organize. An interactive diagram built with HTML/Tailwind is used. Interaction is hovering/clicking to reveal details. Justification: This shows the hierarchy and relationship between layers more effectively than a list. 3. Process Models: Goal is to compare and organize. A dynamic content block powered by JS selectors is the main feature. Visuals for each model are built with HTML/CSS. Interaction is selecting a model to view its details. Justification: This is the most effective way to allow students to directly compare and contrast complex, abstract models in a self-paced manner. 4. Principles: Goal is to inform. Presented as interactive cards. Justification: Breaks down a long list into digestible chunks. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #334155; /* slate-700 */
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .nav-link.active {
+            color: #2563eb; /* blue-600 */
+            border-bottom-color: #2563eb;
+        }
+        .section-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .model-btn {
+            transition: all 0.2s ease;
+        }
+        .model-btn.active {
+            background-color: #2563eb;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .principle-card {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .principle-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .principle-card .details {
+            display: none;
+        }
+        .principle-card.open .details {
+            display: block;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800">Software Engineering 101</h1>
+                <div class="hidden md:flex items-center space-x-4 lg:space-x-8">
+                    <a data-target="nature" class="nav-link text-slate-600 font-medium pb-2 border-b-2 border-transparent hover:text-blue-600 hover:border-blue-600 active">Nature of Software</a>
+                    <a data-target="layers" class="nav-link text-slate-600 font-medium pb-2 border-b-2 border-transparent hover:text-blue-600 hover:border-blue-600">Layers</a>
+                    <a data-target="models" class="nav-link text-slate-600 font-medium pb-2 border-b-2 border-transparent hover:text-blue-600 hover:border-blue-600">Process Models</a>
+                    <a data-target="principles" class="nav-link text-slate-600 font-medium pb-2 border-b-2 border-transparent hover:text-blue-600 hover:border-blue-600">Principles</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 lg:px-8 py-8 md:py-12">
+        
+        <section id="nature" class="space-y-8 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-800 text-center">The Nature of Software</h2>
+            <div class="section-card p-6 md:p-8">
+                <div class="max-w-3xl mx-auto text-center mb-6">
+                    <p class="text-lg text-slate-600">Unlike physical hardware that wears out over time, software deteriorates due to the impact of change. Each modification, fix, or feature addition can introduce new defects, causing the system's reliability to degrade. This interactive chart visualizes the difference.</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="failureCurveChart"></canvas>
+                </div>
+                <div class="text-center mt-6">
+                    <p class="text-sm text-slate-500">The chart shows a comparison between the typical failure rate of hardware (the "bathtub curve") and the deterioration of software over its lifecycle as changes are introduced.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="layers" class="space-y-8 scroll-mt-20 mt-16">
+            <h2 class="text-3xl font-bold text-slate-800 text-center">The Layers of Engineering</h2>
+            <div class="section-card p-6 md:p-8">
+                <div class="max-w-3xl mx-auto text-center mb-8">
+                     <p class="text-lg text-slate-600">Software engineering is a layered technology. Each layer builds upon the foundation of the one below it, moving from broad philosophical commitments to specific technical implementations. Interact with the diagram to learn about each layer.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div id="layers-diagram" class="space-y-2 flex flex-col items-center">
+                        <button data-layer="tools" class="layer-item w-full max-w-sm text-center p-4 rounded-lg bg-blue-500 text-white font-semibold shadow-md">Tools</button>
+                        <button data-layer="methods" class="layer-item w-full max-w-sm text-center p-4 rounded-lg bg-blue-400 text-white font-semibold shadow-md">Methods</button>
+                        <button data-layer="process" class="layer-item w-full max-w-sm text-center p-4 rounded-lg bg-blue-300 text-white font-semibold shadow-md">Process</button>
+                        <button data-layer="quality" class="layer-item w-full max-w-sm text-center p-4 rounded-lg bg-slate-400 text-white font-semibold shadow-md">A Quality Focus</button>
+                    </div>
+                    <div id="layers-info" class="p-6 bg-slate-50 rounded-lg min-h-[200px]">
+                        <h3 id="layer-title" class="text-2xl font-bold text-slate-800 mb-2"></h3>
+                        <p id="layer-description" class="text-slate-600"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="models" class="space-y-8 scroll-mt-20 mt-16">
+            <h2 class="text-3xl font-bold text-slate-800 text-center">Process Models Comparator</h2>
+             <div class="section-card p-6 md:p-8">
+                <div class="max-w-3xl mx-auto text-center mb-8">
+                    <p class="text-lg text-slate-600">A software process model provides a roadmap for development. Different projects require different roadmaps. Use this tool to compare various models, from rigid, prescriptive approaches to flexible, agile frameworks. See how their workflows differ and learn which scenarios they are best suited for.</p>
+                </div>
+                <div class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8" id="model-selector">
+                </div>
+                <div id="model-display" class="bg-slate-50 p-6 rounded-lg grid md:grid-cols-2 gap-8 items-start">
+                    <div>
+                        <h3 id="model-title" class="text-2xl font-bold text-slate-800 mb-4"></h3>
+                        <div id="model-flow-container" class="mb-4"></div>
+                        <p id="model-description" class="text-slate-600 mb-4"></p>
+                    </div>
+                    <div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <h4 class="font-bold text-lg text-green-600 mb-2">Strengths</h4>
+                                <ul id="model-strengths" class="list-disc list-inside space-y-1 text-slate-600"></ul>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg text-red-600 mb-2">Weaknesses</h4>
+                                <ul id="model-weaknesses" class="list-disc list-inside space-y-1 text-slate-600"></ul>
+                            </div>
+                        </div>
+                        <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <h4 class="font-bold text-lg text-blue-800 mb-2">Best Fit Scenario</h4>
+                            <p id="model-scenario" class="text-blue-700"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="principles" class="space-y-8 scroll-mt-20 mt-16">
+            <h2 class="text-3xl font-bold text-slate-800 text-center">Guiding Principles</h2>
+            <div class="section-card p-6 md:p-8">
+                 <div class="max-w-3xl mx-auto text-center mb-8">
+                    <p class="text-lg text-slate-600">Beyond specific processes and tools, effective software engineering is guided by a set of core principles. These are fundamental mindsets that lead to better decision-making and higher-quality software. Click on each card to learn more.</p>
+                </div>
+                <div id="principles-container" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-slate-300 mt-16">
+        <div class="container mx-auto px-4 lg:px-8 py-6 text-center">
+            <p>CSc 401 - Introduction to Software Engineering</p>
+            <p class="text-sm text-slate-400">Interactive Lecture Experience</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const content = {
+                layers: {
+                    quality: {
+                        title: "A Quality Focus",
+                        description: "The bedrock of all engineering. It's a foundational commitment to creating a high-quality product through philosophies like Total Quality Management (TQM) and continuous process improvement."
+                    },
+                    process: {
+                        title: "Process",
+                        description: "The glue that holds everything together. It defines the framework, activities, and deliverables needed to build software in an orderly, manageable way. It provides context for planning, quality assurance, and change control."
+                    },
+                    methods: {
+                        title: "Methods",
+                        description: "The technical 'how-to's' of building software. This includes specific techniques for requirements analysis, design modeling, coding, and testing. These are the practical skills applied within the process."
+                    },
+                    tools: {
+                        title: "Tools",
+                        description: "Automated or semi-automated support for processes and methods. This includes code editors, debuggers, modeling tools, and testing frameworks. Integrated tools form a Computer-Aided Software Engineering (CASE) environment."
+                    }
+                },
+                models: {
+                    waterfall: {
+                        category: "Prescriptive",
+                        title: "The Waterfall Model",
+                        description: "A classic, sequential model where each phase must be fully completed before the next begins. It flows steadily downwards (like a waterfall) through requirements, design, implementation, testing, and maintenance.",
+                        strengths: ["Simple to understand and manage.", "Enforces discipline with clear phases and deliverables.", "Works well for projects with stable, well-understood requirements."],
+                        weaknesses: ["Inflexible and cannot easily accommodate change.", "Working software is not seen until late in the project.", "Unrealistic for most real-world, complex projects."],
+                        scenario: "Building safety-critical software for a medical infusion pump, where requirements are fixed by regulation and cannot change.",
+                        flow: `<div class="flex flex-col space-y-1 text-sm text-center">
+                                  <div class="p-2 bg-slate-200 rounded">Communication</div>
+                                  <div class="self-center">↓</div>
+                                  <div class="p-2 bg-slate-200 rounded">Planning & Modeling</div>
+                                  <div class="self-center">↓</div>
+                                  <div class="p-2 bg-slate-200 rounded">Construction</div>
+                                  <div class="self-center">↓</div>
+                                  <div class="p-2 bg-slate-200 rounded">Deployment</div>
+                               </div>`
+                    },
+                    prototyping: {
+                        category: "Evolutionary",
+                        title: "The Prototyping Model",
+                        description: "An iterative model focused on quickly building a mock-up (prototype) of the system to gather user feedback. This process helps clarify requirements when they are not well understood at the start.",
+                        strengths: ["Excellent for clarifying unclear requirements.", "Provides early and frequent user feedback.", "Reduces the risk of building the wrong product."],
+                        weaknesses: ["Users may mistake the prototype for a final product.", "Can encourage overlooking quality or long-term maintainability.", "Can lead to 'analysis paralysis' if iterations are not managed."],
+                        scenario: "Developing a new, innovative user interface where the optimal user experience can only be discovered through user interaction and feedback.",
+                        flow: `<div class="text-center">
+                                <div class="p-2 bg-slate-200 rounded inline-block">Listen to Customer</div>
+                                <div class="text-2xl my-1">↻</div>
+                                <div class="p-2 bg-slate-200 rounded inline-block">Build/Refine Mock-up</div> → <div class="p-2 bg-slate-200 rounded inline-block">Customer Test-Drives</div>
+                               </div>`
+                    },
+                    spiral: {
+                        category: "Evolutionary",
+                        title: "The Spiral Model",
+                        description: "An evolutionary model that combines iteration with the systematic aspects of the Waterfall model, explicitly incorporating risk analysis in each phase. The process moves in a spiral, with each loop building a more complete version of the product.",
+                        strengths: ["Excellent for large, complex, and high-risk projects.", "Risk analysis is an integral part of the model.", "Accommodates change and evolution as the project progresses."],
+                        weaknesses: ["Can be complex and costly to implement.", "Requires significant expertise in risk assessment.", "May be overkill for smaller, low-risk projects."],
+                        scenario: "Developing a brand new video game, where the biggest risk is whether the core gameplay is 'fun'—a factor that can only be determined through iterative prototyping and playtesting.",
+                        flow: `<div class="relative w-40 h-40 mx-auto">
+                                <div class="absolute inset-0 border-4 border-dashed border-slate-400 rounded-full"></div>
+                                <div class="absolute text-xs" style="top: 45%; left: -20px;">Planning</div>
+                                <div class="absolute text-xs" style="top: -10px; left: 40%;">Risk Analysis</div>
+                                <div class="absolute text-xs" style="top: 45%; right: -25px;">Engineering</div>
+                                <div class="absolute text-xs" style="bottom: -10px; left: 40%;">Evaluation</div>
+                                <div class="absolute text-2xl" style="top: 38%; left: 45%;">🌀</div>
+                               </div>`
+                    },
+                    scrum: {
+                        category: "Agile",
+                        title: "Scrum",
+                        description: "An agile framework for managing complex product development. Work is performed in short, time-boxed iterations called 'Sprints' (1-4 weeks), with the goal of producing a potentially shippable increment of the product in each sprint.",
+                        strengths: ["High visibility of progress and impediments.", "Adapts well to changing requirements.", "Empowers the development team and encourages collaboration."],
+                        weaknesses: ["Can be chaotic if the team is not disciplined.", "Requires a committed Product Owner with a clear vision.", "The risk of scope creep is high if not managed well."],
+                        scenario: "Managing a website update where priorities are clear for the next 1-2 weeks. The team can commit to a set of features (e.g., new banner, bug fix) and deliver them in a short, focused sprint.",
+                        flow: `<div class="flex items-center justify-center space-x-2 text-sm text-center">
+                                  <div class="p-2 bg-slate-200 rounded">Product Backlog</div>
+                                  <div>→</div>
+                                  <div class="p-3 border-2 border-dashed border-slate-400 rounded-full">
+                                    <div class="font-bold">Sprint</div>
+                                    <div class="text-xs">1-4 Weeks</div>
+                                  </div>
+                                  <div>→</div>
+                                  <div class="p-2 bg-slate-200 rounded">Shippable Increment</div>
+                               </div>`
+                    },
+                    kanban: {
+                        category: "Agile",
+                        title: "Kanban",
+                        description: "An agile method focused on visualizing work, limiting Work In Progress (WIP), and maximizing flow. It uses a Kanban board to track tasks as they move through different stages of the workflow, from 'To Do' to 'Done'.",
+                        strengths: ["Flexible and can be applied to existing processes.", "Reduces waste and bottlenecks by limiting WIP.", "Allows for continuous delivery and rapid reprioritization."],
+                        weaknesses: ["Does not prescribe specific time-boxed iterations, which can lead to a lack of urgency.", "Can be less effective if tasks are very large or have many dependencies.", "Relies on the team being proactive in pulling work."],
+                        scenario: "Managing an IT support queue with a continuous stream of ad-hoc requests. The team can visualize the workflow and ensure a steady, prioritized flow of completed tasks without fixed sprints.",
+                        flow: `<div class="grid grid-cols-3 gap-2 text-sm text-center">
+                                  <div class="p-2 bg-blue-100 rounded">To Do</div>
+                                  <div class="p-2 bg-yellow-100 rounded">In Progress (WIP Limit)</div>
+                                  <div class="p-2 bg-green-100 rounded">Done</div>
+                               </div>`
+                    }
+                },
+                principles: [
+                    { name: "The Reason It All Exists", detail: "A software system exists to provide VALUE to its users. All decisions must be made with this in mind." },
+                    { name: "KISS (Keep It Simple, Stupid!)", detail: "All design should be as simple as possible, but no simpler. Simplicity enhances maintainability and reduces errors." },
+                    { name: "Maintain the Vision", detail: "A clear, unified vision is essential for a project to succeed without becoming a patchwork of incompatible components." },
+                    { name: "What You Produce, Others Will Consume", detail: "Always code and document with the understanding that someone else will have to read, debug, and maintain it." },
+                    { name: "Be Open to the Future", detail: "Good design anticipates change. A well-designed system can adapt to evolving requirements and technologies." },
+                    { name: "Plan Ahead for Reuse", detail: "Consciously planning for reuse during design and construction saves time and effort in the long run." },
+                    { name: "Think!", detail: "Clear, complete thought before taking action almost always produces better, higher-quality results." }
+                ]
+            };
+
+            const initFailureChart = () => {
+                const ctx = document.getElementById('failureCurveChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Time 0', 'Early Life', 'Mid Life', 'Late Life', 'Change 1', 'Change 2', 'Change 3'],
+                        datasets: [{
+                            label: 'Hardware Failure Rate (Bathtub Curve)',
+                            data: [20, 5, 4, 15, 16, 17, 18],
+                            borderColor: 'rgb(234, 179, 8)',
+                            backgroundColor: 'rgba(234, 179, 8, 0.2)',
+                            tension: 0.3,
+                            fill: true,
+                        }, {
+                            label: 'Software Failure Rate (Deterioration)',
+                            data: [18, 6, 2, 2, 10, 14, 18],
+                            borderColor: 'rgb(37, 99, 235)',
+                            backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                            tension: 0.1,
+                            fill: true,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Failure Rate' }
+                            },
+                            x: {
+                                title: { display: true, text: 'Time / Lifecycle Events' }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                            },
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Hardware Wear-Out vs. Software Deterioration'
+                            }
+                        }
+                    }
+                });
+            };
+            
+            const initLayers = () => {
+                const diagram = document.getElementById('layers-diagram');
+                const titleEl = document.getElementById('layer-title');
+                const descEl = document.getElementById('layer-description');
+                
+                const updateInfo = (layerKey) => {
+                    const layerData = content.layers[layerKey];
+                    titleEl.textContent = layerData.title;
+                    descEl.textContent = layerData.description;
+                    diagram.querySelectorAll('.layer-item').forEach(btn => {
+                       btn.classList.remove('ring-2', 'ring-blue-500', 'ring-offset-2');
+                       if (btn.dataset.layer === layerKey) {
+                           btn.classList.add('ring-2', 'ring-blue-500', 'ring-offset-2');
+                       }
+                    });
+                };
+                
+                diagram.addEventListener('click', (e) => {
+                    if (e.target.matches('.layer-item')) {
+                        updateInfo(e.target.dataset.layer);
+                    }
+                });
+                
+                updateInfo('quality');
+            };
+            
+            const initModels = () => {
+                const selector = document.getElementById('model-selector');
+                const titleEl = document.getElementById('model-title');
+                const descEl = document.getElementById('model-description');
+                const strengthsEl = document.getElementById('model-strengths');
+                const weaknessesEl = document.getElementById('model-weaknesses');
+                const scenarioEl = document.getElementById('model-scenario');
+                const flowContainer = document.getElementById('model-flow-container');
+                
+                const modelKeys = Object.keys(content.models);
+                modelKeys.forEach(key => {
+                    const model = content.models[key];
+                    const button = document.createElement('button');
+                    button.dataset.model = key;
+                    button.textContent = model.title;
+                    button.className = 'model-btn px-4 py-2 text-sm font-semibold rounded-full bg-white text-slate-700 shadow-sm border border-slate-200 hover:bg-slate-100';
+                    selector.appendChild(button);
+                });
+                
+                const updateDisplay = (modelKey) => {
+                    const model = content.models[modelKey];
+                    titleEl.textContent = model.title;
+                    descEl.textContent = model.description;
+                    scenarioEl.textContent = model.scenario;
+                    flowContainer.innerHTML = model.flow;
+                    
+                    strengthsEl.innerHTML = model.strengths.map(s => `<li>${s}</li>`).join('');
+                    weaknessesEl.innerHTML = model.weaknesses.map(w => `<li>${w}</li>`).join('');
+                    
+                    selector.querySelectorAll('.model-btn').forEach(btn => {
+                       btn.classList.remove('active');
+                       if (btn.dataset.model === modelKey) {
+                           btn.classList.add('active');
+                       }
+                    });
+                };
+                
+                selector.addEventListener('click', e => {
+                    if(e.target.matches('.model-btn')) {
+                        updateDisplay(e.target.dataset.model);
+                    }
+                });
+                
+                updateDisplay(modelKeys[0]);
+            };
+            
+            const initPrinciples = () => {
+                const container = document.getElementById('principles-container');
+                content.principles.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'principle-card bg-white p-5 rounded-lg shadow-sm border border-slate-100';
+                    card.innerHTML = `<h4 class="font-bold text-lg text-slate-800">${p.name}</h4>
+                                      <p class="details mt-2 text-slate-600">${p.detail}</p>`;
+                    card.addEventListener('click', () => {
+                        card.classList.toggle('open');
+                    });
+                    container.appendChild(card);
+                });
+            };
+
+            const initNav = () => {
+                const navLinks = document.querySelectorAll('.nav-link');
+                const sections = document.querySelectorAll('main section');
+
+                navLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const targetId = link.dataset.target;
+                        const targetSection = document.getElementById(targetId);
+                        
+                        if (targetSection) {
+                            window.scrollTo({
+                                top: targetSection.offsetTop - 80, // header offset
+                                behavior: 'smooth'
+                            });
+                        }
+                    });
+                });
+
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            navLinks.forEach(link => {
+                                link.classList.toggle('active', link.dataset.target === entry.target.id);
+                            });
+                        }
+                    });
+                }, { rootMargin: "-30% 0px -70% 0px" });
+
+                sections.forEach(section => observer.observe(section));
+            };
+            
+            initFailureChart();
+            initLayers();
+            initModels();
+            initPrinciples();
+            initNav();
+        });
+    </script>
+</body>
+</html>
+
+
+

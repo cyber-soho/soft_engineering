@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Labs — Foundations & Overview (Software Engineering)</title>
+  <meta name="description" content="Interactive lab page with exercises, timers, autosave, export, and evaluation rubric for the Foundations & Overview lecture." />
+  <style>
+    :root{      --bg: #0b1020; --panel:#121a33; --muted:#8ea2c1; --text:#e6eeff; --accent:#82b1ff; --ok:#6ee7b7; --warn:#fbbf24; --danger:#fb7185; --stroke:#1f2a4a; --softbg: rgba(255,255,255,0.06);
+    }
+    [data-theme="light"]{      --bg:#f8fbff; --panel:#ffffff; --muted:#3a4a68; --text:#0b1426; --accent:#1f6feb; --ok:#0ea5e9; --warn:#b45309; --danger:#b91c1c; --stroke:#c9d7ee; --softbg: rgba(0,0,0,0.06);
+    }
+    html,body{height:100%}
+    body{margin:0;font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji","Segoe UI Emoji"; background:var(--bg); color:var(--text);} 
+    .wrap{display:grid; grid-template-columns: 300px 1fr; min-height:100vh;}
+    aside{border-right:1px solid var(--stroke); background:var(--panel); position:sticky; top:0; height:100vh; overflow:auto;}
+    main{padding:24px;} section{scroll-margin-top:100px;} html{scroll-behavior:smooth;}
+    header{position:sticky; top:0; background:var(--bg); z-index:5; padding:16px 24px; border-bottom:1px solid var(--stroke); display:flex; gap:12px; align-items:center; justify-content:space-between}
+    .title{font-weight:700; font-size:1.1rem}
+    .btn{appearance:none; border:1px solid var(--stroke); background:var(--panel); color:var(--text); padding:10px 12px; border-radius:12px; cursor:pointer; transition:transform .06s ease;}
+    .btn:hover{transform:translateY(-1px)}
+    .btn-row{display:flex; gap:8px; flex-wrap:wrap}
+    .card{border:1px solid var(--stroke); background:var(--panel); border-radius:16px; padding:18px; box-shadow: 0 8px 20px rgba(0,0,0,.12)}
+    .muted{color:var(--muted)}
+    h1,h2,h3{margin:.2em 0 .5em}
+    h1{font-size:1.8rem}
+    h2{font-size:1.35rem}
+    h3{font-size:1.05rem}
+    details{border:1px dashed var(--stroke); border-radius:12px; padding:12px; background:var(--softbg);}
+    summary{cursor:pointer; font-weight:600}
+    .kpi{display:grid; grid-template-columns: repeat(4, minmax(120px,1fr)); gap:12px; margin:12px 0}
+    .kpi .card{padding:14px; text-align:center}
+    .kpi .n{font-weight:700; font-size:1.3rem}
+    textarea{width:100%; min-height:200px; resize:vertical; border-radius:10px; border:1px solid var(--stroke); padding:12px; background:transparent; color:var(--text)}
+    input[type="text"], input[type="number"]{width:100%; border-radius:10px; border:1px solid var(--stroke); padding:10px; background:transparent; color:var(--text)}
+    label{font-weight:600}
+    .grid{display:grid; gap:16px}
+    .g2{grid-template-columns: repeat(2, minmax(0,1fr));}
+    .rubric{width:100%; border-collapse:collapse; font-size:.95rem}
+    .rubric th, .rubric td{border:1px solid var(--stroke); padding:10px; vertical-align:top}
+    .rubric th{background:rgba(255,255,255,0.04); text-align:left}
+    .badge{display:inline-block; padding:3px 8px; border-radius:999px; border:1px solid var(--stroke); font-size:.8rem}
+    nav{padding:16px}
+    .nav-group{margin-bottom:18px}
+    .nav-group h4{margin:.2em 0 .6em; font-size:.9rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted)}
+    .nav a{display:block; padding:10px 12px; border-radius:10px; text-decoration:none; color:var(--text); border:1px solid transparent}
+    .nav a:hover{background:rgba(255,255,255,0.05); border-color:var(--stroke)}
+    .progress{height:10px; border:1px solid var(--stroke); border-radius:999px; overflow:hidden; background:var(--softbg)}
+    .progress > i{display:block; height:100%; width:0; background:linear-gradient(90deg, var(--accent), var(--ok));}
+    .foot{margin-top:28px; display:flex; align-items:center; gap:10px; color:var(--muted); font-size:.9rem}
+    .timer{font-variant-numeric:tabular-nums; font-weight:700}
+    .pill{padding:6px 9px; border-radius:999px; border:1px solid var(--stroke)}
+    .checklist label{display:flex; align-items:center; gap:8px}
+    .checklist input{width:18px; height:18px}
+    .right{display:flex; gap:10px; align-items:center}
+    .note{font-size:.9rem; padding:8px 10px; border-left:3px solid var(--accent); background:rgba(130,177,255,.08); border-radius:6px}
+    .small{font-size:.9rem}
+    .hr{height:1px; background:var(--stroke); margin:16px 0}
+    .keyval{display:grid; grid-template-columns: 140px 1fr; gap:8px;}
+    .kbd{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background:var(--softbg); border:1px solid var(--stroke); padding:2px 6px; border-radius:6px}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+  <div class="wrap" id="app">
+    <aside>
+      <nav class="nav">
+        <div class="nav-group">
+          <h4>Labs Navigation</h4>
+          <a href="#overview">Overview</a>
+          <a href="#exercise1">Exercise 1 — Automated Grader</a>
+          <a href="#exercise2">Exercise 2 — Process Models</a>
+          <a href="#rubric">Evaluation Grid (100%)</a>
+        </div>
+        <div class="nav-group">
+          <h4>Quick Actions</h4>
+          <a href="#" id="saveBtn">Save Progress</a>
+          <a href="#" id="loadBtn">Load Saved</a>
+          <a href="#" id="exportTxtBtn">Export Answers (.txt)</a>
+          <a href="#" id="exportJsonBtn">Export Answers (.json)</a>
+          <a href="#" id="printBtn">Print</a>
+        </div>
+        <div class="nav-group">
+          <h4>Preferences</h4>
+          <div class="btn-row">
+            <button class="btn" id="themeBtn" title="Toggle light/dark">Toggle Theme</button>
+          </div>
+          <div class="hr"></div>
+          <div class="small muted">Autosave <span class="badge" id="autosaveState">off</span></div>
+          <div class="small muted">Last saved: <span id="lastSaved">—</span></div>
+        </div>
+      </nav>
+    </aside>
+
+    <div>
+      <header>
+        <div>
+          <div class="title">Labs — Foundations & Overview (Software Engineering)</div>
+          <div class="muted small">Practical Exercises (Estimated Time: <b>2 Hours</b>)</div>
+        </div>
+        <div class="right">
+          <div class="pill"><span class="muted">Timer:</span> <span class="timer" id="timer">00:00:00</span></div>
+          <button class="btn" id="startTimer">Start</button>
+          <button class="btn" id="pauseTimer">Pause</button>
+          <button class="btn" id="resetTimer">Reset</button>
+        </div>
+      </header>
+
+      <main>
+        <section id="overview" class="card">
+          <h1>Practical Exercises — Instructions</h1>
+          <p><b>Instructions for Students:</b> Please answer the following two exercises based on the concepts discussed in the <i>“Foundations & Overview”</i> lecture. Your responses should be clear, well‑reasoned, and demonstrate your understanding of the core principles and process models of software engineering.</p>
+          <div class="kpi">
+            <div class="card"><div class="muted small">Total Exercises</div><div class="n">2</div></div>
+            <div class="card"><div class="muted small">Suggested Time</div><div class="n">120 min</div></div>
+            <div class="card"><div class="muted small">Autosave</div><div class="n" id="kpiAuto">Off</div></div>
+            <div class="card"><div class="muted small">Progress</div><div class="progress"><i id="progressBar"></i></div></div>
+          </div>
+          <div class="note">Tip: Use the <span class="kbd">Save</span> and <span class="kbd">Export</span> options in the sidebar to keep a copy of your work. Your answers are also auto‑saved every 30 seconds when enabled.</div>
+        </section>
+
+        <section id="exercise1" class="card" style="margin-top:16px">
+          <h2>Exercise 1: Applying Foundational Principles <span class="badge">60 minutes</span></h2>
+          <p><b>Scenario:</b> A university professor wants to commission a simple “Automated Grader” application for their multiple‑choice exams. The application should be able to:</p>
+          <ul>
+            <li>Scan a standardized answer sheet (e.g., a Scantron form image).</li>
+            <li>Compare the scanned answers against a correct answer key provided by the professor.</li>
+            <li>Calculate a final score for each student.</li>
+            <li>Export the results (Student Name, Student ID, Score) into a single CSV file.</li>
+          </ul>
+          <p><b>Task:</b> Using the problem‑solving framework and the guiding principles discussed in the lecture, describe how you would approach the initial stages of this project. Specifically, structure your answer to address the following four points, integrating at least three of Hooker’s seven principles where you see fit.</p>
+          <ol>
+            <li><b>Understand the Problem:</b> Who are the stakeholders? What are the key objectives and potential unknowns?</li>
+            <li><b>Plan a Solution:</b> How would you model a solution? Which principles would guide your high‑level design choices?</li>
+            <li><b>Carry Out the Plan:</b> From a development perspective, what considerations are important for ensuring the code is maintainable and understandable in the future?</li>
+            <li><b>Examine the Result:</b> How would you and the professor verify that the application works correctly and delivers value?</li>
+          </ol>
+
+          <details>
+            <summary>Helpful prompts (optional)</summary>
+            <ul class="small">
+              <li>Map your points to Polya’s steps and explicitly name at least three of Hooker’s principles (e.g., “The Reason It All Exists”, “KISS”, “Be Open to the Future”, “What You Produce, Others Will Consume”).</li>
+              <li>Consider risks: image quality, ambiguous markings, misaligned sheets, different file formats.</li>
+              <li>Think verification: golden datasets, unit/integration tests, usability feedback, and CSV validation.</li>
+            </ul>
+          </details>
+
+          <div class="grid" style="margin-top:12px">
+            <div class="g2">
+              <div>
+                <label for="ex1_name">Your Name</label>
+                <input id="ex1_name" type="text" placeholder="Full name" />
+              </div>
+              <div>
+                <label for="ex1_id">Student ID</label>
+                <input id="ex1_id" type="text" placeholder="Student ID" />
+              </div>
+            </div>
+            <div>
+              <label for="ex1_answer">Your Answer</label>
+              <textarea id="ex1_answer" placeholder="Write your structured response addressing the four points and Hooker’s principles…"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <section id="exercise2" class="card" style="margin-top:16px">
+          <h2>Exercise 2: Selecting the Right Process Model <span class="badge">60 minutes</span></h2>
+          <p><b>Scenario:</b> You are a software project manager who must recommend a development process model for three different upcoming projects.</p>
+          <ul>
+            <li><b>Project A: The Avionics Update.</b> You are developing safety‑critical software for an airplane’s navigation system. The requirements are fully defined by federal aviation regulations, are non‑negotiable, and will not change. Every step of the process must be meticulously documented and verifiable for a safety audit.</li>
+            <li><b>Project B: The Food Discovery App.</b> A startup wants to build a new mobile app that gives users personalized restaurant recommendations. They have a basic vision but are unsure which features users will find most engaging (e.g., social sharing, chef interviews, dietary filtering). The market is competitive, and the ability to get user feedback early and adapt quickly is crucial.</li>
+            <li><b>Project C: The Corporate Intranet Portal.</b> You manage the IT team for a large company. Your team handles a continuous stream of requests to update the company’s internal website. These requests are varied—from fixing a broken link to adding a new page for the HR department or updating the company calendar. The priority of these tasks can change daily based on management’s needs.</li>
+          </ul>
+          <p><b>Task:</b> For each project (A, B, and C), perform the following:</p>
+          <ol>
+            <li><b>Select a Process Model:</b> Choose the most appropriate software process model from the lecture (e.g., Waterfall, Prototyping, Spiral, Scrum, Kanban).</li>
+            <li><b>Justify Your Choice:</b> Explain why your chosen model is a good fit. Connect the project’s characteristics (e.g., stability of requirements, level of risk, need for feedback) to the strengths of the model.</li>
+            <li><b>Describe the First Step:</b> Briefly outline what the very first activity or phase would look like for that project under your chosen model.</li>
+          </ol>
+
+          <div class="grid g2" style="margin-top:12px">
+            <div class="card">
+              <h3>Project A — Your Plan</h3>
+              <textarea id="ex2_a" placeholder="Model, justification, and first step for the Avionics Update…"></textarea>
+            </div>
+            <div class="card">
+              <h3>Project B — Your Plan</h3>
+              <textarea id="ex2_b" placeholder="Model, justification, and first step for the Food Discovery App…"></textarea>
+            </div>
+            <div class="card">
+              <h3>Project C — Your Plan</h3>
+              <textarea id="ex2_c" placeholder="Model, justification, and first step for the Corporate Intranet Portal…"></textarea>
+            </div>
+            <div class="card checklist">
+              <h3>Self‑Checklist</h3>
+              <label><input type="checkbox" id="chk_models"> Selected appropriate model for A, B, C</label>
+              <label><input type="checkbox" id="chk_justify"> Strong justification linked to project traits</label>
+              <label><input type="checkbox" id="chk_first"> Clear first‑step description for each project</label>
+            </div>
+          </div>
+        </section>
+
+        <section id="rubric" class="card" style="margin-top:16px">
+          <h2>Evaluation Grid (100%)</h2>
+          <table class="rubric">
+            <thead>
+              <tr><th>Section</th><th>Criteria</th><th>Points</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td rowspan="3"><b>Exercise 1 (50%)</b></td>
+                <td>Application of Polya’s Steps</td>
+                <td>20</td>
+                <td>The student clearly and logically addresses the four problem‑solving steps (Understand, Plan, Carry Out, Examine) in the context of the scenario.</td>
+              </tr>
+              <tr>
+                <td>Integration of Hooker’s Principles</td>
+                <td>20</td>
+                <td>The student correctly identifies and integrates at least three of Hooker’s principles into their response, providing a clear justification for why each principle applies.</td>
+              </tr>
+              <tr>
+                <td>Clarity and Coherence</td>
+                <td>10</td>
+                <td>The response is well‑structured, easy to read, and uses appropriate terminology from the lecture.</td>
+              </tr>
+              <tr>
+                <td rowspan="3"><b>Exercise 2 (50%)</b></td>
+                <td>Correct Model Selection</td>
+                <td>15</td>
+                <td>The student selects the most appropriate process model for each of the three projects (5 points each).</td>
+              </tr>
+              <tr>
+                <td>Strength of Justification</td>
+                <td>25</td>
+                <td>The justification for each choice is strong, referencing specific project characteristics and linking them directly to the strengths and weaknesses of the chosen model as discussed in the lecture.</td>
+              </tr>
+              <tr>
+                <td>Description of Initial Phases</td>
+                <td>10</td>
+                <td>The student accurately describes the initial activity or phase for each project under the chosen model, demonstrating a practical understanding of how the model is initiated.</td>
+              </tr>
+              <tr>
+                <td colspan="2"><b>Total</b></td>
+                <td><b>100</b></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="card" style="margin-top:16px">
+          <h2>Submission Metadata (optional)</h2>
+          <div class="keyval">
+            <div>Course</div><div><input id="meta_course" type="text" placeholder="e.g., Foundations of Software Engineering"/></div>
+            <div>Instructor</div><div><input id="meta_instructor" type="text" placeholder="Instructor name"/></div>
+            <div>Date</div><div><input id="meta_date" type="text" placeholder="YYYY‑MM‑DD"/></div>
+          </div>
+        </section>
+
+        <div class="foot">
+          <span class="muted">Keyboard: </span>
+          <span class="kbd">Ctrl / Cmd + S</span> save ·
+          <span class="kbd">Ctrl / Cmd + P</span> print
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    const $ = (s)=>document.querySelector(s);
+    const $$ = (s)=>Array.from(document.querySelectorAll(s));
+    const themeRoot = document.documentElement;
+    const timerEl = $('#timer');
+    const progressEl = $('#progressBar');
+    const autosaveState = $('#autosaveState');
+    const kpiAuto = $('#kpiAuto');
+
+    // THEME
+    const themeBtn = $('#themeBtn');
+    const savedTheme = localStorage.getItem('labs_theme');
+    if(savedTheme){ themeRoot.setAttribute('data-theme', savedTheme); }
+    themeBtn.addEventListener('click', ()=>{
+      const cur = themeRoot.getAttribute('data-theme');
+      const next = (cur==='dark'?'light':'dark');
+      themeRoot.setAttribute('data-theme', next);
+      localStorage.setItem('labs_theme', next);
+    });
+
+    // TIMER
+    let t0 = null, acc = 0, tid = null;
+    const fmt = (ms)=>{
+      const s = Math.floor(ms/1000); const hh = String(Math.floor(s/3600)).padStart(2,'0');
+      const mm = String(Math.floor((s%3600)/60)).padStart(2,'0'); const ss = String(s%60).padStart(2,'0');
+      return `${hh}:${mm}:${ss}`;
+    };
+    function tick(){ const now = performance.now(); timerEl.textContent = fmt(acc + (t0? (now - t0):0)); tid = requestAnimationFrame(tick); }
+    $('#startTimer').addEventListener('click', ()=>{ if(!t0){ t0 = performance.now(); tick(); }});
+    $('#pauseTimer').addEventListener('click', ()=>{ if(t0){ acc += performance.now()-t0; t0=null; cancelAnimationFrame(tid); tick(); }});
+    $('#resetTimer').addEventListener('click', ()=>{ t0=null; acc=0; cancelAnimationFrame(tid); tick(); });
+    tick();
+
+    // FIELDS to track
+    const fields = [
+      'ex1_name','ex1_id','ex1_answer','ex2_a','ex2_b','ex2_c','meta_course','meta_instructor','meta_date','chk_models','chk_justify','chk_first'
+    ];
+
+    function collect(){
+      const v = {};
+      fields.forEach(id=>{
+        const el = document.getElementById(id);
+        if(!el) return;
+        if(el.type==='checkbox') v[id] = !!el.checked; else v[id] = el.value;
+      });
+      v['_ts'] = new Date().toISOString();
+      return v;
+    }
+
+    function apply(v){
+      fields.forEach(id=>{
+        const el = document.getElementById(id); if(!el) return;
+        if(el.type==='checkbox') el.checked = !!v[id]; else if(typeof v[id]!== 'undefined') el.value = v[id];
+      });
+    }
+
+    function progress(){
+      const v = collect();
+      let total = 6; // 3 textareas + name + id + any meta
+      let done = 0;
+      if((v.ex1_answer||'').trim().length>40) done++;
+      if((v.ex2_a||'').trim().length>30) done++;
+      if((v.ex2_b||'').trim().length>30) done++;
+      if((v.ex2_c||'').trim().length>30) done++;
+      if((v.ex1_name||'').trim().length>1) done++;
+      if((v.ex1_id||'').trim().length>1) done++;
+      const pct = Math.min(100, Math.round((done/total)*100));
+      progressEl.style.width = pct+'%';
+    }
+
+    setInterval(progress, 1000);
+
+    // SAVE/LOAD
+    const STORAGE_KEY = 'labs_foundations_overview_v1';
+    const lastSavedEl = $('#lastSaved');
+
+    function save(){ const v = collect(); localStorage.setItem(STORAGE_KEY, JSON.stringify(v)); const ts = new Date().toLocaleString(); lastSavedEl.textContent = ts; }
+    function load(){ const raw = localStorage.getItem(STORAGE_KEY); if(!raw) return; try{ const v = JSON.parse(raw); apply(v); lastSavedEl.textContent = new Date(v['_ts']||Date.now()).toLocaleString(); }catch(e){} }
+
+    $('#saveBtn').addEventListener('click', (e)=>{ e.preventDefault(); save(); flash('Saved'); });
+    $('#loadBtn').addEventListener('click', (e)=>{ e.preventDefault(); load(); flash('Loaded'); });
+
+    // AUTOSAVE
+    let autosave = true; // on by default for safety
+    function setAutosaveState(){ autosaveState.textContent = autosave? 'on':'off'; kpiAuto.textContent = autosave? 'On':'Off'; }
+    setAutosaveState();
+    setInterval(()=>{ if(autosave) save(); }, 30000);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e)=>{
+      if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); save(); flash('Saved'); }
+      if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='p'){ /* allow default print */ }
+    });
+
+    // EXPORT
+    function download(name, data, type='text/plain'){
+      const blob = new Blob([data], {type});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+
+    function asText(){
+      const v = collect();
+      return `Labs — Foundations & Overview\nSaved: ${new Date().toLocaleString()}\n\nExercise 1 — Automated Grader\nName: ${v.ex1_name||''}\nStudent ID: ${v.ex1_id||''}\nAnswer:\n${v.ex1_answer||''}\n\nExercise 2 — Process Models\nA) ${v.ex2_a||''}\n\nB) ${v.ex2_b||''}\n\nC) ${v.ex2_c||''}\n\nChecklist: models=${!!v.chk_models}, justification=${!!v.chk_justify}, firstStep=${!!v.chk_first}\nCourse: ${v.meta_course||''} | Instructor: ${v.meta_instructor||''} | Date: ${v.meta_date||''}\n`;
+    }
+
+    $('#exportTxtBtn').addEventListener('click', (e)=>{ e.preventDefault(); download('labs_foundations_overview.txt', asText()); });
+    $('#exportJsonBtn').addEventListener('click', (e)=>{ e.preventDefault(); download('labs_foundations_overview.json', JSON.stringify(collect(), null, 2), 'application/json'); });
+
+    // PRINT
+    $('#printBtn').addEventListener('click', (e)=>{ e.preventDefault(); window.print(); });
+
+    // Flash feedback
+    let flashDiv = null, flashTO = null;
+    function flash(msg){
+      if(!flashDiv){ flashDiv = document.createElement('div'); flashDiv.style.cssText='position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--stroke);padding:10px 14px;border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,.18);z-index:9999'; document.body.appendChild(flashDiv); }
+      flashDiv.textContent = msg; flashDiv.style.opacity='1'; clearTimeout(flashTO); flashTO = setTimeout(()=>{ flashDiv.style.opacity='0'; }, 1200);
+    }
+
+    // initial load
+    load(); progress();
+  })();
+  </script>
+</body>
+</html>

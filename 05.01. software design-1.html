@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Software Design Lecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Calm Neutral Blue -->
+    <!-- Application Structure Plan: The application is structured into three main, switchable sections corresponding to the lecture's parts: Foundational Concepts, Architectural Design, and Component-Level Design. This thematic, non-linear structure replaces the simple scroll of the source document. Within each section, a grid of interactive cards is used, each dedicated to a specific concept. These cards feature internal tabs to toggle between definitions, real-life examples, and code snippets. This design was chosen to break down a long lecture into digestible, user-driven segments, encouraging active exploration over passive reading and improving knowledge retention. -->
+    <!-- Visualization & Content Choices: Concepts like Layered Architecture and Component Diagrams, which were originally UML, are recreated using structured HTML and Tailwind CSS to avoid the forbidden SVG and Mermaid JS formats. Goal: Organize -> Method: Styled HTML divs. For each core topic: Goal: Inform/Compare -> Method: An interactive card with tabs. Interaction: The user clicks a tab ('Definition', 'Example', 'Code') to reveal specific content. Justification: This compartmentalizes information, preventing cognitive overload and allowing users to focus on one aspect at a time. All code examples are presented as static, formatted text for clarity. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        .tab-button.active {
+            background-color: #0284c7;
+            color: white;
+        }
+        .main-nav.active {
+            border-bottom: 2px solid #0284c7;
+            color: #0284c7;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .tab-panel {
+            display: none;
+        }
+        .tab-panel.active {
+            display: block;
+        }
+        .code-block {
+            background-color: #1f2937;
+            color: #d1d5db;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: monospace;
+        }
+        .output-sandbox {
+            background-color: #111827;
+            color: #9ca3af;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            min-height: 8rem;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-2">Software Design: From Concepts to Components</h1>
+            <p class="text-lg text-slate-600">An Interactive Lecture on Principles, Architecture, and Implementation</p>
+        </header>
+
+        <nav class="flex justify-center border-b border-slate-200 mb-8">
+            <button data-section="part1" class="main-nav active text-lg font-semibold py-4 px-6 text-slate-600 hover:text-sky-600 transition-colors duration-300">1. Foundational Concepts</button>
+            <button data-section="part2" class="main-nav text-lg font-semibold py-4 px-6 text-slate-600 hover:text-sky-600 transition-colors duration-300">2. Architectural Design</button>
+            <button data-section="part3" class="main-nav text-lg font-semibold py-4 px-6 text-slate-600 hover:text-sky-600 transition-colors duration-300">3. Component-Level Design</button>
+        </nav>
+
+        <main>
+            <!-- Part 1: Foundational Concepts -->
+            <section id="part1" class="content-section active">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    
+                    <!-- Card: Introduction -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-sky-700 mb-3">Introduction to Software Design</h3>
+                        <p class="text-slate-600">Software design bridges the gap between requirements and implementation. It's where critical decisions are made that impact the software's quality, maintainability, and scalability. A poor design leads to **Technical Debt**: the implied cost of rework caused by choosing an easy solution now instead of a better, more sustainable approach.</p>
+                    </div>
+
+                    <!-- Card: Abstraction -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-sky-700 mb-3">Abstraction</h3>
+                        <div class="concept-card" data-concept="abstraction">
+                            <div class="flex border-b mb-4">
+                                <button class="tab-button active py-2 px-4 rounded-t" data-tab="def">Definition</button>
+                                <button class="tab-button py-2 px-4 rounded-t" data-tab="ex">Example</button>
+                            </div>
+                            <div class="tab-panel active" data-tab="def"><p>The process of hiding complexity and exposing only essential features. It allows us to focus on "what" a thing does, rather than "how" it does it.</p></div>
+                            <div class="tab-panel" data-tab="ex"><p class="font-semibold">Car Ignition System:</p><p class="text-slate-600">You start a car by turning a key. You don't need to know about the starter motor, battery, or fuel injection. The complex process is abstracted into a simple action.</p></div>
+                        </div>
+                    </div>
+
+                    <!-- Card: Architecture -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-sky-700 mb-3">Architecture</h3>
+                        <div class="concept-card" data-concept="architecture">
+                            <div class="flex border-b mb-4">
+                                <button class="tab-button active py-2 px-4 rounded-t" data-tab="def">Definition</button>
+                                <button class="tab-button py-2 px-4 rounded-t" data-tab="ex">Example</button>
+                            </div>
+                            <div class="tab-panel active" data-tab="def"><p>The fundamental structures of a software system. It defines high-level components, their relationships, and how they interact to provide conceptual integrity.</p></div>
+                            <div class="tab-panel" data-tab="ex"><p class="font-semibold">House Blueprint:</p><p class="text-slate-600">A blueprint defines a house's structure—room layout, load-bearing walls—without specifying paint colors. It ensures the house is functional and sound, just as software architecture ensures a system is robust and scalable.</p></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card: Patterns -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-sky-700 mb-3">Patterns</h3>
+                        <div class="concept-card" data-concept="patterns">
+                            <div class="flex border-b mb-4">
+                                <button class="tab-button active py-2 px-4 rounded-t" data-tab="def">Definition</button>
+                                <button class="tab-button py-2 px-4 rounded-t" data-tab="ex">Example</button>
+                            </div>
+                            <div class="tab-panel active" data-tab="def"><p>A general, reusable solution to a commonly occurring problem within a given context. It's a template for how to solve a problem, not a finished piece of code.</p></div>
+                            <div class="tab-panel" data-tab="ex"><p class="font-semibold">A Recipe:</p><p class="text-slate-600">A recipe for a cake is a pattern. It provides ingredients (components) and steps (interactions) to solve the problem of "how to bake a cake." You can reuse the pattern with different ingredients to make different cakes.</p></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card: Separation of Concerns -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-sky-700 mb-3">Separation of Concerns</h3>
+                        <div class="concept-card" data-concept="soc">
+                            <div class="flex border-b mb-4">
+                                <button class="tab-button active py-2 px-4 rounded-t" data-tab="def">Definition</button>
+                                <button class="tab-button py-2 px-4 rounded-t" data-tab="ex">Example</button>
+                            </div>
+                            <div class="tab-panel active" data-tab="def"><p>A design principle for separating a program into distinct sections, where each section addresses a separate concern (e.g., UI, business logic, data access).</p></div>
+                            <div class="tab-panel" data-tab="ex"><p class="font-semibold">Organizing a Kitchen:</p><p class="text-slate-600">You have separate cabinets for plates (presentation), pots (cooking), and a fridge for food (storage). This separation makes the kitchen easier to manage. Software similarly separates UI logic from business rules.</p></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card: Modularity -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-sky-700 mb-3">Modularity</h3>
+                        <div class="concept-card" data-concept="modularity">
+                            <div class="flex border-b mb-4">
+                                <button class="tab-button active py-2 px-4 rounded-t" data-tab="def">Definition</button>
+                                <button class="tab-button py-2 px-4 rounded-t" data-tab="ex">Example</button>
+                            </div>
+                            <div class="tab-panel active" data-tab="def"><p>The degree to which a system is composed of discrete components (modules) such that a change to one has minimal impact on others. It's an outcome of Separation of Concerns.</p></div>
+                            <div class="tab-panel" data-tab="ex"><p class="font-semibold">LEGO Bricks:</p><p class="text-slate-600">Each LEGO brick is a self-contained module with a standard interface. You can build complex structures and change one part of your creation without dismantling the whole thing.</p></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card: Information Hiding -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-sky-700 mb-3">Information Hiding</h3>
+                        <div class="concept-card" data-concept="infohiding">
+                            <div class="flex border-b mb-4">
+                                <button class="tab-button active py-2 px-4 rounded-t" data-tab="def">Definition</button>
+                                <button class="tab-button py-2 px-4 rounded-t" data-tab="ex">Example</button>
+                            </div>
+                            <div class="tab-panel active" data-tab="def"><p>Hiding design decisions in a program that are most likely to change, thus protecting other parts of the program. Implementation details of a module are hidden from other modules.</p></div>
+                            <div class="tab-panel" data-tab="ex"><p class="font-semibold">Using an ATM:</p><p class="text-slate-600">You use a simple interface (screen, keypad) without needing to know the complex internal mechanics or how it connects to the bank's network. This simplifies use and enhances security.</p></div>
+                        </div>
+                    </div>
+
+                    <!-- Card: Functional Independence -->
+                    <div class="bg-white rounded-lg shadow-lg p-6 md:col-span-2">
+                        <h3 class="text-2xl font-bold text-sky-700 mb-3">Functional Independence (Cohesion & Coupling)</h3>
+                        <div class="concept-card" data-concept="independence">
+                            <div class="flex border-b mb-4">
+                                <button class="tab-button active py-2 px-4 rounded-t" data-tab="def">Definition</button>
+                                <button class="tab-button py-2 px-4 rounded-t" data-tab="ex">Example</button>
+                                <button class="tab-button py-2 px-4 rounded-t" data-tab="code">Code</button>
+                            </div>
+                            <div class="tab-panel active" data-tab="def">
+                                <p>A measure of good design, achieved by creating modules with high cohesion and low coupling.</p>
+                                <ul class="list-disc list-inside mt-2 text-slate-600">
+                                    <li><strong>High Cohesion:</strong> Elements inside a module belong together and are focused on a single task.</li>
+                                    <li><strong>Low Coupling:</strong> Modules have minimal interdependence; a change in one does not require changes in others.</li>
+                                </ul>
+                            </div>
+                            <div class="tab-panel" data-tab="ex">
+                                <p class="font-semibold">Home Entertainment System:</p>
+                                <p class="text-slate-600">A good system has separate, low-coupled components (player, receiver, speakers). If the player breaks, you replace only the player. A bad, high-coupled system would have everything in one box; if one part breaks, the whole system is useless.</p>
+                            </div>
+                            <div class="tab-panel" data-tab="code">
+                                <pre class="code-block"><code>
+// High Cohesion: Each function has one job.
+function validate_email(email, _print) {
+    _print("Email validated.");
+    return true; // Simplified for demo
+}
+
+function save_user_to_db(user, _print) {
+    _print("User saved.");
+    return true;
+}
+
+function send_welcome_email(email, _print) {
+    _print("Email sent.");
+}
+
+// Low Coupling: This function coordinates calls.
+function register_new_user(user, _print) {
+    if (validate_email(user.email, _print)) {
+        save_user_to_db(user, _print);
+        send_welcome_email(user.email, _print);
+    }
+}
+
+const user = {name: "Alice", email: "alice@example.com"};
+register_new_user(user, _print);
+                                </code></pre>
+                                <div class="mt-4 flex space-x-2">
+                                    <button class="run-code-btn bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded transition-colors">Run</button>
+                                    <button class="clear-output-btn bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 rounded transition-colors">Clear</button>
+                                </div>
+                                <div class="output-sandbox mt-4"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+            
+            <!-- Part 2: Architectural Design -->
+            <section id="part2" class="content-section">
+                <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">Architectural design represents the "big picture" structure of the system. An architectural style is a proven, named collection of design decisions, like a template for a certain category of system.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                    <!-- Card: Data-Centered Architecture -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-sky-700 mb-3">Data-Centered Architecture</h3>
+                        <div class="concept-card" data-concept="data-centered">
+                            <div class="flex border-b mb-4">
+                                <button class="tab-button active py-2 px-4 rounded-t" data-tab="def">Definition</button>
+                                <button class="tab-button py-2 px-4 rounded-t" data-tab="ex">Example</button>
+                            </div>
+                            <div class="tab-panel active" data-tab="def"><p>A central data store (e.g., a database) is at the core of the architecture. Other components (clients) access and manipulate this central repository.</p></div>
+                            <div class="tab-panel" data-tab="ex"><p class="font-semibold">University Information System:</p><p class="text-slate-600">A central student database is accessed by independent applications for registration, billing, library services, and online learning. All systems revolve around the shared data.</p></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card: Data-Flow Architecture -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-sky-700 mb-3">Data-Flow (Pipe & Filter)</h3>
+                        <div class="concept-card" data-concept="data-flow">
+                            <div class="flex border-b mb-4">
+                                <button class="tab-button active py-2 px-4 rounded-t" data-tab="def">Definition</button>
+                                <button class="tab-button py-2 px-4 rounded-t" data-tab="ex">Example</button>
+                            </div>
+                            <div class="tab-panel active" data-tab="def"><p>Input data is transformed through a series of components called "filters," with data flowing between them via "pipes." Each filter performs a specific, independent step in a sequence.</p></div>
+                            <div class="tab-panel" data-tab="ex"><p class="font-semibold">Online Photo Printing:</p><p class="text-slate-600">An uploaded photo passes through a sequence of filters: 1. Validate file -> 2. Enhance color -> 3. Resize image -> 4. Send to printer. Each step is a filter in the pipeline.</p></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card: Layered Architecture -->
+                    <div class="bg-white rounded-lg shadow-lg p-6 md:col-span-2">
+                        <h3 class="text-2xl font-bold text-sky-700 mb-3">Layered Architecture</h3>
+                        <div class="concept-card" data-concept="layered">
+                            <div class="flex border-b mb-4">
+                                <button class="tab-button active py-2 px-4 rounded-t" data-tab="def">Definition</button>
+                                <button class="tab-button py-2 px-4 rounded-t" data-tab="ex">Example</button>
+                                <button class="tab-button py-2 px-4 rounded-t" data-tab="diag">Diagram</button>
+                            </div>
+                            <div class="tab-panel active" data-tab="def"><p>The system is organized into layers, each providing services to the layer above it. This separates concerns, such as UI from business logic. A common example is the three-tier architecture.</p></div>
+                            <div class="tab-panel" data-tab="ex"><p class="font-semibold">Online Pizza Order:</p><p class="text-slate-600">1. <strong>Presentation Layer:</strong> The website you use to build your pizza. 2. <strong>Business Logic Layer:</strong> Calculates the price, validates coupons, and finds the nearest store. 3. <strong>Data Access Layer:</strong> Saves your order to the database.</p></div>
+                            <div class="tab-panel" data-tab="diag">
+                                <div class="p-4 space-y-2">
+                                    <div class="bg-sky-100 border border-sky-300 text-sky-800 rounded-lg p-4 text-center">Presentation Layer (UI)</div>
+                                    <div class="text-center text-2xl text-slate-400">↓</div>
+                                    <div class="bg-amber-100 border border-amber-300 text-amber-800 rounded-lg p-4 text-center">Business Logic Layer</div>
+                                    <div class="text-center text-2xl text-slate-400">↓</div>
+                                    <div class="bg-emerald-100 border border-emerald-300 text-emerald-800 rounded-lg p-4 text-center">Data Access Layer (Database)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card: Model-View-Controller (MVC) -->
+                    <div class="bg-white rounded-lg shadow-lg p-6 md:col-span-2">
+                        <h3 class="text-2xl font-bold text-sky-700 mb-3">Model-View-Controller (MVC)</h3>
+                        <div class="concept-card" data-concept="mvc">
+                            <div class="flex border-b mb-4">
+                                <button class="tab-button active py-2 px-4 rounded-t" data-tab="def">Definition</button>
+                                <button class="tab-button py-2 px-4 rounded-t" data-tab="ex">Example</button>
+                                <button class="tab-button py-2 px-4 rounded-t" data-tab="code">Code</button>
+                            </div>
+                            <div class="tab-panel active" data-tab="def">
+                                <p>A pattern that divides an application into three interconnected parts to separate internal data representation from the ways information is presented to or accepted from the user.</p>
+                                <ul class="list-disc list-inside mt-2 text-slate-600">
+                                    <li><strong>Model:</strong> Manages the application's data and business logic.</li>
+                                    <li><strong>View:</strong> Renders the UI and presents data to the user.</li>
+                                    <li><strong>Controller:</strong> Handles user input, interacts with the Model, and updates the View.</li>
+                                </ul>
+                            </div>
+                            <div class="tab-panel" data-tab="ex"><p class="font-semibold">Weather App:</p><p class="text-slate-600">The <strong>Model</strong> holds the weather data. The <strong>View</strong> is the screen that displays the temperature. The <strong>Controller</strong> takes your search for a city, tells the Model to fetch new data, and then tells the View to update.</p></div>
+                            <div class="tab-panel" data-tab="code">
+                                <pre class="code-block"><code>
+class UserModel { // The MODEL
+    constructor() {
+        this.users = ['Alice', 'Bob'];
+    }
+    getUsers() {
+        return this.users;
+    }
+}
+
+class UserView { // The VIEW
+    constructor(_print) {
+        this._print = _print;
+    }
+    showUsers(users) {
+        this._print(`Users: ${users.join(', ')}`);
+    }
+}
+
+class UserController { // The CONTROLLER
+    constructor(model, view) {
+        this.model = model;
+        this.view = view;
+    }
+    updateView() {
+        const users = this.model.getUsers();
+        this.view.showUsers(users);
+    }
+}
+
+// --- Execution ---
+const model = new UserModel();
+const view = new UserView(_print);
+const controller = new UserController(model, view);
+controller.updateView();
+                                </code></pre>
+                                <div class="mt-4 flex space-x-2">
+                                    <button class="run-code-btn bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded transition-colors">Run</button>
+                                    <button class="clear-output-btn bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 rounded transition-colors">Clear</button>
+                                </div>
+                                <div class="output-sandbox mt-4"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+            
+            <!-- Part 3: Component-Level Design -->
+            <section id="part3" class="content-section">
+                <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">Component-level design focuses on the internal details of each software component. This is where architectural elements are translated into a detailed "blueprint" for coding.</p>
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                     
+                    <!-- Card: Component Definition -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-sky-700 mb-3">What is a Component?</h3>
+                        <p class="text-slate-600">A modular, deployable, and replaceable part of a system that encapsulates implementation and exposes a set of interfaces. In an OO context, it's a set of collaborating classes. In a traditional context, it's a function or module.</p>
+                    </div>
+
+                    <!-- Card: Open-Closed Principle -->
+                    <div class="bg-white rounded-lg shadow-lg p-6 md:col-span-2 lg:col-span-3">
+                        <h3 class="text-2xl font-bold text-sky-700 mb-3">Open-Closed Principle (OCP)</h3>
+                        <div class="concept-card" data-concept="ocp">
+                            <div class="flex border-b mb-4">
+                                <button class="tab-button active py-2 px-4 rounded-t" data-tab="def">Definition</button>
+                                <button class="tab-button py-2 px-4 rounded-t" data-tab="ex">Example</button>
+                                <button class="tab-button py-2 px-4 rounded-t" data-tab="code">Code</button>
+                            </div>
+                            <div class="tab-panel active" data-tab="def"><p><strong>"A component should be open for extension, but closed for modification."</strong> This means you should be able to add new functionality without changing existing, tested code. This is usually achieved via abstractions like interfaces.</p></div>
+                            <div class="tab-panel" data-tab="ex"><p class="font-semibold">Payment Processing System:</p><p class="text-slate-600">Instead of one function with many `if` statements for different payment types, you create a `PaymentProcessor` interface. Each payment type (Credit Card, PayPal) is a separate class that implements the interface. To add a new payment type, you create a new class; the existing code doesn't change.</p></div>
+                            <div class="tab-panel" data-tab="code">
+                                <pre class="code-block"><code>
+// The "closed for modification" part is this abstract-like class.
+class Shape {
+    area() {
+        throw new Error("This method must be overridden by a subclass.");
+    }
+}
+
+// The system is "open for extension" by adding new classes.
+class Rectangle extends Shape {
+    constructor(width, height) {
+        super();
+        this.width = width;
+        this.height = height;
+    }
+    area() {
+        return this.width * this.height;
+    }
+}
+
+class Circle extends Shape {
+    constructor(radius) {
+        super();
+        this.radius = radius;
+    }
+    area() {
+        return 3.14 * this.radius ** 2;
+    }
+}
+
+// This calculator never needs to change.
+class AreaCalculator {
+    calculateArea(shapes, _print) {
+        const totalArea = shapes.reduce((sum, shape) => sum + shape.area(), 0);
+        _print(`Total Area: ${totalArea}`);
+    }
+}
+
+const shapes = [new Rectangle(10, 5), new Circle(3)];
+const calculator = new AreaCalculator();
+calculator.calculateArea(shapes, _print);
+
+                                </code></pre>
+                                <div class="mt-4 flex space-x-2">
+                                    <button class="run-code-btn bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded transition-colors">Run</button>
+                                    <button class="clear-output-btn bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 rounded transition-colors">Clear</button>
+                                </div>
+                                <div class="output-sandbox mt-4"></div>
+                            </div>
+                        </div>
+                    </div>
+                     
+                    <!-- Card: Liskov Substitution Principle -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-sky-700 mb-3">Liskov Substitution (LSP)</h3>
+                        <div class="concept-card" data-concept="lsp">
+                            <div class="flex border-b mb-4">
+                                <button class="tab-button active py-2 px-4 rounded-t" data-tab="def">Definition</button>
+                                <button class="tab-button py-2 px-4 rounded-t" data-tab="ex">Example</button>
+                            </div>
+                            <div class="tab-panel active" data-tab="def"><p><strong>"Subclasses should be substitutable for their base classes."</strong> Code that uses a base class must be able to use any of its subclasses without breaking. The subclass must honor the base class's contract.</p></div>
+                            <div class="tab-panel" data-tab="ex"><p class="font-semibold">Birds That Can't Fly:</p><p class="text-slate-600">If you have a `Bird` class with a `fly()` method, you can't have a `Penguin` subclass inherit from it. A function expecting any `Bird` to fly will break when given a `Penguin`. This violates LSP. The inheritance hierarchy is wrong.</p></div>
+                        </div>
+                    </div>
+
+                    <!-- Card: Interface Segregation Principle -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-sky-700 mb-3">Interface Segregation (ISP)</h3>
+                        <div class="concept-card" data-concept="isp">
+                            <div class="flex border-b mb-4">
+                                <button class="tab-button active py-2 px-4 rounded-t" data-tab="def">Definition</button>
+                                <button class="tab-button py-2 px-4 rounded-t" data-tab="ex">Example</button>
+                            </div>
+                            <div class="tab-panel active" data-tab="def"><p><strong>"Many client-specific interfaces are better than one general-purpose interface."</strong> Clients should not be forced to depend on methods they do not use. It's better to have smaller, more focused interfaces.</p></div>
+                            <div class="tab-panel" data-tab="ex"><p class="font-semibold">Smart Printer:</p><p class="text-slate-600">Instead of one big `IMachine` interface with `print()`, `scan()`, and `fax()`, create separate `IPrinter`, `IScanner`, and `IFax` interfaces. A simple printer class only needs to implement `IPrinter`, not methods it can't perform.</p></div>
+                        </div>
+                    </div>
+
+                    <!-- Card: Component-Based Development -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-sky-700 mb-3">Component-Based Dev</h3>
+                        <div class="concept-card" data-concept="cbd">
+                            <div class="flex border-b mb-4">
+                                <button class="tab-button active py-2 px-4 rounded-t" data-tab="def">Definition</button>
+                                <button class="tab-button py-2 px-4 rounded-t" data-tab="ex">Example</button>
+                            </div>
+                            <div class="tab-panel active" data-tab="def"><p>An approach that emphasizes building systems by assembling reusable software components, rather than writing everything from scratch. This can speed up development and improve quality.</p></div>
+                            <div class="tab-panel" data-tab="ex"><p class="font-semibold">Building with a CMS:</p><p class="text-slate-600">Building a WordPress site involves assembling components: a core CMS, a theme for design, and plugins for e-commerce, contact forms, and SEO. You build a complex system by integrating pre-built parts.</p></div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </main>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const mainNavButtons = document.querySelectorAll('.main-nav');
+        const contentSections = document.querySelectorAll('.content-section');
+        const conceptCards = document.querySelectorAll('.concept-card');
+
+        // Main navigation logic
+        mainNavButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetSectionId = button.dataset.section;
+
+                mainNavButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                contentSections.forEach(section => {
+                    if (section.id === targetSectionId) {
+                        section.classList.add('active');
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+            });
+        });
+
+        // Tab logic within each concept card
+        conceptCards.forEach(card => {
+            const tabButtons = card.querySelectorAll('.tab-button');
+            const tabPanels = card.querySelectorAll('.tab-panel');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetTabId = button.dataset.tab;
+
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    tabPanels.forEach(panel => {
+                        if (panel.dataset.tab === targetTabId) {
+                            panel.classList.add('active');
+                        } else {
+                            panel.classList.remove('active');
+                        }
+                    });
+                });
+            });
+        });
+
+        // Code execution logic
+        const runButtons = document.querySelectorAll('.run-code-btn');
+        const clearButtons = document.querySelectorAll('.clear-output-btn');
+
+        runButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const codePanel = button.closest('.tab-panel');
+                const codeBlock = codePanel.querySelector('pre.code-block');
+                const outputSandbox = codePanel.querySelector('.output-sandbox');
+                const code = codeBlock.textContent;
+
+                outputSandbox.innerHTML = ''; // Clear previous output
+
+                const _print = (message) => {
+                    const line = document.createElement('div');
+                    line.textContent = `> ${message}`;
+                    outputSandbox.appendChild(line);
+                };
+                
+                try {
+                    const executableCode = new Function('_print', code);
+                    executableCode(_print);
+                } catch (e) {
+                    _print(`Error: ${e.message}`);
+                }
+            });
+        });
+
+        clearButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const codePanel = button.closest('.tab-panel');
+                const outputSandbox = codePanel.querySelector('.output-sandbox');
+                outputSandbox.innerHTML = '';
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
+

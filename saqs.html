@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Midterm Study Guide</title>
+    <!-- Load Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the app */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Tailwind gray-100 */
+        }
+
+        /* --- Chapter Navigation --- */
+        #chapter-nav {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 1rem;
+            background-color: white;
+            border-bottom: 1px solid #e5e7eb; /* Tailwind gray-200 */
+        }
+        .nav-button {
+            padding: 0.5rem 1rem;
+            margin: 0.25rem;
+            border-radius: 0.5rem; /* rounded-lg */
+            background-color: #e5e7eb; /* Tailwind gray-200 */
+            color: #374151; /* Tailwind gray-700 */
+            font-weight: 500; /* medium */
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+        .nav-button:hover {
+            background-color: #d1d5db; /* Tailwind gray-300 */
+        }
+        .nav-button.active {
+            background-color: #3b82f6; /* Tailwind blue-500 */
+            color: white;
+            border-color: #1d4ed8; /* Tailwind blue-700 */
+        }
+
+        /* --- Flip Card Styles --- */
+        .card-container {
+            /* Set a perspective for the 3D effect */
+            perspective: 1000px;
+            min-height: 350px;
+        }
+
+        .question-card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            /* Enable 3D transformations */
+            transform-style: preserve-3d;
+            transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        /* Flip the card on hover */
+        .card-container:hover .question-card {
+            transform: rotateY(180deg);
+        }
+        
+        /* Flip the card on tap for touch devices */
+        .card-container:active .question-card {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            /* Hide the back face when it's not visible */
+            backface-visibility: hidden;
+            border-radius: 0.75rem; /* rounded-xl */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .card-front {
+            background-color: white;
+            padding: 1.5rem; /* p-6 */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-back {
+            background-color: #1f2937; /* Tailwind gray-800 */
+            color: white;
+            padding: 1.5rem; /* p-6 */
+            /* Position the back face flipped */
+            transform: rotateY(180deg);
+            overflow-y: auto;
+        }
+
+        /* --- Card Content --- */
+        .question-topic {
+            font-size: 0.75rem; /* text-xs */
+            font-weight: 500; /* medium */
+            color: #6b7280; /* Tailwind gray-500 */
+            text-align: right;
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            max-width: 60%;
+        }
+
+        .question-number {
+            font-size: 1.875rem; /* text-3xl */
+            font-weight: 700; /* bold */
+            color: #3b82f6; /* Tailwind blue-500 */
+        }
+
+        .question-text {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 500; /* medium */
+            color: #111827; /* Tailwind gray-900 */
+            margin-top: 1rem;
+            flex-grow: 1;
+        }
+
+        .hover-prompt {
+            font-size: 0.875rem; /* text-sm */
+            color: #6b7280; /* Tailwind gray-500 */
+            text-align: center;
+            margin-top: 1rem;
+            font-style: italic;
+        }
+
+        .card-back h3 {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* semibold */
+            color: #3b82f6; /* Tailwind blue-500 */
+            margin-top: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .card-back p {
+            font-size: 0.875rem; /* text-sm */
+            line-height: 1.5; /* leading-relaxed */
+            color: #d1d5db; /* Tailwind gray-300 */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <h1 class="text-3xl font-bold leading-tight text-gray-900">
+                Midterm Interactive Study Guide
+            </h1>
+            <p class="mt-2 text-gray-600">Hover over (or tap on) a card to see the answer. Use the buttons below to filter by chapter.</p>
+        </div>
+    </header>
+
+    <!-- Chapter Navigation Bar -->
+    <nav id="chapter-nav" class="sticky top-0 z-10"></nav>
+
+    <!-- Main Content Grid for Cards -->
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div id="card-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+            <!-- Question cards will be injected here by JavaScript -->
+        </div>
+    </main>
+
+    <!-- 
+      Hidden script block containing the raw data from the DOCX file.
+      This keeps the HTML clean and lets JS parse it on load.
+    -->
+    <script type="text/plain" id="rawData">
+ESS
+151. Explain the difference between hardware "wear-out" and software "deterioration" as described in the lecture. Why does software "deteriorate"?
+Tip: Think about the "bathtub curve" for hardware and what happens to software over time when it is changed or updated.
+Possible Answer: The key difference is that hardware "wears out" while software "deteriorates."
+Hardware wear-out, as described by the "bathtub curve," is a physical process. After an initial "infant mortality" phase where manufacturing defects are found, hardware enters a long "useful life" with a low failure rate. Eventually, it enters the "wear-out" phase, where physical components degrade from use and environmental factors, and the failure rate increases until the product dies.
+Software, being a logical element, does not "wear out." It isn't subject to physical decay. In theory, its failure rate should decrease as bugs are fixed and then remain stable. However, software "deteriorates" due to the side effects of change. Throughout its life, software is constantly modified to fix bugs, add features, or adapt to new environments. Each change, no matter how carefully planned, carries the risk of introducing new, unknown defects. These new defects cause the failure rate to spike. Over time, as many changes are layered on top of each other, the software's structure can degrade, making future changes even harder and more error-prone.
+Explanation: This answer is correct because it identifies the core distinction from the "foundation and intro.docx" lecture. It correctly defines hardware wear-out as a physical process (the bathtub curve) and software deterioration as a logical process driven by the cumulative side effects of change, which introduce new defects.
+Topic 1: Foundations & Overview: Foundations of Software Engineering: Chapter 1: 1.1
+ESS
+152. A project manager must choose a process model for two different projects. Project A is a safety-critical medical device with stable, well-understood requirements. Project B is a new, innovative social media app with highly uncertain requirements. Compare the Waterfall Model and the Prototyping Model, and assign the most appropriate model to each project.
+Tip: Consider which model is linear and rigid, and which is designed for iteration and requirement discovery.
+Possible Answer: The Waterfall Model and the Prototyping Model serve opposite needs.
+The Waterfall Model is a linear, sequential process. It flows from Communication (requirements) to Planning, Modeling, Construction, and Deployment. Each phase must be fully completed and documented before the next begins. Its strength is in its rigid discipline and heavy emphasis on documentation. Its weakness is its inflexibility; a change in requirements late in the project is catastrophic.
+The Prototyping Model is an iterative, evolutionary model. It is used when requirements are uncertain. The process involves building a "mock-up" or prototype of the system, getting customer feedback ("test-driving" it), and then refining the prototype in a continuous loop. Its goal is not to build a final product, but to help the customer and developer discover and define the requirements.
+For Project A (medical device), the Waterfall Model is the correct choice. The requirements are stable, fixed, and non-negotiable, and the heavy documentation required by this model is essential for regulatory approval and safety verification.
+For Project B (social media app), the Prototyping Model is the best choice. The requirements are highly uncertain, and the only way to determine what features users will want is to build a prototype, let users interact with it, and iteratively refine the concept.
+Explanation: This answer is correct. It accurately defines both the Waterfall and Prototyping models based on the "foundation and intro.docx" lecture. It correctly assigns Waterfall to the project with stable, high-stakes requirements (Project A) and Prototyping to the project with uncertain requirements (Project B), just as the lecture examples illustrate.
+Topic 2: Software Processes & Standards: Process Models (including Waterfall Model): Chapter 2: 2.5.1; Chapter 2
+ESS
+153. What are the five core "framework activities" of a generic software process, and what is the role of an "umbrella activity"?
+Tip: List the five main sequential steps of any project, from talking to the customer to delivering the product. Then, think about what activities must happen during all of those steps.
+Possible Answer: The five core framework activities, as defined in the lecture, are the main phases of a software project:
+Communication: Collaborating with the customer to understand objectives and gather requirements.
+Planning: Creating the "map" for the project, which includes estimating resources, identifying risks, and establishing a schedule.
+Modeling: Creating models (like sketches or diagrams) to better understand the requirements (analysis) and to formulate a solution (design).
+Construction: The "building" phase, which combines writing code with the testing needed to find and fix errors.
+Deployment: Delivering the completed software to the customer, who then evaluates it and provides feedback.
+An "umbrella activity" is a task that is not a sequential phase but is applied throughout the entire software process, "hovering" over the core framework activities. Examples include Risk Management (identifying risks at all stages), Software Quality Assurance (ensuring quality at all stages), and Software Configuration Management (managing change at all stages).
+Explanation: This answer is correct as it accurately lists and describes the five core framework activities (Communication, Planning, Modeling, Construction, Deployment) presented in the "foundation and intro.docx" lecture. It also correctly defines an umbrella activity as a cross-cutting concern (like risk management) that is applied continuously, rather than as a discrete phase.
+Topic 2: Software Processes & Standards: Software Process (IEEE Standard 1074): Chapter 1: 1.3; Chapter 2: 2.1; 2.2
+ESS
+154. Explain the key difference between Scrum and Kanban. How does their approach to "work in progress" and "time" differ?
+Tip: Think about how Scrum uses fixed-length iterations (Sprints) versus Kanban's focus on a continuous flow of tasks.
+Possible Answer: The primary difference between Scrum and Kanban is their approach to time and workflow.
+Scrum is a time-boxed, iterative framework. Work is done in fixed-length iterations called "Sprints" (e.g., 1-4 weeks). At the start of a Sprint, the team commits to a specific set of tasks (the Sprint Backlog), and that work is "locked in." The goal is to deliver a potentially shippable increment of the product at the end of each Sprint.
+Kanban, in contrast, is a continuous flow model. It is not based on fixed iterations. Instead, it uses a visual "Kanban Board" to represent the workflow (e.g., To Do, In Progress, Done). The key principle of Kanban is to "limit Work In Progress (WIP)." Each "In Progress" column has a strict limit on the number of tasks it can hold. A team member can only "pull" a new task into the "In Progress" column when a slot is free, which encourages the team to focus on finishing tasks rather than starting new ones.
+In summary, Scrum manages work using fixed time-boxes (Sprints), while Kanban manages work by limiting the amount of work in progress at any given time.
+Explanation: This answer is correct and drawn from "foundation and intro.docx." It correctly identifies the core difference: Scrum is time-boxed with Sprints, while Kanban is a continuous flow model. It also correctly identifies that Kanban's primary mechanism for managing work is limiting WIP, which is a key distinction from Scrum's Sprint-based planning.
+Topic 2: Software Processes & Standards: Agile Development: Chapter 3: 3.4; 3.5
+ESS
+155. What is the "KISS (Keep It Simple, Stupid!)" principle, and why is it important for software maintainability?
+Tip: This is one of David Hooker's principles. How does simplicity relate to the future developer who has to fix your code?
+Possible Answer: The "KISS (Keep It Simple, Stupid!)" principle, as described in the lecture, is one of David Hooker's seven guiding principles for software engineering. It states that "All design should be as simple as possible, but no simpler."
+This principle is crucial for software maintainability. The majority of a software's cost is not in its initial creation, but in its maintenance over its lifecycle. This maintenance is often performed by a developer who did not write the original code (or by the original developer months later, after they have forgotten the details).
+A simple, clear, and elegant design is easier for a future developer to understand. This means they can find and fix bugs more quickly and add new features with less risk of breaking existing functionality. A complex, "clever," or convoluted design is difficult to understand, hard to debug, and fragile to change. Simplicity enhances maintainability and reduces the likelihood of errors being introduced during modification.
+Explanation: This answer is correct. It accurately defines the KISS principle as stated in "foundation and intro.docx." It also correctly links the principle to maintainability, explaining that simple code is easier for other developers to understand, debug, and modify, which is the core argument for the principle in the lecture.
+Topic 1: Foundations & Overview: Foundations of Software Engineering: Chapter 1: 1.4
+ESS
+156. The lecture separates software engineering principles into "Process" principles and "Practice" principles. Explain the difference between these two types and provide one example of each.
+Tip: Think about which set of principles guides the overall project flow and which guides the technical, hands-on work.
+Possible Answer: The lecture ("Practice and Requirements.docx") distinguishes between principles that guide the overall project and those that guide the technical work.
+Process Principles guide the overall flow or "roadmap" of a project. They are about management, planning, and the human elements of a project. They answer the question, "How do we run a successful project?"
+Example: "Build an Effective Team." This principle emphasizes that software development is a human activity and that a team built on trust, respect, and good communication is essential for success. Other examples include "Be Agile," "Manage Change," and "Assess Risk."
+Practice Principles guide the technical, hands-on work of analysis, design, and coding. They are the "how-to" rules for actually building the software. They answer the question, "How do we build the software well?"
+Example: "Divide and Conquer (Separation of Concerns)." This principle states that a complex problem is easier to solve if you break it down into smaller, manageable, independent pieces. Other examples include "Understand the Use of Abstraction" and "Look for Patterns."
+Explanation: This answer is correct. It accurately describes the distinction made in "Practice and Requirements.docx" between Process principles (guiding the project flow and human factors) and Practice principles (guiding the technical implementation). It provides a correct example for each category, directly from the lecture material.
+Topic 1: Foundations & Overview: Foundations of Software Engineering: Chapter 1: 1.4
+ESS
+157. What is the "Divide and Conquer" principle, and how does it relate to "Effective Modularity"?
+Tip: Think about how you achieve the goal of "Divide and Conquer." What is the mechanism that makes it possible in the code?
+Possible Answer: "Divide and Conquer," also known as "Separation of Concerns," is a core practice principle stating that a complex problem is always easier to solve if it is broken down into smaller, manageable, independent pieces. Each piece should address a specific "concern" and not worry about the others.
+"Effective Modularity" is the mechanism for achieving "Divide and Conquer." A module is a discrete component of a system (like a function or a class) that does one thing and does it well. By building software that exhibits effective modularity, we are physically separating the concerns into distinct modules.
+For example, the "Divide and Conquer" principle would suggest that calculating a shopping cart's total price should be broken down. The mechanism to do this is modularity: we create a calculate_subtotal() module, a calculate_sales_tax() module, and an apply_discount() module. Because these concerns are in separate modules, we can change the tax calculation logic without any risk of breaking the subtotal or discount logic.
+Explanation: This answer is correct. It accurately defines "Divide and Conquer" as the principle of breaking down problems. Crucially, it identifies "Effective Modularity" as the mechanism for achieving this, which is an explicit point made in the "Practice and Requirements.docx" lecture. The shopping cart example is also drawn directly from the lecture.
+Topic 3: Software Development Phases: Software Design: Chapter 9
+ESS
+158. The Requirements Engineering framework consists of seven tasks. List and briefly describe four of these tasks.
+Tip: Think about the lifecycle of a requirement, from its first vague idea to its final, validated state and how it's managed after.
+Possible Answer: The Requirements Engineering framework includes seven tasks. Four of them are:
+Inception: This is the starting point. It involves establishing a basic understanding of the problem, identifying the key stakeholders, and defining the basic scope and nature of the solution. It answers the question, "Why are we doing this?"
+Elicitation: This is the process of gathering the requirements from the stakeholders. This is a difficult task because stakeholders may not know exactly what they want, or they may have conflicting needs. Techniques include interviews, workshops, and focus groups.
+Negotiation: This task involves reconciling conflicts. Stakeholders often ask for more than is achievable within the budget and schedule. In this phase, the team prioritizes requirements, assesses their cost and risk, and works with stakeholders to agree on a realistic plan that provides value.
+Validation: This task assesses the quality of the requirements specification. The team reviews the document to find any inconsistencies, omissions, or ambiguities. The primary question of validation is, "Are we building the right product?"
+Explanation: This answer is correct. It selects four of the seven tasks (Inception, Elicitation, Negotiation, Validation) listed in "Practice and Requirements.docx" and provides a brief description for each that accurately reflects the definitions given in the lecture material.
+Topic 3: Software Development Phases: Requirements Elicitation: Chapter 7
+ESS
+159. What is the purpose of a "Use Case" in scenario-based modeling? Describe what its "Main Success Path" and "Exceptions" sections contain.
+Tip: Think about the "Withdraw Cash" example. The main path is what happens when everything goes right, and exceptions are what happen when things go wrong.
+Possible Answer: A "Use Case" is a key tool in scenario-based modeling. Its purpose is to tell a story about how an external "Actor" (like a person or another system) interacts with the system to achieve a specific goal. It captures a "contract for behavior" and helps the team understand the system from the user's point of view.
+A formal Use Case is structured into several parts:
+The Main Success Path (or "Scenario") is the core of the Use Case. It describes the sequence of steps that occur when everything goes perfectly. For a "Withdraw Cash" Use Case, this would be the step-by-step flow: Customer inserts card, enters correct PIN, selects an amount, has sufficient funds, and receives the cash.
+The Exceptions (or "Alternative Paths") section describes what happens when things do not go perfectly. It documents all the "what-if" scenarios. For the "Withdraw Cash" Use Case, exceptions would include: "If the PIN is incorrect," "If the account has insufficient funds," "If the customer enters an amount not in a $20 multiple," or "If the customer presses Cancel."
+Explanation: This answer is correct. It accurately defines a Use Case as a story of an actor achieving a goal, as described in "Practice and Requirements.docx." It correctly identifies the "Main Success Path" as the "happy path" and "Exceptions" as the alternative scenarios when things go wrong, using the lecture's "Withdraw Cash" example as a reference.
+Topic 3: Software Development Phases: Software Analysis: Chapter 8
+ESS
+160. What is "Class-Based Modeling," and what is the "grammatical parse" technique used to identify candidate classes?
+Tip: Think about the "things" or "nouns" in a system, versus the "actions" or "verbs."
+Possible Answer: "Class-Based Modeling" is a type of requirements modeling that describes the internal structure of the system, rather than the user's view. It focuses on identifying the "things," or objects, that the system manipulates. These are the analysis classes. It also defines the data properties of these classes (their attributes) and the actions they can perform (their operations). A UML Class Diagram is the primary tool for visualizing this model.
+The "grammatical parse" is a technique to identify candidate classes from a text-based description of the system (like a use case). The process involves reading the description and identifying all the nouns and noun phrases. These nouns are considered potential classes. For example, in the sentence "The Customer inserts their card into the ATM," the nouns "Customer," "card," and "ATM" are all good candidate classes. The verbs (like "inserts") often map to operations.
+Explanation: This answer is correct. It defines class-based modeling as focusing on the "things" or objects in the system, their attributes, and operations, as stated in "Practice and Requirements.docx." It also correctly defines the "grammatical parse" as the technique of identifying nouns as candidate classes, using an example consistent with the lecture.
+Topic 3: Software Development Phases: Software Analysis: Chapter 8
+ESS
+161. Explain what a UML State Diagram is used for in "Behavioral Modeling." Use the concepts of "State," "Event," and "Guard Condition" in your explanation.
+Tip: Think about the ATM example and how it moves from "Idle" to "Waiting for PIN." What triggers this, and what condition might apply?
+Possible Answer: A UML State Diagram is the primary tool for "Behavioral Modeling." Its purpose is to represent the system's dynamic behavior over time, modeling how a single object or system responds to events. It shows the different "modes" or "states" the system can be in and how it moves between them.
+State: A "State" is a condition or situation during the life of the object. For example, an ATM has an "Idle" state, a "WaitingForPIN" state, and a "DispensingCash" state.
+Event: An "Event" is what triggers a "transition" (a change) from one state to another. For example, the on card_inserted event triggers the transition from the "Idle" state to the "WaitingForPIN" state.
+Guard Condition: A "Guard Condition" is a rule that must be true for a transition to occur. For example, when the user enters an incorrect PIN, the system transitions from "WaitingForPIN" back to "WaitingForPIN." This transition has a guard condition: [attempts < 3]. If the event on incorrect_pin occurs and the guard condition [attempts >= 3] is true, the system transitions to the "CardConfiscated" state instead.
+Explanation: This answer is correct. It accurately defines a State Diagram's purpose as modeling dynamic behavior, as per "Practice and Requirements.docx." It correctly defines "State" (Idle), "Event" (on card_inserted), and "Guard Condition" ([attempts < 3]) using the exact terminology and examples from the lecture's ATM State Diagram.
+Topic 3: Software Development Phases: Software Analysis: Chapter 8
+ESS
+162. What is "Technical Debt," and how does it relate to the design principle of "Separation of Concerns"?
+Tip: Think about why taking a "shortcut" now makes future work harder. What happens when you don't separate concerns?
+Possible Answer: "Technical Debt" is a design concept that describes the "implied cost of rework caused by choosing an easy (limited) solution now instead of using a better approach that would take longer." Like financial debt, it's a shortcut that saves you time today but must be "repaid" later. This "interest" comes in the form of increased difficulty in adding new features, fixing bugs, and maintaining the system.
+This relates directly to the "Separation of Concerns" (SoC) principle. SoC states that a program should be broken into distinct sections, each addressing one concern. A common way to incur technical debt is to violate SoC. For example, instead of separating a program into a User Interface layer, a Business Logic layer, and a Data Access layer, a developer takes a shortcut and mixes all the logic together in one "Big Ball of Mud." This is fast at first, but it creates massive technical debt. When a simple change is needed later (e.g., updating a database query), the developer has to untangle complex, coupled code, making the change risky and slow. Adhering to SoC is a key way to avoid incurring technical debt.
+Explanation: This answer is correct. It defines Technical Debt using the definition from "software design-1.docx." It correctly links this concept to "Separation of Concerns" by explaining that violating SoC (e.g., by mixing logic) is a primary way to incur technical debt, making future maintenance (the "interest" payment) much harder.
+Topic 3: Software Development Phases: Software Design: Chapter 9
+ESS
+163. Explain the design concept of "Functional Independence" by defining its two components: "Cohesion" and "Coupling." What is the ideal combination for a good design?
+Tip: Think about a module's internal focus (cohesion) versus its external dependencies (coupling).
+Possible Answer: "Functional Independence" is a key measure of a good, modular software design. It is achieved by creating modules that are as independent and self-contained as possible. This independence is measured by two qualities: cohesion and coupling.
+Cohesion: This refers to the degree to which the elements inside a module belong together. High Cohesion is desirable. It means the module is focused on a single task (e.g., a calculate_sales_tax() function only calculates sales tax). A module with low cohesion does many unrelated things (e.g., a function that validates user input, saves to a database, and sends an email).
+Coupling: This refers to the degree of interdependence between software modules. Low Coupling is desirable. It means that a change in one module will not require a change in another. Modules are connected by simple, stable interfaces (like standard cables for home theater components). High coupling (a "bad design") means modules are tangled together, and a change in one breaks many others.
+The ideal combination for a good design is High Cohesion and Low Coupling. This creates a system that is easy to understand, test, maintain, and reuse.
+Explanation: This answer is correct. It accurately defines Functional Independence and its two components as described in "software design-1.docx." It correctly defines cohesion as a module's internal focus and coupling as its external dependencies. Most importantly, it identifies the ideal combination as "High Cohesion and Low Coupling."
+Topic 3: Software Development Phases: Software Design: Chapter 9
+ESS
+164. Compare and contrast the "Data-Centered" and "Data-Flow (Pipe and Filter)" architectural styles. Provide a clear example for each.
+Tip: Think of one as a "hub" (Data-Centered) and the other as a "conveyor belt" (Data-Flow).
+Possible Answer: "Data-Centered" and "Data-Flow" are two distinct architectural styles.
+A Data-Centered Architecture has a central data store (like a database) at its core, which is accessed by multiple other components (clients). The clients are relatively independent of each other and interact with the central data.
+Example: A university's student information system. A central database holds all student data. This database is accessed by many different client applications: the Registrar's Office app (for courses), the Bursar's Office app (for tuition), and the Library System (for books). The clients don't interact with each other, only with the central data.
+A Data-Flow (Pipe and Filter) Architecture is a sequential-processing system. Input data is "piped" through a series of "filters," where each filter is a component that performs a specific transformation on the data. The output of one filter becomes the input for the next.
+Example: An online photo printing service. When a user uploads an image, the data is piped to a "Validation Filter" (checks format), then to an "Enhancement Filter" (applies auto-correct), then to a "Resizing Filter" (scales to 4x6), and finally to a "Print Queue Filter."
+Explanation: This answer is correct. It accurately defines both architectural styles from "software design-1.docx." The "hub" vs. "conveyor belt" analogy is clear, and the answer uses the exact examples from the lecture (university system for Data-Centered, photo service for Data-Flow) to illustrate the difference.
+Topic 3: Software Development Phases: Software Design: Chapter 10
+ESS
+165. What is the "Liskov Substitution Principle" (LSP)? Explain the "Bird" and "Penguin" example used to illustrate a violation of this principle.
+Tip: The principle states subclasses must be substitutable for their base classes. What happens when a function that expects a Bird (and its fly() method) gets a Penguin?
+Possible Answer: The Liskov Substitution Principle (LSP) is a component-level design principle that states "Subclasses should be substitutable for their base classes." This means that any function or piece of code that works with an object of a base class (e.g., a Bird object) must also be able to work with an object of any of its subclasses (e.g., a Sparrow object) without breaking.
+The "Bird" and "Penguin" example illustrates a common violation.
+A developer creates a base class Bird with a fly() method.
+They create a Sparrow subclass that inherits from Bird and implements the fly() method.
+They write a function make_bird_fly(bird_object) which takes any Bird and calls bird_object.fly(). This works perfectly for Sparrow objects.
+Later, they create a Penguin class that also inherits from Bird. However, penguins cannot fly.
+This creates a violation. If a Penguin object is passed to the make_bird_fly() function, the program will break because the Penguin subclass cannot fulfill the "contract" of the Bird base class (i.e., it cannot fly()). The Penguin object is not a valid substitute for a Bird object in this context.
+Explanation: This answer is correct. It provides a clear definition of LSP as stated in "software design-1.docx." It then uses the lecture's "Bird" and "Penguin" example to perfectly illustrate how the principle is violated: the Penguin subclass is not substitutable for the Bird base class in a function that expects all birds to fly.
+Topic 3: Software Development Phases: Software Design: Chapter 11
+ESS
+166. Explain the "Interface Segregation Principle" (ISP). Use the "smart printer" example from the lecture to describe a violation.
+Tip: Think about "fat" interfaces versus "thin," client-specific interfaces. What happens when a BasicPrinter is forced to implement fax()?
+Possible Answer: The Interface Segregation Principle (ISP) is a component-level design principle that states, "Many client-specific interfaces are better than one general-purpose interface." In short, it means that you should not force a client (a class) to depend on methods it does not use.
+The "smart printer" example from the lecture illustrates a violation.
+Bad Design (Violation): A developer creates one "fat" interface called IMachine that includes methods for print(), staple(), and fax().
+The Problem: The company sells a "Smart Machine" that can do all three things, so it implements the IMachine interface. But they also sell a cheap BasicPrinter that can only print. To fit into the framework, the BasicPrinter class is forced to implement the IMachine interface. This means it must provide implementations for staple() and fax(), which it cannot do. It will have to throw an error or do nothing, which is confusing and bad design.
+Good Design (Follows ISP): The developer creates three separate, client-specific interfaces: IPrinter, IStapler, and IFax. The BasicPrinter class only implements IPrinter. The "Smart Machine" class implements all three. No class is forced to depend on methods it doesn't use.
+Explanation: This answer is correct. It defines ISP using the exact quote from the "software design-1.docx" lecture ("Many client-specific interfaces..."). It then perfectly describes the "smart printer" scenario, explaining why the "fat" IMachine interface is a violation when a BasicPrinter is forced to implement it.
+Topic 3: Software Development Phases: Software Design: Chapter 11
+ESS
+167. Describe the "Layered Architecture" style. Use the example of an online pizza order to explain the responsibilities of the "Presentation," "Business Logic," and "Data Access" layers.
+Tip: Think about the separation of concerns. One layer handles the visuals, one handles the rules, and one handles the database.
+Possible Answer: A Layered Architecture is an architectural style that organizes a system into a set of layers, where each layer provides a set of services to the layer directly above it. This separates the concerns of the application into distinct, manageable sections.
+The online pizza order example from the lecture illustrates this:
+Presentation Layer: This is the layer the user interacts with; it's the website or mobile app. Its responsibility is to display the user interface, such as the menu of pizzas and toppings, and to collect the user's input (their selection, address, and payment info). It knows nothing about how to calculate tax or store the order.
+Business Logic Layer: This is the "brains" of the operation. When the Presentation Layer submits the order, this layer takes over. Its responsibility is to enforce all the "business rules." For example, it validates that the coupon code is still active, calculates the total price including sales tax, and determines which physical store is closest to the customer's address.
+Data Access Layer: This layer's sole responsibility is to communicate with the database. The Business Logic Layer tells this layer, "Save this order." The Data Access Layer is responsible for writing the SQL query to insert the order into the Orders table. It also handles retrieving data, like fetching the menu from the Pizzas table.
+Explanation: This answer is correct. It accurately defines a Layered Architecture and its purpose (Separation of Concerns). It then uses the "online pizza order" example from "software design-1.docx" to correctly describe the distinct responsibilities of the Presentation (UI), Business Logic (rules), and Data Access (database) layers.
+Topic 3: Software Development Phases: Software Design: Chapter 10
+ESS
+168. What is User Experience (UX) design? Explain why it is a "holistic process" and not just about visual design, using Jesse James Garrett's 5 layers as a reference.
+Tip: Think about the 5 layers, from the most abstract (Strategy) to the most concrete (Surface). Where does visual design fit?
+Possible Answer: User Experience (UX) Design is the holistic process of enhancing user satisfaction by improving the usability, accessibility, and pleasure of the entire interaction between a user and a product.
+It is "holistic" because it is not just about the final visual design. As Jesse James Garrett's 5 layers model shows, the visual design (the "Surface") is only the most concrete and final layer. A good UX is built on a foundation of four deeper layers:
+Strategy: The most abstract layer, defining the core user needs and business goals. (Why are we building this?)
+Scope: Defines the functional and content requirements. (What are we building?)
+Structure: Defines how the features fit together, including information architecture and interaction design.
+Skeleton: The layout of components, like buttons and text, to optimize efficiency.
+Surface: The final visual design, including colors and typography.
+A product can look beautiful on the "Surface" but be a terrible UX if the "Strategy" is wrong (it solves the wrong problem) or the "Structure" is confusing (users can't find the features). A good UX is a result of getting all five layers right, from the abstract foundation to the concrete surface.
+Explanation: This answer is correct. It defines UX as a "holistic process" using the definition from "software design-2.docx." It correctly explains why it is holistic by referencing Jesse James Garrett's 5 layers, accurately listing them from abstract (Strategy) to concrete (Surface) and showing that visual design is only the final piece.
+Topic 3: Software Development Phases: Software Design: Chapter 12
+ESS
+169. Theo Mandel's "Golden Rules" of interface design include "Place the User in Control" and "Reduce the User's Memory Load." Provide a clear, real-world example for each of these rules.
+Tip: For "Control," think of a safety net like "Undo." For "Memory," think of how a website can "remember" information for you.
+Possible Answer: "Place the User in Control" and "Reduce the User's Memory Load" are two of Theo Mandel's "Golden Rules."
+Place the User in Control: This rule states that users should feel in charge of the software, not the other way around. The software should be a tool that provides a safety net.
+Example: The "Undo Send" feature in an email client. After a user hits "Send," the system gives them a 5-10 second window to "Undo" the action. This gives the user control over their mistake (like a typo), prevents panic, and allows them to interrupt and reverse an action. Other examples include a clear "Cancel" button on a long form or a simple "Undo" for a deleted file.
+Reduce the User's Memory Load: This rule states that an interface should not be a memory test. The more a user has to remember, the more error-prone the interaction becomes.
+Example: An e-commerce checkout page. A well-designed site will "remember" a logged-in user's shipping address and payment information. It pre-populates these fields, so the user only has to recognize and confirm the data, not recall and re-type their full address and credit card number. This reduces cognitive load and minimizes typing errors.
+Explanation: This answer is correct. It accurately defines both Golden Rules from "software design-2.docx" and, most importantly, provides the exact real-world examples (Undo Send and e-commerce checkout) that were used in the lecture to illustrate each principle.
+Topic 3: Software Development Phases: Software Design: Chapter 12
+ESS
+170. What is the Model-View-Controller (MVC) architectural pattern? Describe the specific responsibility of each of its three components.
+Tip: Think about the separation of concerns for an application: one part handles data, one part handles the display, and one part handles user input.
+Possible Answer: Model-View-Controller (MVC) is an architectural pattern that separates an application's concerns into three interconnected components. This separation makes the application easier to maintain and evolve, as the UI can be changed without affecting the business logic.
+The responsibilities of the components are:
+Model: This component manages the application's data and business logic. It is responsible for data storage, retrieval, and processing. For example, in a To-Do list app, the Model would contain the list of tasks and the methods to add_task() or mark_task_complete(). It knows nothing about the user interface.
+View: This is the user interface (UI) of the application. It is responsible for displaying the data from the Model to the user. For example, it would render the list of tasks as an HTML page. The View is "dumb"; it only knows how to show things and sends user actions (like a button click) to the Controller.
+Controller: This component acts as the intermediary between the Model and the View. It receives user input from the View (e.g., the user clicks the "Add Task" button). It then processes this input by telling the Model to update its data (e.g., calling model.add_task()). After the Model is updated, the Controller tells the View to refresh itself to display the new data.
+Explanation: This answer is correct. It accurately defines the MVC pattern as a separation of concerns, as described in "software design-2.docx." It correctly identifies the three components and describes their precise responsibilities: Model (data/logic), View (display/UI), and Controller (intermediary/input handler).
+Topic 3: Software Development Phases: Software Design: Chapter 10; Chapter 12; Chapter 13
+ESS
+171. What is a "design pattern"? Compare it to an "anti-pattern" and provide a clear example of one anti-pattern from the lecture.
+Tip: One is a proven, good solution to a common problem, while the other is a common "solution" that is actually bad practice.
+Possible Answer: A design pattern is a "general, reusable solution to a commonly occurring problem" in software design. It is not a finished piece of code, but rather a "template" or proven description of how to solve a problem. Using a design pattern (like the "Adapter" pattern) helps a developer avoid "reinventing the wheel" and leads to a more robust and maintainable design.
+An anti-pattern is the opposite: it is a common "solution" to a problem that is actually bad practice. It describes a common response that is ineffective and counterproductive.
+A clear example of an anti-pattern from the lecture is "The Blob" (or "God Object"). This is a single, massive class that does far too much work. For example, a UserManager class that handles user registration, profile updates, content retrieval, administrative banning, and CSV exporting. This class violates the "Separation of Concerns" and "High Cohesion" principles. It is hard to maintain (a change in one feature risks breaking all others), difficult to test, and impossible to reuse. The correct solution is to refactor this "Blob" into smaller, focused classes (e.g., AuthenticationService, ProfileService, AdminService).
+Explanation: This answer is correct. It defines "design pattern" and "anti-pattern" based on the definitions in "software design-2.docx." It correctly identifies "The Blob" as a key anti-pattern and uses the lecture's UserManager example to describe its characteristics and how it violates core design principles.
+Topic 3: Software Development Phases: Software Design: Chapter 14
+ESS
+172. The "software coding.docx" lecture separates core principles into "Process" and "Practice." Explain this distinction and provide one example of a "Construction Principle."
+Tip: "Process" guides the project's overall flow, while "Practice" guides the technical work. "Construction" is a phase that has its own principles.
+Possible Answer: The lecture makes a distinction between high-level principles:
+Core Principles: Process: These principles guide the overall flow of a software project. They are about the "big picture" of management and adaptation, such as "Be Agile," "Manage Change," and "Assess Risk."
+Core Principles: Practice: These principles guide the technical, hands-on work of analysis, design, and coding. They are the rules for how to build the software, such as "Divide and Conquer," "Understand the Use of Abstraction," and "Look for Patterns."
+A "Construction Principle" is a more granular principle that guides the specific framework activity of "Construction" (i.e., coding and testing). The lecture breaks these down into Preparation, Coding, and Validation.
+Example: One "Construction Principle" (from the Validation part) is to "Conduct code walkthroughs and perform unit tests." This principle states that code should be reviewed (by humans) and tested (by automated unit tests) as part of the construction phase to find and fix errors before the software is deployed.
+Explanation: This answer is correct. It accurately explains the difference between "Process" and "Practice" principles as defined in "software coding.docx." It then correctly identifies "Conduct code walkthroughs and perform unit tests" as a specific "Construction Principle" listed in the lecture.
+Topic 1: Foundations & Overview: Foundations of Software Engineering: Chapter 1: 1.4
+Topic 3: Software Development Phases: Software Coding: Chapter 6: 6.2.4
+ESS
+173. What is the STRIDE threat modeling framework? List the six threat categories it represents.
+Tip: The name "STRIDE" is a mnemonic for the six categories.
+Possible Answer: STRIDE is a threat modeling framework used to identify and categorize security threats during the design phase of a project. It provides a mnemonic for the six main categories of threats. By analyzing a system's design (e.g., a Data Flow Diagram) and considering each STRIDE category, a team can proactively identify potential vulnerabilities and build in "mitigations" to defend against them.
+The six categories represented by the STRIDE mnemonic are:
+Spoofing: Pretending to be someone or something else (violates Authentication).
+Tampering: Modifying data without authorization (violates Integrity).
+Repudiation: Denying having performed an action (violates Non-Repudiation).
+Information Disclosure: Exposing information to unauthorized parties (violates Confidentiality).
+Denial of Service (DoS): Making a system or resource unavailable (violates Availability).
+Elevation of Privilege: Gaining capabilities without authorization (violates Authorization).
+Explanation: This answer is correct. It accurately defines STRIDE as a threat modeling framework used during design, as per the "software coding.docx" lecture. It then correctly lists all six categories from the mnemonic, and as a bonus, correctly identifies the security property each one violates, which is also in the lecture.
+Topic 3: Software Development Phases: Software Design: Chapter 9; Chapter 10
+ESS
+174. Explain what a SQL Injection attack is. Using the lecture's example, describe how vulnerable code (using string formatting) creates this vulnerability and how secure code (using parameterized queries) prevents it.
+Tip: Think about what happens when an attacker's input (' OR '1'='1') is pasted directly into a query string versus being sent as a separate, safe value.
+Possible Answer: A SQL Injection (SQLi) attack is a vulnerability that occurs when an attacker can interfere with the database queries an application makes. It happens when an application fails to "Validate Input" and instead builds a query by pasting untrusted user input directly into the SQL command string.
+Vulnerable Code: The lecture shows vulnerable code that uses string formatting, like:
+query = f"SELECT * FROM users WHERE username = '{username_from_web}'"
+If an attacker provides the input _ OR '1'='1_, the final query becomes:
+SELECT * FROM users WHERE username = '' OR '1'='1'
+The OR '1'='1' clause is always true, so the database will return every single row from the users table, dumping all user data. The attacker's input was executed as part of the SQL command.
+Secure Code: The secure-by-default approach uses parameterized queries (or prepared statements):
+query = "SELECT * FROM users WHERE username = ?"
+cursor.execute(query, (username_from_web,))
+Here, the ? is a placeholder. The query structure is sent to the database first, and the untrusted user input is sent separately. The database engine does not execute the input; it treats it as a single, literal string value. It will literally search for a user whose name is ' OR '1'='1', find no such user, and return no results. The attack is neutralized.
+Explanation: This answer is correct. It accurately defines SQL Injection as a failure to validate input. It uses the exact "vulnerable" f-string code and attacker input (' OR '1'='1') from the "software coding.docx" lecture to show how the attack works. It then correctly identifies "parameterized queries" as the secure solution and explains why it works (input is treated as data, not code).
+Topic 3: Software Development Phases: Software Coding: Chapter 18: 18.9
+ESS
+175. Explain what a Cross-Site Scripting (XSS) attack is. Describe how vulnerable code creates this vulnerability and how secure code (using auto-escaping) prevents it.
+Tip: This attack is the twin of SQLi, but it happens in the user's browser. What happens when you "Sanitize Data" versus when you don't?
+Possible Answer: A Cross-Site Scripting (XSS) attack is a vulnerability that occurs when an application fails to "Sanitize Data Sent to Other Systems," specifically data sent to a user's web browser. An attacker "injects" malicious client-side script (like JavaScript) into a web page that is then viewed by other users.
+Vulnerable Code: The lecture example shows a comments page where comments are rendered as raw HTML. An attacker submits a malicious comment:
+<script>alert('You have been hacked!');</script>
+The vulnerable application stores this string and displays it on the page for all other users. The browser, seeing a <script> tag, executes the attacker code, causing an alert box to pop up in the victim browser. The attacker could use a more malicious script to steal the victim session cookies or redirect them to a phishing site.
+Secure Code: The secure approach, used by modern template engines like Flask/Jinja2, is to "auto-escape" all variables by default. When the malicious comment is rendered, the engine transforms it into harmless text:
+&lt;script&gt;alert('You have been hacked!');&lt;/script&gt;
+The victim's browser will now display this harmless text on the screen instead of executing it as code. The attack is completely neutralized.
+Explanation: This answer is correct. It accurately defines XSS as a failure to sanitize output, as per "software coding.docx." It uses the lecture's exact example (an injected <script> tag in a comment) to show how the attack works. It also correctly identifies "auto-escaping" (turning < into &lt;) as the secure solution and explains why it works (browser treats it as text, not code).
+Topic 3: Software Development Phases: Software Coding: Chapter 18: 18.9; Chapter 21
+ESS
+176. Explain the "Principle of Least Privilege" and "Defense in Depth." How do these two security principles work together?
+Tip: "Least Privilege" is about minimizing what a component can do. "Defense in Depth" is about how many layers of defense you have.
+Possible Answer: These are two fundamental security principles.
+The "Principle of Least Privilege" states that a process, user, or program should only have the bare minimum permissions necessary to perform its specific job. For example, a web script's database account that only displays blog posts should only have SELECT privileges on the posts table. It should not have admin rights, nor should it be able to DELETE from the users table. This minimizes the damage an attacker can do if they compromise that one component.
+"Defense in Depth" is the principle of using multiple, overlapping layers of security. It assumes that any single layer can and will fail. Instead of relying only on a firewall, a system might have five layers: a network firewall (Layer 1), application-level validation (Layer 2), access control (Layer 3), data-at-rest encryption (Layer 4), and monitoring (Layer 5).
+These two principles work together: "Least Privilege" is a key part of an effective "Defense in Depth" strategy. In the 5-layer example, Layer 3 (Access Control) is the implementation of the Principle of Least Privilege. This principle ensures that even if an attacker breaches the firewall (Layer 1) and the application (Layer 2), their capabilities are still severely limited by the "Least Privilege" account, which acts as another strong defensive layer.
+Explanation: This answer is correct. It accurately defines both "Principle of Least Privilege" (bare minimum permissions) and "Defense inDepth" (multiple layers) using the exact concepts and examples from the "software coding.docx" lecture. It also correctly explains how they work together: Least Privilege is one of the "layers" in a Defense in Depth strategy.
+Topic 3: Software Development Phases: Software Coding: Chapter 18: 18.9
+ESS
+177. What is "Insecure Deserialization"? Explain why using Python's pickle module with untrusted data is a severe security risk, and what a secure alternative is.
+Tip: Think about what pickle stores (code-executing objects) versus what a format like JSON stores (just data).
+Possible Answer: "Deserialization" is the process of converting a string or byte stream back into an object in memory. "Insecure Deserialization" is a vulnerability that occurs when an application deserializes data from an untrusted source (like a user-submitted file), and the "re-building" process can be manipulated to execute arbitrary code.
+Using Python's pickle module with untrusted data is a severe risk because pickle is not a data-only format. It serializes entire Python objects, including a reference to the code needed to rebuild them. An attacker can create a malicious payload object that, when deserialized by pickle.loads(), executes a system command (as shown in the lecture's MaliciousPayload example using the __reduce__ method). The attack runs as soon as the data is loaded.
+A secure alternative is to use a data-only format like JSON. JSON (JavaScript Object Notation) can only represent simple data (strings, numbers, lists, dictionaries). When json.loads() is called on an attacker's string, it parses the data; it does not execute any code. The attacker's malicious string is simply loaded as harmless text, neutralizing the threat.
+Explanation: This answer is correct. It accurately defines Insecure Deserialization. It explicitly identifies why pickle is dangerous (it deserializes objects that can execute code via __reduce__) and correctly identifies JSON as the secure alternative, explaining why it is safe (it is a data-only format). This is all drawn directly from the "software coding.docx" lecture.
+Topic 3: Software Development Phases: Software Coding: Chapter 18: 18.9
+ESS
+178. A server at a large financial firm fails, costing the company millions. Explain the difference between a "blameless post-mortem" (accountability) and a "failure of competence" in this context.
+Tip: "Accountability" is about the process failure (what allowed the mistake?). "Competence" is about the individual's knowledge (what did they fail to know?).
+Possible Answer: These two concepts from the lecture ("bullet_points-5.docx") represent different types of professional failure.
+A "blameless post-mortem" demonstrates Accountability. In this process, the team's goal is not to find the individual engineer to blame for the failure. The goal is to understand the systemic cause of the failure. "What in our process allowed this mistake to happen?" For example, the Knight Capital glitch (losing $440M) was a failure in their deployment process. A blameless post-mortem would focus on fixing that process (e.g., "We must automate deployments so a server can't be missed") to prevent the entire class of error from happening again. This is a healthy, accountable response.
+A "failure of competence" is a failure of an individual's professional responsibility to stay current. For example, if the server failed because a developer stored all passwords using the outdated, broken MD5 hashing algorithm, and an attacker easily cracked them, this is a failure of "Competence and Continuous Learning." The developer was negligent for relying on outdated knowledge. This is a failure of individual due diligence, separate from the team's process of accountability.
+Explanation: This answer is correct. It accurately defines a "blameless post-mortem" as a process-focused, systemic review, which is the core of Accountability (using the Knight Capital example from "bullet_points-5.docx"). It correctly contrasts this with a "failure of competence," which is an individual's failure to maintain up-to-date knowledge (using the MD5 example, also from the lecture).
+Topic 1: Foundations & Overview: Professional, Ethical, and Social Responsibility of a Software Engineer: Chapter 5; Chapter 30: 30.5
+ESS
+179. The Therac-25 tragedy is a classic example of a failure of "Quality and Due Diligence." Describe two of the specific failures that led to the radiation overdoses.
+Tip: Think about the software bug itself (the race condition) and the physical hardware of the machine.
+Possible Answer: The Therac-25 tragedy, which led to multiple patient deaths from radiation overdoses, was a catastrophic failure of professional due diligence. Two of the specific failures described in the lecture are:
+Removal of Hardware Interlocks: Previous models of the radiation machine had physical hardware interlocks (electromechanical locks) that would physically prevent the machine from entering a dangerous state (e.g., high-power beam with no filter). To save money, these hardware safeties were removed in the Therac-25 and replaced with software-only safety checks. This was a critical error, as it placed 100% of the safety burden on the software.
+A "Race Condition" Bug: The software, which was now solely responsible for safety, was buggy. It contained a "race condition"—a bug that only occurred if a skilled operator entered data very quickly, in a specific sequence that the testers had not anticipated. This sequence of events would cause the software to fail, moving the high-power beam into place without the protective filter, delivering a lethal dose of radiation to the patient.
+The failure was a "perfect storm" of these issues: the hardware interlocks that would have stopped the bug were removed, and the software that replaced them was inadequately tested and contained a critical flaw.
+Explanation: This answer is correct. It selects two of the primary causes of the Therac-25 tragedy as listed in the "bullet_points-5.docx" lecture: the "Removal of Hardware Interlocks" and the "Race Conditions" bug. The answer accurately describes how these two failures interacted to cause the disaster.
+Topic 1: Foundations & Overview: Professional, Ethical, and Social Responsibility of a Software Engineer: Chapter 5; Chapter 30: 30.5
+ESS
+180. The ACM/IEEE-CS Code of Ethics has eight principles. Explain the paramount principle, Principle 1: PUBLIC, and use the Volkswagen "defeat device" scandal to illustrate a violation.
+Tip: This principle states your highest loyalty. What did the VW engineers build, and who did it harm?
+Possible Answer: Principle 1: PUBLIC states that "Software engineers shall act consistently with the public interest."
+This is the paramount principle of the entire code. It means that an engineer's ultimate loyalty is to the public good, which includes public health, safety, and the environment. This duty overrides any conflicting loyalty to a client or employer. An engineer is not just an "order-taker" and has a moral obligation to refuse to build software that they know will cause public harm.
+The Volkswagen "defeat device" scandal is a clear and deliberate violation of this principle. VW engineers were tasked with programming diesel engines to pass emissions tests. To do this, they built a "defeat device"—software that could detect when it was in a lab testing environment and switch the engine to a low-emissions mode. When the car was on the road, the software would switch back to a high-performance, high-pollution mode that emitted nitrogen oxides up to 40 times the legal limit. This was a direct act against the public interest, prioritizing corporate profit over public health and environmental law.
+Explanation: This answer is correct. It accurately defines Principle 1: PUBLIC as the paramount duty to the public good, as stated in "bullet_points-5.docx." It then uses the lecture's primary example, the VW "defeat device," to perfectly illustrate a large-scale, intentional violation of this principle.
+Topic 1: Foundations & Overview: Professional, Ethical, and Social Responsibility of a Software Engineer: Chapter 5; Chapter 30: 30.5
+ESS
+181. Explain Principle 3: PRODUCT and Principle 4: JUDGMENT from the ACM/IEEE-CS Code of Ethics. Provide a brief example for each.
+Tip: "PRODUCT" is about the quality of the work. "JUDGMENT" is about the integrity of the decision-maker.
+Possible Answer: These two principles define an engineer's commitment to their work and their decision-making process.
+Principle 3: PRODUCT states that "Software engineers shall ensure that their products... meet the highest professional standards possible." This is an ethical commitment to quality and due diligence. It means advocating for proper testing, clear documentation, and robust design.
+Example: A manager pressures a team to "just ship" an unstable, insecure product to meet a deadline. The lead engineer, adhering to this principle, ethically refuses to sign off on the release, documenting the critical risks to the user (e.g., data loss, security breaches) that would result from releasing a low-quality product.
+Principle 4: JUDGMENT states that "Software engineers shall maintain integrity and independence in their professional judgment." This means an engineer's technical judgment must not be compromised by pressure, bribes, or personal conflicts.
+Example: An engineer is in charge of selecting a new vendor. Their spouse works for one of the vendors being considered. To maintain their integrity, the engineer must disclose this "conflict of interest" to their manager and likely recuse themselves from the final decision to ensure it is made based on technical merit, not personal connections.
+Explanation: This answer is correct. It accurately defines both the PRODUCT and JUDGMENT principles. It also provides the exact, clear-cut examples used in the "bullet_points-5.docx" lecture for each principle (pushing back on a rushed deadline for PRODUCT, disclosing a conflict of interest for JUDGMENT).
+Topic 1: Foundations & Overview: Professional, Ethical, and Social Responsibility of a Software Engineer: Chapter 5; Chapter 30: 30.5
+ESS
+182. Explain Principle 7: COLLEAGUES and Principle 8: SELF from the ACM/IEEE-CS Code of Ethics. Provide a brief example for each.
+Tip: "COLLEAGUES" is about how you treat others. "SELF" is about your own personal development.
+Possible Answer: These two principles define an engineer's responsibility to their team and to themselves.
+Principle 7: COLLEAGUES states that "Software engineers shall be fair to and supportive of their colleagues." Engineering is a team activity. This principle requires engineers to treat colleagues with respect, share knowledge, and foster a collaborative environment.
+Example: During a code review, instead of leaving a demeaning comment like "This is garbage," a senior developer provides constructive, supportive feedback: "Good start. This works, but have you considered using a hash map here? It would improve the performance. Let's chat about it." This supports the colleague's growth and improves the product.
+Principle 8: SELF states that "Software engineers shall participate in lifelong learning... and shall promote an ethical approach to the practice of the profession." This is a commitment to personal and professional growth, connecting back to the responsibility of "Competence."
+Example: An engineer working on facial recognition technology takes it upon themselves, in their own time, to read research papers about the known biases of such algorithms. This "lifelong learning" makes them a better engineer who can then ask informed, ethical questions about their work.
+Explanation: This answer is correct. It accurately defines both the COLLEAGUES and SELF principles. It also provides the exact, clear-cut examples used in the "bullet_points-5.docx" lecture for each principle (constructive code review for COLLEAGUES, self-education on AI bias for SELF).
+Topic 1: Foundations & Overview: Professional,Ethical, and Social Responsibility of a Software Engineer: Chapter 5; Chapter 30: 30.5
+ESS
+183. What is "Social Responsibility" in software engineering? Explain the concept of "Algorithmic Bias" using the Amazon AI recruiting tool as an example.
+Tip: Social responsibility is about the wider impact of your work. How can an "objective" algorithm learn to be unfair?
+Possible Answer: "Social Responsibility" is one of the three pillars of a software engineer's duty. It is the broad awareness that our work's impact extends beyond our immediate client to affect society, culture, privacy, and the environment. It involves considering the second- and third-order consequences of the systems we build.
+"Algorithmic Bias" is a key failure of social responsibility. An algorithm is not automatically objective; it will learn and often amplify the biases present in the data it is trained on.
+The Amazon AI recruiting tool is a perfect example. Amazon trained a model on 10 years of resumes submitted to the company. Since the tech industry (and Amazon) had historically hired more men for technical roles, the data was biased. The AI learned this bias and taught itself that male candidates were preferable. It learned to penalize resumes that contained the word "women's" (e.g., "women's chess club") and downgraded graduates from all-women's colleges. Amazon's engineers could not be sure they had removed the bias, so they had to scrap the project. The tool was socially irresponsible because it perpetuated and automated past discrimination.
+Explanation: This answer is correct. It accurately defines Social Responsibility as the awareness of a system's broader impact. It then defines Algorithmic Bias as a system learning from biased data, and uses the "bullet_points-5.docx" lecture's primary example (Amazon's AI recruiting tool) to perfectly illustrate how this bias occurs and its discriminatory results.
+Topic 1: Foundations & Overview: Professional, Ethical, and Social Responsibility of a Software Engineer: Chapter 5; Chapter 30: 30.5
+ESS
+184. What is "Accessibility (a11y)" in software design, and why is it a social responsibility? Provide an example of an accessibility failure.
+Tip: Think about who is excluded when accessibility is ignored.
+Possible Answer: "Accessibility" (often abbreviated a11y, for the 11 letters between 'a' and 'y') is the practice of designing software so that people with disabilities can use it. This includes users who are blind (need screen readers), have motor impairments (may use only a keyboard), have low vision (need high contrast), or are deaf (need captions).
+It is a "Social Responsibility" because failing to design for accessibility is the modern equivalent of building a public library with only stairs and no ramp. It effectively excludes a large portion of the population (around 15%) from the digital world. When software is used for critical services (banking, government benefits, job applications), inaccessible design becomes a form of discrimination and denies people access to essential services.
+An example of an accessibility failure would be a state government website for applying for unemployment benefits that is not navigable using only a keyboard. A person with a motor disability who cannot use a mouse would be unable to complete the form. This is a severe failure of social responsibility, as the government has denied a critical service to its citizens with disabilities.
+Explanation: This answer is correct. It accurately defines "Accessibility (a11y)" and why it is a social responsibility (exclusion from the digital world), as described in "bullet_points-5.docx." It also provides the exact example from the lecture (inaccessible government website) to illustrate a failure.
+Topic 1: Foundations & Overview: Professional, Ethical, and Social Responsibility of a Software Engineer: Chapter 5; Chapter 30: 30.5
+ESS
+185. What is meant by the "Environmental Impact" of software? Use the example of training large AI models to explain this social responsibility.
+Tip: Software runs on hardware, and hardware consumes energy. What is the "carbon footprint" of computation?
+Possible Answer: The "Environmental Impact" of software is a social responsibility that requires engineers to recognize that software is not ethereal; it runs on physical hardware in data centers that consume massive amounts of electricity and water. Inefficient, "bloated" code requires more CPU cycles, which, at a global scale, adds up to a significant energy cost and carbon footprint.
+"Green Software Engineering" is the emerging discipline focused on building more sustainable software.
+The example of training large AI models illustrates this perfectly. Training a single, large-scale AI model for natural language processing can be incredibly energy-intensive. A 2019 study showed that this process could emit over 626,000 pounds of carbon dioxide, nearly five times the lifetime emissions of an average car.
+This implies a social responsibility for engineers to be mindful of computational efficiency. They should explore more efficient algorithms, question if training an even larger model is necessary, and advocate for using cloud providers that are powered by renewable energy.
+Explanation: This answer is correct. It accurately defines the "Environmental Impact" of software as a social responsibility related to energy consumption, as per "bullet_points-5.docx." It then uses the lecture's primary example (the carbon footprint of training large AI models) to explain the scale and real-world consequences of this issue.
+Topic 1: Foundations & Overview: Professional, Ethical, and Social Responsibility of a Software Engineer: Chapter 5
+ESS
+186. Compare the "agile" and "waterfall" approaches to the cost of change. Why does the cost of change "flatten" in an agile model?
+Tip: Think about the waterfall graph where the cost of a change spikes exponentially over time. How do agile practices like continuous testing prevent this spike?
+Possible Answer: In a traditional Waterfall Model, the cost of making a change to the software grows exponentially over the project's life. A change to a requirement that is caught during the "Communication" phase is cheap to fix (it's just a document). That same change, if only discovered during the "Deployment & Testing" phase, is catastrophic. It could require a complete redesign, recoding, and re-testing of the entire system, costing thousands of times more.
+The "agile" approach, by contrast, "flattens" this cost-of-change curve. The cost of a change in an agile project is more or less constant, even late in the project. It achieves this because the process is iterative and incremental. The team is building and testing a "shippable increment" in every sprint. Practices like continuous integration and automated testing mean that the impact of a change is discovered almost immediately, not months later during a final testing phase. This rapid feedback loop and continuous validation prevent the cost of a change from spiraling out of control.
+Explanation: This answer is correct. It accurately describes the cost-of-change curve for both Waterfall (exponentially rising) and Agile (flattened) as presented in the "foundation and intro.docx" lecture. It also correctly explains why agile flattens the curve: its iterative nature and practices like continuous testing provide rapid feedback.
+Topic 2: Software Processes & Standards: Agile Development: Chapter 3
+ESS
+187. What are "core practice" principles in software engineering? List and describe two examples from the lecture, such as "Strive for Consistency" or "Focus on the Transfer of Information."
+Tip: These are the "technical" principles from "Practice and Requirements.docx." Think about how a user interacts with an interface or how data moves between components.
+Possible Answer: "Core practice" principles are the rules that guide the technical, hands-on work of analysis, design, and coding. They are distinct from "process" principles, which guide the overall project flow.
+Two examples from the lecture are:
+Strive for Consistency: This principle states that a consistent interface (whether a UI for a user or an API for a developer) is easier to learn, use, and understand. For example, a "Save" icon should look the same and be in the same place across all screens of an application. This allows users to build a mental model and use the software more intuitively.
+Focus on the Transfer of Information: This principle notes that software is fundamentally about moving information between interfaces (e.g., user-to-screen, app-to-database, system-to-system). These interfaces are where errors, omissions, and misunderstandings are most likely to occur. Therefore, a developer should pay special attention to designing and validating these information transfer points.
+Explanation: This answer is correct. It accurately defines "core practice" principles as guiding the technical work. It then lists and correctly describes two such principles ("Strive for Consistency" and "Focus on the Transfer ofInformation") using the definitions provided in "Practice and Requirements.docx."
+Topic 1: Foundations & Overview: Foundations of Software Engineering: Chapter 1: 1.4
+Topic 3: Software Development Phases: Software Design: Chapter 9
+ESS
+188. What is "Requirements Management," and why is it one of the seven essential tasks of requirements engineering?
+Tip: Think about what happens in a real project after the requirements document is "finished."
+Possible Answer: "Requirements Management" is one of the seven tasks of the requirements engineering framework. Its purpose is to identify, control, and track requirements and any changes made to them as the project proceeds.
+It is an essential task because of a simple fact: requirements always change. It is unrealistic to assume that a requirements specification, once written, is "frozen." Over the course of a project, the customer's needs will change, new market opportunities will arise, or technical constraints will be discovered.
+Without a formal "Requirements Management" process, these changes will lead to chaos. The "Smart Fridge" app example from the lecture illustrates this: when marketing requests a new, un-planned feature (integration with a grocery delivery API), the team doesn't just start coding. They use their change management process to create a "change request," analyze its impact on the schedule and budget, get formal approval, and then integrate it into the plan in a controlled manner. This task prevents "scope creep" and ensures all changes are tracked and managed.
+Explanation: This answer is correct. It accurately defines "Requirements Management" as the process of controlling change, as per "Practice and Requirements.docx." It correctly identifies why it's essential (because requirements always change) and uses the "Smart Fridge" example from the lecture to show how a change management process works.
+Topic 4: Supporting & Cross-Cutting Activities: Configuration Management: Chapter 22: 22.5
+ESS
+189. Explain the "KISS (Keep It Simple, Stupid!)" principle. Then, explain the "Keep it Simple" principle as it relates to secure coding.
+Tip: Hooker's "KISS" is about general maintainability. The "Keep it Simple" security principle is about the attack surface.
+Possible Answer: These are two related but distinct principles.
+Hooker's "KISS (Keep It Simple, Stupid!)" Principle: This is a general design principle for practice, as seen in "foundation and intro.docx." It states, "All design should be as simple as possible, but no simpler." The primary benefit here is maintainability. A simple, elegant design is easier for other developers to understand, debug, and enhance, which reduces errors and long-term cost.
+Secure Coding "Keep it Simple" Principle: This is a specific principle for secure development, as seen in "software coding.docx." Here, the benefit is security. The principle states that "Complexity is the enemy of security." A simple, small design has a smaller attack surface (fewer features, API endpoints, etc.) and is therefore easier to analyze, test, and secure. Every complex feature added to a system is a new place for security bugs to hide.
+In short, the general KISS principle is about making code simple for developers, while the security "Keep it Simple" principle is about making the system simple to reduce opportunities for attackers.
+Explanation: This answer is correct. It accurately distinguishes between the two principles. It defines Hooker's "KISS" from "foundation and intro.docx" as being about maintainability. It then defines the security "Keep it Simple" principle from "software coding.docx" as being about reducing the attack surface and complexity, which is the enemy of security.
+Topic 1: Foundations & Overview: Foundations of Software Engineering: Chapter 1: 1.4
+Topic 3: Software Development Phases: Software Coding: Chapter 18: 18.9
+ESS
+190. What is the "Default Deny" security principle, and how does it relate to the "Principle of Least Privilege"?
+Tip: "Default Deny" is the starting point (you get nothing). "Least Privilege" is the result (you only get what you need).
+Possible Answer: These are two closely related access-control principles.
+"Default Deny" is the principle that, by default, a user or process should have no access to any resource. All permissions must be explicitly granted. For example, when a new employee joins a file server, they should, by default, be able to see no folders. A manager must then explicitly grant them "Read" access to the specific folders they need. This is much safer than the "Default Allow" alternative, where a new user gets "Read" access to everything, and a manager must remember to explicitly deny access to sensitive folders.
+"Principle of Least Privilege" is the principle that a process or user should have only the bare minimum permissions necessary to perform its specific job, and no more.
+These two principles work together. "Default Deny" is the starting point for implementing "Least Privilege." You start by giving a user no access (Default Deny), and then you grant them only the specific permissions they need to do their job (Principle of Least Privilege). For example, a web script's database account starts with no permissions, and you grant it only SELECT on the posts table. This achieves "Least Privilege."
+Explanation: This answer is correct. It accurately defines "Default Deny" (start with no access) and "Principle of Least Privilege" (get only the bare minimum). It uses the lecture examples from "software coding.docx" and correctly explains their relationship: "Default Deny" is the starting mechanism to achieve the "Least Privilege" end-state.
+Topic 3: Software Development Phases: Software Coding: Chapter 18: 18.9
+ESS
+191. What is the difference between "Static Analysis (SAST)" and "Dynamic Analysis (DAST)" as Quality Assurance techniques for security?
+Tip: Think about what is being tested: the source code itself, or the running application?
+Possible Answer: SAST and DAST are two key techniques for finding security flaws, but they operate at different stages.
+Static Analysis (SAST): This stands for "Static Application Security Testing." SAST tools scan the application's source code (the "static" text) before it is run. They look for known, insecure code patterns, or "vulnerability signatures." For example, a SAST tool could scan Python code and find a line that builds a SQL query using an f-string, flagging it as a potential SQL Injection vulnerability. It's like a spell-checker for security bugs.
+Dynamic Analysis (DAST): This stands for "Dynamic Application Security Testing." DAST tools attack the running application (the "dynamic" process) from the outside, just as a real attacker would. They don't see the source code. They send malicious inputs to web forms and API endpoints to see if the application is vulnerable. For example, a DAST tool would try to exploit a SQL Injection vulnerability by sending ' OR '1'='1' to a login form and seeing if it gets a successful response.
+Explanation: This answer is correct. It accurately defines both SAST and DAST based on the "software coding.docx" lecture. It correctly identifies the key difference: SAST scans the static source code for patterns, while DAST attacks the running application to find flaws.
+Topic 3: Software Development Phases: Software Testing: Chapter 19; Chapter 20; Chapter 21
+ESS
+192. What is the purpose of a "Maturity Model" like OWASP SAMM, and how does it differ from a "Top 10" list like the OWASP Top 10?
+Tip: One is a "what to avoid" list. The other is a "how to get better" roadmap.
+Possible Answer: These two OWASP resources serve very different purposes.
+The OWASP Top 10 is an awareness document. It is a "what to avoid" list that identifies the 10 most critical security risks currently facing web applications (e.g., Injection, Broken Access Control). Its purpose is to educate developers, designers, and managers on the most common and dangerous threats so they can prioritize their defensive efforts.
+A Maturity Model like OWASP SAMM (Software Assurance Maturity Model) is a prescriptive roadmap for an entire organization. Its purpose is not just to list risks, but to provide a concrete, step-by-step process for an organization to "level up" and improve its security practices. It assesses the organization's current process (e.g., in Governance, Design, Implementation) and provides a clear path on how to mature those practices over time.
+In short, the Top 10 tells you what the biggest problems are, while SAMM gives you a roadmap for fixing your processes so you stop creating those problems.
+Explanation: This answer is correct. It accurately describes the OWASP Top 10 as an awareness list of risks ("what to avoid"). It then correctly defines a maturity model like OWASP SAMM as a "prescriptive roadmap" for process improvement ("how to get better"), which is the exact terminology used in the "software coding.docx" lecture.
+Topic 2: Software Processes & Standards: Software Process Improvement (CMMI): Chapter 28
+ESS
+193. The lecture describes "three interconnected pillars" of an engineer's duty. List these three pillars and briefly explain what each one represents.
+Tip: These are the three main sections from the "bullet_points-5.docx" lecture: Professional, Ethical, and Social.
+Possible Answer: The three interconnected pillars that define a software engineer's duty are:
+Professional Responsibility: This is the bedrock of the craft. It is the obligation to our clients, employers, and ourselves to deliver high-quality, competent work. This pillar includes concepts like "Competence and Continuous Learning," "Quality and Due Diligence," and "Accountability" (e.g., using blameless post-mortems).
+Ethical Responsibility: This is the "moral compass" that guides our decisions when the rules are not clear. It is about acting with integrity and fairness. This pillar is best defined by the eight principles of the "ACM/IEEE-CS Code of Ethics," such as acting in the "PUBLIC" interest and being fair to "COLLEAGUES."
+Social Responsibility: This is the broadest awareness of our work's impact on society as a whole. It is our duty to-consider the "second-order" effects of our technology on areas like user "Privacy," "Algorithmic Bias," "Accessibility (a11y)," and the "Environmental Impact" of our code.
+Explanation: This answer is correct. It lists the three pillars from the introduction of "bullet_points-5.docx" (Professional, Ethical, Social). It then provides a brief and accurate description of what each pillar represents, correctly pulling the key concepts (e.g., Competence, ACM Code, Privacy) that were used to define each pillar in the lecture.
+Topic 1: Foundations & Overview: Professional, Ethical, and Social Responsibility of a Software Engineer: Chapter 5
+ESS
+194. What is a "blameless post-mortem," and how does it demonstrate the professional responsibility of "Accountability"?
+Tip: Think about the Knight Capital glitch. Was the goal to fire the engineer who made the mistake, or to fix the process that allowed the mistake?
+Possible Answer: A "blameless post-mortem" is a meeting or process conducted after a major failure (like a server outage) to understand what went wrong. The "blameless" aspect is critical: the goal is not to find an individual to blame, but to understand the systemic causes of the failure. The team asks, "What in our process allowed this to happen?"
+This demonstrates the professional responsibility of Accountability in its healthiest form. Accountability is not about punishment; it is about "taking ownership of... outcomes." A team that conducts a blameless post-mortem is taking collective ownership of the failure.
+For example, instead of blaming the engineer who missed a deployment step (as in the Knight Capital glitch), the team's post-mortem would identify the root cause: "Our deployment process is manual, which makes it error-prone." The action item would be to "Automate the deployment process," which prevents that entire class of error from ever happening again. This is a mature, accountable response focused on process improvement, not individual blame.
+Explanation: This answer is correct. It accurately defines a "blameless post-mortem" as a process-focused, non-punitive review, as described in "bullet_points-5.docx." It correctly links this to "Accountability" by explaining that it is about taking collective ownership of the process failure, not blaming an individual. It also correctly references the Knight Capital glitch example.
+Topic 1: Foundations & Overview: Professional, Ethical, and Social Responsibility of a Software Engineer: Chapter 5
+ESS
+195. What is the ACM/IEEE-CS Code of Ethics, and what is its purpose? Explain the difference between its application to Principle 2 (CLIENT AND EMPLOYER) and Principle 1 (PUBLIC).
+Tip: Think about the "conflict" between these two principles. Which one is "paramount" and overrides the other?
+Possible Answer: The "ACM/IEEE-CS Software Engineering Code of Ethics" is the most important ethical document for the profession. Its purpose is to provide a "moral compass" or standard for professional conduct. It is not a legal document but a framework to help engineers make the right decisions when faced with complex dilemmas.
+The difference between Principle 2 and Principle 1 highlights the code's priorities:
+Principle 2: CLIENT AND EMPLOYER states that engineers shall act in the best interests of their client and employer. This means protecting confidential information (like a proprietary algorithm) and delivering the best work possible.
+Principle 1: PUBLIC states that engineers shall act consistently with the public interest. This principle is paramount and overrides all others, including Principle 2.
+The code makes it clear: you have a duty to your employer, unless your employer asks you to do something that harms the public. The Volkswagen "defeat device" is a perfect example. The engineers who built that software were not serving their employer (PrincCiple 2); they were violating their primary duty to the public's health and safety (Principle 1).
+Explanation: This answer is correct. It accurately defines the Code of Ethics' purpose as a "moral compass." It correctly defines both Principle 1 and Principle 2. Most importantly, it identifies Principle 1 (PUBLIC) as "paramount" and correctly explains that it overrides Principle 2 (CLIENT/EMPLOYER) in a conflict, using the Volkswagen example from "bullet_points-5.docx."
+Topic 1: Foundations & Overview: Professional, Ethical, and Social Responsibility of a Software Engineer: Chapter 5; Chapter 30: 30.5
+ESS
+196. The lecture separates software engineering into a 4-layer technology. List these four layers, from the bedrock to the top, and briefly describe the "Process" layer.
+Tip: The layers are: Quality, Process, Methods, and Tools.
+Possible Answer: The four layers of software engineering, from the foundation up, are:
+A Quality Focus (The Bedrock): This is the foundation for all engineering, representing a commitment to continuous process improvement.
+Process (The Foundation): This layer is the "glue" that holds everything together.
+Methods (The "How-To"): These are the technical, hands-on techniques for analysis, design, coding, and testing.
+Tools (The Support): These are the automated or semi-automated tools (like CASE) that support the methods.
+The Process layer is the framework for a set of key process areas that must be established for effective software delivery. It defines the "what" of a project (the core framework activities like Communication, Planning, Modeling, Construction, and Deployment) and the "umbrella activities" (like Risk Management and Quality Assurance) that apply throughout. It provides the context for managing the project, controlling change, and ensuring a quality product is delivered.
+Explanation: This answer is correct. It lists the four layers in the correct order (Quality, Process, Methods, Tools) as presented in the "foundation and intro.docx" lecture. It then provides an accurate and detailed description of the "Process" layer as the "glue" that defines the framework and umbrella activities.
+Topic 1: Foundations & Overview: Foundations of Software Engineering: Chapter 1: 1.2
+Topic 2: Software Processes & Standards: Software Process (IEEE Standard 1074): Chapter 1: 1.3
+ESS
+197. Explain the "core practice principle" of "Abstraction" and how it helps manage complexity. Use the car ignition system example from the lecture.
+Tip: Think about "hiding the complexity." What do you not need to know when you start a car?
+Possible Answer: "Abstraction" is a core "practice principle" in software engineering. It is the process of hiding the complexity of a system and exposing only the essential features needed to interact with it. It allows us to manage overwhelming complexity by focusing on the "what" rather than the "how."
+The lecture ("software design-1.docx") uses the car's ignition system as a prime example.
+When a user wants to start a car, they are presented with a simple abstraction: a key-turn or a "Start" button. This is the simple interface. The user does not need to know how the car starts. The underlying complexity is hidden. This includes the battery, the starter motor, the fuel injection system, the spark plugs, and all the electronic signals that coordinate them.
+By hiding this-complexity behind a simple "turn key" abstraction, the designer allows the user (or another component) to use the system without needing to understand its internal, complex implementation. This is essential for building large systems.
+Explanation: This answer is correct. It accurately defines "Abstraction" as the principle of "hiding complexity" as stated in "software design-1.docx." It then uses the lecture's car ignition example to perfectly illustrate this, explaining that the "key turn" is the simple interface that hides the complex internal workings.
+Topic 3: Software Development Phases: Software Design: Chapter 9
+ESS
+198. What is the "Open-Closed Principle" (OCP)? Use the "Payment Processing System" example to explain how it works.
+Tip: The principle is "Open for extension, closed for modification." How can you add Apple Pay without changing the existing payment code?
+Possible Answer: The "Open-Closed Principle" (OCP) is a component-level design principle that states a software module should be "open for extension, but closed for modification." This means you should be able to add new functionality to a component without changing its existing, working source code. This is usually achieved using interfaces or abstract base classes.
+The "Payment Processing System" example from the lecture ("software design-1.docx") illustrates this:
+Bad Design (Violates OCP): A single process_payment function has a large if/elif block to check the payment_type. To add "Apple Pay," you must modify this function by adding another elif payment_type == 'apple_pay'. This is risky, as you might break the existing credit card or PayPal logic. The function is "open for modification."
+Good Design (Follows OCP): You create a PaymentProcessor interface that has one method: pay(). You then create CreditCardProcessor and PayPalProcessor classes that implement this interface. The main application code only knows about the PaymentProcessor interface. To add Apple Pay, you simply create a new class, ApplePayProcessor, that also implements the interface. No existing code is touched. The system is "open for extension" (adding new classes) but "closed for modification" (no changes to existing code).
+Explanation: This answer is correct. It defines OCP using the exact quote from "software design-1.docx." It then uses the lecture's "Payment Processing" example to perfectly contrast a "bad" (if/elif) design with a "good" (interface-based) design, showing how the good design allows extension (a new class) without modification.
+Topic 3: Software Development Phases: Software Design: Chapter 11
+ESS
+199. What are the three "Golden Rules" of interface design, according to Theo Mandel?
+Tip: These three rules are the main headers in the "software design-2.docx" lecture: Control, Memory, and...
+Possible Answer: The three "Golden Rules" of interface design, as articulated by Theo Mandel and presented in the lecture, are:
+Place the User in Control: The software should be a tool that responds to the user. Users should feel like they are in charge, not the other way around. This is achieved through features like "Undo" buttons, "Cancel" operations, and providing flexible, interruptible interactions.
+Reduce the User's Memory Load: The interface should not be a memory test. The system should "remember" information for the user (like their address) and provide clear visual cues, meaningful defaults, and intuitive shortcuts so the user only has to recognize information, not recall it from memory.
+Make the Interface Consistent: Consistency is the cornerstone of usability. It allows users to transfer knowledge from one part of an application to another. This includes visual consistency (same icons/colors), functional consistency (same actions work the same way), and contextual consistency (e.g., "breadcrumb" trails to show the user where they are).
+Explanation: This answer is correct. It lists the three "Golden Rules" exactly as they are named and described in the "software design-2.docx" lecture: Place the User in Control, Reduce the User's Memory Load, and Make the Interface Consistent. The brief descriptions for each are also accurate.
+Topic 3: Software Development Phases: Software Design: Chapter 12
+ESS
+200. What is "Copy and Paste Programming," and why is it considered an "anti-pattern"?
+Tip: Think about what happens when you find a bug in the code you copied.
+Possible Answer: "Copy and Paste Programming" is an "anti-pattern" that describes the practice of reusing code by literally copying a block of code from one part of an application and pasting it into another, instead of creating a reusable function or class.
+It is considered a dangerous anti-pattern for one primary reason: code duplication.
+This code duplication leads to severe maintenance problems. The lecture ("software design-2.docx") gives the example: if a bug is found in the original, copied block of code, that same bug now exists in every single place the code was pasted. A developer must then hunt down every copy and fix them all identically. If they miss one, the bug persists.
+This practice makes the code hard to maintain, error-prone, and fragile. The correct solution would have been to put the reusable logic into a single function or class, and then have all other parts of the application call that one function. This way, a bug only needs to be fixed in one place.
+Explanation: This answer is correct. It accurately defines "Copy and Paste Programming" and identifies it as an anti-pattern, as per "software design-2.docx." It correctly states the primary reason it's an anti-pattern: code duplication and the resulting maintenance nightmare when a bug must be fixed in multiple places.
+    </script>
+
+    <!-- Main Application Logic -->
+    <script>
+        // Wait for the DOM to be fully loaded before running the script
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // --- DOM Elements ---
+            var navContainer = document.getElementById('chapter-nav');
+            var cardGrid = document.getElementById('card-grid');
+            var rawData = document.getElementById('rawData').textContent;
+
+            /**
+             * Parses the raw text from the document into an array of question objects.
+             */
+            function parseSAQs(text) {
+                var questions = [];
+                // Split the text into individual question blocks
+                var blocks = text.split('ESS\n').slice(1); // slice(1) to skip the first empty split
+
+                for (var i = 0; i < blocks.length; i++) {
+                    var block = blocks[i];
+                    // Use regex to find all chapter numbers
+                    var chapterRegex = /Chapter (\d+)/g;
+                    var match;
+                    var chapters = [];
+                    while ((match = chapterRegex.exec(block)) !== null) {
+                        chapters.push(parseInt(match[1]));
+                    }
+
+                    // Use regex to find the topic.
+                    // Find the last occurrence of "Topic ..." in the block.
+                    var lines = block.trim().split('\n');
+                    var topicLine = '';
+                    for (var j = lines.length - 1; j >= 0; j--) {
+                        // 
+                        // --- CORE FIX ---
+                        // Replaced modern .startsWith() with universally compatible .indexOf()
+                        // .startsWith('Topic ') ===> .indexOf('Topic ') === 0
+                        //
+                        if (lines[j].indexOf('Topic ') === 0) {
+                            topicLine = lines[j];
+                            break;
+                        }
+                    }
+                    
+                    var topic = 'General';
+                    if (topicLine) {
+                        // Get the text before the first ": Chapter"
+                        topic = topicLine.split(': Chapter')[0].trim();
+                    } else {
+                        // Fallback if no topic line is found (original logic)
+                        var topicMatch = block.match(/\n(Topic [\s\S]+?): Chapter/);
+                        if (topicMatch) {
+                            topic = topicMatch[1].trim();
+                        }
+                    }
+
+                    // Use regex to extract other parts
+                    var idMatch = block.match(/^(\d+)\./);
+                    var questionMatch = block.match(/^\d+\. ([\s\S]+?)\nTip:/);
+                    var tipMatch = block.match(/\nTip: ([\s\S]+?)\nPossible Answer:/);
+                    var answerMatch = block.match(/\nPossible Answer: ([\s\S]+?)\nExplanation:/);
+
+                    if (idMatch && questionMatch && tipMatch && answerMatch) {
+                        questions.push({
+                            id: idMatch[1].trim(),
+                            question: questionMatch[1].trim(),
+                            tip: tipMatch[1].trim(),
+                            answer: answerMatch[1].trim(),
+                            topic: topic.replace(/:$/, ''), // Remove trailing colon
+                            chapters: chapters, // Array of numbers [1, 2, 30]
+                        });
+                    }
+                }
+                return questions;
+            }
+
+            /**
+             * Renders the chapter navigation buttons.
+             */
+            function renderNav(questions) {
+                // Use an object as a 'set' for older JS compatibility
+                var allChaptersSet = {}; 
+                // Replaced questions.forEach with a for loop
+                for (var i = 0; i < questions.length; i++) {
+                    var q = questions[i];
+                    // Replaced q.chapters.forEach with a for loop
+                    for (var j = 0; j < q.chapters.length; j++) {
+                        var c = q.chapters[j];
+                        allChaptersSet[c] = true;
+                    }
+                }
+                
+                // Get the keys and convert to numbers
+                var chapterKeys = Object.keys(allChaptersSet);
+                // Replaced chapterKeys.map with a for loop
+                var sortedChapters = [];
+                for (var k = 0; k < chapterKeys.length; k++) {
+                    sortedChapters.push(parseInt(chapterKeys[k], 10));
+                }
+                sortedChapters.sort(function(a, b) { return a - b; });
+
+                // Clear existing nav and add "All" button
+                navContainer.innerHTML = '';
+                var allButton = createNavButton('All', 'all');
+                allButton.className += ' active'; // Start with "All" active
+                navContainer.appendChild(allButton);
+
+                // Add button for each chapter
+                // Replaced sortedChapters.forEach with a for loop
+                for (var l = 0; l < sortedChapters.length; l++) {
+                    var chapterNum = sortedChapters[l];
+                    var btn = createNavButton('Chapter ' + chapterNum, chapterNum);
+                    navContainer.appendChild(btn);
+                }
+            }
+
+            /**
+             * Helper to create a single navigation button.
+             */
+            function createNavButton(text, chapterFilter) {
+                var button = document.createElement('button');
+                button.className = 'nav-button';
+                button.textContent = text;
+                button.setAttribute('data-filter', chapterFilter);
+                
+                button.addEventListener('click', function() {
+                    // Update active state
+                    var allButtons = document.querySelectorAll('.nav-button');
+                    for (var i = 0; i < allButtons.length; i++) {
+                        // Remove " active" class
+                        allButtons[i].className = allButtons[i].className.replace(/\s*active\b/g, '');
+                    }
+                    // Add " active" class to the clicked button
+                    button.className += ' active';
+
+                    // Filter the cards
+                    filterCards(chapterFilter);
+                });
+                return button;
+            }
+
+            /**
+             * Renders all the question cards into the grid.
+             */
+            function renderCards(questions) {
+                cardGrid.innerHTML = ''; // Clear grid
+                for (var i = 0; i < questions.length; i++) {
+                    var q = questions[i];
+                    
+                    // Create the data attribute for filtering
+                    // Replaced q.chapters.map with a for loop
+                    var chapterClasses = '';
+                    for (var j = 0; j < q.chapters.length; j++) {
+                        chapterClasses += 'chapter-' + q.chapters[j] + ' ';
+                    }
+                    chapterClasses = chapterClasses.trim(); // remove trailing space
+                    
+                    var cardContainer = document.createElement('div');
+                    cardContainer.className = 'card-container';
+                    cardContainer.setAttribute('data-chapters', chapterClasses); 
+
+                    // Use string concatenation instead of template literals
+                    cardContainer.innerHTML = 
+                        '<div class="question-card">' +
+                            '<!-- Front Face -->' +
+                            '<div class="card-face card-front">' +
+                                '<span class="question-topic">' + q.topic + '</span>' +
+                                '<div>' +
+                                    '<div class="question-number">' + q.id + '</div>' +
+                                    '<p class="question-text">' + q.question + '</p>' +
+                                '</div>' +
+                                '<span class="hover-prompt">Hover / Tap to see answer</span>' +
+                            '</div>' +
+                            
+                            '<!-- Back Face -->' +
+                            '<div class="card-face card-back">' +
+                                '<h3>Tip:</h3>' +
+                                '<p>' + q.tip.replace(/\n/g, '<br>') + '</p>' +
+                                '<h3 class="mt-4">Possible Answer:</h3>' +
+                                '<p>' + q.answer.replace(/\n/g, '<br>') + '</p>' +
+                            '</div>' +
+                        '</div>';
+                    cardGrid.appendChild(cardContainer);
+                }
+            }
+
+            /**
+             * Filters the visible cards based on the selected chapter.
+             */
+            function filterCards(chapterFilter) {
+                var allCards = document.querySelectorAll('.card-container');
+                
+                // NodeList.forEach is not supported in all older browsers, use a loop
+                for (var i = 0; i < allCards.length; i++) {
+                    var card = allCards[i];
+                    if (chapterFilter === 'all') {
+                        // Show all cards
+                        card.style.display = 'block';
+                    } else {
+                        // Check if the card's data attribute contains the chapter
+                        var cardChapters = card.getAttribute('data-chapters').split(' ');
+                        
+                        // Use indexOf for older browser compatibility
+                        if (cardChapters.indexOf('chapter-' + chapterFilter) !== -1) {
+                            card.style.display = 'block';
+                        } else {
+                            // Hide cards that don't match
+                            card.style.display = 'none';
+                        }
+                    }
+                }
+            }
+
+            /**
+             * Main function to initialize the application.
+             */
+            function init() {
+                var questions = parseSAQs(rawData);
+                renderNav(questions);
+                renderCards(questions);
+            }
+
+            // Run the app
+            init();
+        });
+    </script>
+</body>
+</html>

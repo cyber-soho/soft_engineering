@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Engineering Course Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Calm Neutrals (Grays, White, Indigo Accent) -->
+    <!-- Application Structure Plan: A single-page layout with a sticky header navigation for quick scrolling ('At a Glance', 'Modules', 'Assessments'). The core content is divided into three logical sections: 1) A 'Course Structure at a Glance' section featuring a Chart.js bar chart to visualize the "weight" of each module by its number of sub-topics. 2) An 'Interactive Course Modules' section using an accordion pattern, where users click a module title to reveal its sub-topics. 3) An 'Assessments' section displaying the midterm and final in simple cards. This structure was chosen for usability. The nav and chart provide a high-level overview, while the accordion interaction allows users to "drill down" into specific areas of interest without being overwhelmed by a single, long list. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Course structure (4 main topics, 2 assessments). Goal: Provide overview. Viz/Method: Top navigation bar with anchor links. Interaction: Click to smooth-scroll. Justification: Familiar, fast navigation for an SPA. Library/Method: HTML/JS.
+        - Report Info: Number of sub-topics per main module (3, 5, 6, 4). Goal: Compare module "density". Viz/Method: Horizontal Bar Chart. Interaction: Hover for tooltips. Justification: Fulfills mandatory Chart.js use in a way that is relevant to the source data (visualizing its structure), providing an "at a glance" comparison. Library/Method: Chart.js (Canvas).
+        - Report Info: 4 main topics and their respective sub-topics. Goal: Inform/Explore. Viz/Method: Interactive "Accordion" sections. Interaction: Click on module header to toggle visibility of sub-topic `<ul>` list. Justification: This is the most intuitive way to make a ToC interactive, preventing clutter and encouraging active exploration. Library/Method: HTML/Tailwind/JS.
+        - Report Info: Midterm & Final Assessment. Goal: Inform. Viz/Method: Static content cards. Interaction: None. Justification: These are simple informational points that don't require drill-down. Library/Method: HTML/Tailwind.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 250px;
+            max-height: 300px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 300px;
+                max-height: 350px;
+            }
+        }
+        /* Style for new links */
+        .module-link {
+            color: #4f46e5; /* indigo-600 */
+            text-decoration: none;
+            transition: text-decoration 0.2s ease-in-out;
+        }
+        .module-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased">
+
+    <header class="sticky top-0 z-50 bg-white shadow-md">
+        <nav class="container mx-auto max-w-5xl px-4 py-3 flex justify-center space-x-4 md:space-x-8">
+            <a href="#glance" class="nav-link text-gray-600 hover:text-indigo-600 font-medium">At a Glance</a>
+            <a href="#modules" class="nav-link text-gray-600 hover:text-indigo-600 font-medium">Modules</a>
+            <a href="#assessments" class="nav-link text-gray-600 hover:text-indigo-600 font-medium">Assessments</a>
+            <a href="#disclaimers" class="nav-link text-gray-600 hover:text-indigo-600 font-medium">Disclaimers</a>
+        </nav>
+    </header>
+
+    <main class="container mx-auto max-w-5xl p-4 md:p-8">
+        <section class="text-center mb-12">
+            <h1 class="text-3xl md:text-4xl font-bold text-indigo-700 mb-4">Software Engineering: Course Explorer</h1>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                Welcome to the interactive guide for your Software Engineering course. This application helps you explore the course structure, from high-level modules down to individual topics.
+            </p>
+        </section>
+
+        <section id="glance" class="mb-12 pt-16 -mt-16">
+            <h2 class="text-2xl font-semibold text-center mb-3">Course Structure at a Glance</h2>
+            <p class="text-gray-600 text-center mb-6 max-w-2xl mx-auto">
+                This chart visualizes the "weight" of each core module based on the number of sub-topics it contains. This gives you a quick idea of which modules cover more distinct concepts.
+            </p>
+            <div class="bg-white p-4 md:p-6 rounded-lg shadow-lg">
+                <div class="chart-container">
+                    <canvas id="topicsChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="modules" class="mb-12 pt-16 -mt-16">
+            <h2 class="text-2xl font-semibold text-center mb-3">Interactive Course Modules</h2>
+            <p class="text-gray-600 text-center mb-6 max-w-2xl mx-auto">
+                Here are the main learning modules for the course. Click on any module title to expand it and see the list of topics covered within that section.
+            </p>
+            <div class="space-y-4">
+                
+                <div class="accordion-item bg-white rounded-lg shadow-lg overflow-hidden">
+                    <button class="accordion-header w-full flex justify-between items-center p-5 text-left font-semibold text-lg text-indigo-700 hover:bg-indigo-50 focus:outline-none">
+                        <span>1. Foundations & Overview</span>
+                        <span class="accordion-arrow transform transition-transform duration-200">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </span>
+                    </button>
+                    <div class="accordion-content hidden p-5 border-t border-gray-200">
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <!-- MODIFIED: Added links -->
+                            <li><a href="01. intro.html" target="_blank" class="module-link">Foundations of Software Engineering</a></li>
+                            <li><a href="02. labs_overview.html" target="_blank" class="module-link">Introduction to Software Engineering</a></li>
+                            <li><a href="03. ch-5.html" target="_blank" class="module-link">Professional, Ethical, and Social Responsibility of a Software Engineer</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-white rounded-lg shadow-lg overflow-hidden">
+                    <button class="accordion-header w-full flex justify-between items-center p-5 text-left font-semibold text-lg text-indigo-700 hover:bg-indigo-50 focus:outline-none">
+                        <span>2. Software Processes & Standards</span>
+                        <span class="accordion-arrow transform transition-transform duration-200">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </span>
+                    </button>
+                    <div class="accordion-content hidden p-5 border-t border-gray-200">
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <!-- MODIFIED: Added link -->
+                            <li><a href="04. practice and requirements.html" target="_blank" class="module-link">Software Process (IEEE Standard 1074)</a></li>
+                            <li>Process Models (including Waterfall Model)</li>
+                            <li>Software Life Cycles</li>
+                            <li>Agile Development</li>
+                            <li>Software Process Improvement (CMMI)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-white rounded-lg shadow-lg overflow-hidden">
+                    <button class="accordion-header w-full flex justify-between items-center p-5 text-left font-semibold text-lg text-indigo-700 hover:bg-indigo-50 focus:outline-none">
+                        <span>3. Software Development Phases</span>
+                        <span class="accordion-arrow transform transition-transform duration-200">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </span>
+                    </button>
+                    <div class="accordion-content hidden p-5 border-t border-gray-200">
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <!-- MODIFIED: Added links -->
+                            <li><a href="05.01. software design-1.html" target="_blank" class="module-link">Requirements Elicitation</a></li>
+                            <li><a href="05.02. lab-1.html" target="_blank" class="module-link">Software Analysis</a></li>
+                            <li><a href="06. software design-2.html" target="_blank" class="module-link">Software Design</a></li>
+                            <li><a href="07. software coding.html" target="_blank" class="module-link">Software Coding</a></li>
+                            <li>Software Testing</li>
+                            <li>Software Delivery</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-white rounded-lg shadow-lg overflow-hidden">
+                    <button class="accordion-header w-full flex justify-between items-center p-5 text-left font-semibold text-lg text-indigo-700 hover:bg-indigo-50 focus:outline-none">
+                        <span>4. Supporting & Cross-Cutting Activities</span>
+                        <span class="accordion-arrow transform transition-transform duration-200">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </span>
+                    </button>
+                    <div class="accordion-content hidden p-5 border-t border-gray-200">
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li>Configuration Management</li>
+                            <li>Software Quality Assurance</li>
+                            <li>System Documentation</li>
+                            <li>Software Maintenance</li>
+                        </ul>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+
+        <section id="assessments" class="pt-16 -mt-16">
+            <h2 class="text-2xl font-semibold text-center mb-3">Assessments</h2>
+            <p class="text-gray-600 text-center mb-6 max-w-2xl mx-auto">
+                The course includes key assessments to measure your understanding of the material.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                    <!-- MODIFIED: Changed h3 to a link -->
+                    <h3 class="text-xl font-semibold text-indigo-700 mb-2">
+                        <a href="saqs.html" target="_blank" class="module-link">Midterm Assessment</a>
+                    </h3>
+                    <!-- Kept existing link as requested -->
+                    <p class="text-gray-700"><a href="Midterm_Review.html" target="_blank" class="module-link">A Comprehensive Exam</a> will be conducted mid-way through the course.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                    <h3 class="text-xl font-semibold text-indigo-700 mb-2">Final Assessment</h3>
+                    <p class="text-gray-700">A final Comprehensive Exam and overall course feedback session will conclude the course.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODIFIED SECTION: Disclaimers and License -->
+        <section id="disclaimers" class="pt-16 -mt-16">
+            <h2 class="text-2xl font-semibold text-center mb-6">Disclaimers and License</h2>
+            
+            <!-- Highly Visible Security Warning -->
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-6 rounded-lg shadow-md mb-6" role="alert">
+                <h3 class="font-bold text-lg mb-2">IMPORTANT: Lab Security & Legal Compliance Warning</h3>
+                <p class="mb-2">All lab exercises, especially those involving security, networking, or software analysis, must be conducted in a secure, isolated, and virtualized environment (e.g., a "sandbox").</p>
+                <p class="mb-2">You are solely responsible for your actions. Any attempt to apply these techniques or tools on public or private networks, systems, or applications that you do not explicitly own or have written permission to test is strictly forbidden, unethical, and illegal in most jurisdictions.</p>
+                <p>This course material is for educational purposes only. The author and affiliates disclaim all liability for any misuse, damage, or legal consequences resulting from your actions. Practice responsibly and legally.</p>
+            </div>
+
+            <!-- General Disclaimers -->
+            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-6 rounded-lg shadow-md mb-6">
+                <h3 class="font-bold text-lg mb-2">Legal Disclaimer</h3>
+                <p class="mb-2">The information provided in this course and its associated materials is for educational purposes only. It is not intended as professional advice. The author, Cyber Soho, provides no warranties, express or implied, and assumes no liability or responsibility for any errors or omissions in the content, or for any actions taken in reliance on the information contained herein.</p>
+                
+                <h3 class="font-bold text-lg mt-4 mb-2">Non-Affiliation & Editorial Disclaimer</h3>
+                <p>All product names, logos, brands, and trademarks featured or referred to within this course are the property of their respective trademark holders. These trademark holders are not affiliated with Cyber Soho, this course, or its materials. The use of these names and logos is for identification and educational purposes only and does not imply any endorsement or affiliation.</p>
+            </div>
+
+            <!-- MODIFIED: License and Copyright -->
+            <div class="bg-white p-6 rounded-lg shadow-lg text-gray-700">
+                <h3 class="text-xl font-semibold text-indigo-700 mb-2">License & Intellectual Property</h3>
+                <p class="font-semibold">Copyright &copy; 2025 Cyber Soho. All Rights Reserved.</p>
+                
+                <p class="mt-4">This HTML file and all associated content linked from it are protected by intellectual property and copyright laws. No part of this work may be reproduced, distributed, or transmitted in any form or by any means, including photocopying, recording, or other electronic or mechanical methods, without the prior written permission of the author (Cyber Soho).</p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center p-6 mt-12 text-gray-500 text-sm">
+        <p>Copyright &copy; 2025 Cyber Soho. All rights reserved.</p>
+        <p>Generated Interactive Course Explorer</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            function setupChart() {
+                const ctx = document.getElementById('topicsChart').getContext('2d');
+                if (!ctx) return;
+
+                const data = {
+                    labels: [
+                        '1. Foundations',
+                        '2. Processes & Standards',
+                        '3. Development Phases',
+                        '4. Supporting Activities'
+                    ],
+                    datasets: [{
+                        label: 'Number of Sub-topics',
+                        data: [3, 5, 6, 4],
+                        backgroundColor: 'rgba(79, 70, 229, 0.7)',
+                        borderColor: 'rgba(79, 70, 229, 1)',
+                        borderWidth: 1
+                    }]
+                };
+
+                const options = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                autoSkip: false,
+                                maxRotation: 0,
+                                minRotation: 0,
+                                callback: function(value, index, values) {
+                                    const label = this.getLabelForValue(value);
+                                    if (label.length > 20) {
+                                        return label.substring(0, 20) + '...';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.dataset.label}: ${context.raw}`;
+                                }
+                            }
+                        }
+                    }
+                };
+                
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: data,
+                    options: options
+                });
+            }
+
+            function setupAccordions() {
+                const accordions = document.querySelectorAll('.accordion-item');
+                accordions.forEach(item => {
+                    const header = item.querySelector('.accordion-header');
+                    const content = item.querySelector('.accordion-content');
+                    const arrow = header.querySelector('.accordion-arrow');
+
+                    if(header && content) {
+                        header.addEventListener('click', () => {
+                            const isHidden = content.classList.contains('hidden');
+                            if(isHidden) {
+                                content.classList.remove('hidden');
+                                if(arrow) arrow.classList.add('rotate-180');
+                            } else {
+                                content.classList.add('hidden');
+                                if(arrow) arrow.classList.remove('rotate-180');
+                            }
+                        });
+                    }
+                });
+            }
+
+            function setupNavigation() {
+                document.querySelectorAll('a.nav-link').forEach(anchor => {
+                    anchor.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const targetId = this.getAttribute('href');
+                        const targetElement = document.querySelector(targetId);
+                        if(targetElement) {
+                            targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }
+                    });
+                });
+            }
+
+            setupChart();
+            setupAccordions();
+            setupNavigation();
+        });
+    </script>
+
+</body>
+</html>
