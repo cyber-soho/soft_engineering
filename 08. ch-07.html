@@ -1,0 +1,2955 @@
+<!DOCTYPE html>
+<html lang="en" class="solarized-light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Testing</title>
+    <!-- 
+      This is a single-file HTML application. 
+      All CSS, JavaScript, and content are embedded.
+    -->
+    <style>
+        /* --- 1. Theme Variables (Solarized) --- */
+        :root {
+            --base03: #002b36;
+            --base02: #073642;
+            --base01: #586e75;
+            --base00: #657b83;
+            --base0: #839496;
+            --base1: #93a1a1;
+            --base2: #eee8d5;
+            --base3: #fdf6e3;
+            --yellow: #b58900;
+            --orange: #cb4b16;
+            --red: #dc322f;
+            --magenta: #d33682;
+            --violet: #6c71c4;
+            --blue: #268bd2;
+            --cyan: #2aa198;
+            --green: #859900;
+
+            /* Light Theme */
+            --theme-bg: var(--base3);
+            --theme-bg-accent: var(--base2);
+            --theme-text: var(--base01);
+            --theme-text-strong: var(--base00);
+            --theme-text-heading: var(--base02);
+            --theme-text-accent: var(--blue);
+            --theme-border: var(--base2);
+            --theme-shadow: var(--base1);
+            --theme-button-bg: var(--base2);
+            /* --- FIX APLIED HERE --- */
+            /* The original value (var(--base3)) was almost white, matching the light background */
+            --theme-button-text: var(--base02); /* FIX: Changed from base3 (light) to base02 (dark) for light-theme contrast */
+            /* --- END OF FIX --- */
+            --theme-button-hover: var(--base1);
+            --theme-code-bg: var(--base2);
+            --theme-code-text: var(--base01);
+            --theme-output-bg: var(--base2);
+            --theme-output-text: var(--theme-text);
+            --theme-link: var(--blue);
+            --theme-link-visited: var(--violet);
+            --theme-example-bg: var(--base2);
+            --theme-example-border: var(--base1);
+            --theme-input-bg: var(--base3);
+            --theme-input-border: var(--base1);
+            --theme-modal-bg: var(--base3);
+            --theme-modal-shadow: #00000080;
+        }
+
+        /* Dark Theme */
+        html.solarized-dark {
+            --theme-bg: var(--base03);
+            --theme-bg-accent: var(--base02);
+            --theme-text: var(--base0);
+            --theme-text-strong: var(--base1);
+            --theme-text-heading: var(--base2);
+            --theme-text-accent: var(--cyan);
+            --theme-border: var(--base01);
+            --theme-shadow: #000000;
+            --theme-button-bg: var(--base02);
+            --theme-button-text: var(--base1);
+            --theme-button-hover: var(--base01);
+            --theme-code-bg: var(--base02);
+            --theme-code-text: var(--base0);
+            --theme-output-bg: #000;
+            --theme-output-text: var(--base1);
+            --theme-link: var(--cyan);
+            --theme-link-visited: var(--violet);
+            --theme-example-bg: var(--base02);
+            --theme-example-border: var(--base01);
+            --theme-input-bg: var(--base02);
+            --theme-input-border: var(--base01);
+            --theme-modal-bg: var(--base02);
+            --theme-modal-shadow: #ffffff80;
+        }
+
+        /* --- 2. Basic Styles & Typography --- */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--theme-bg);
+            color: var(--theme-text);
+            line-height: 1.7;
+            transition: background-color 0.3s, color 0.3s;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1rem;
+            padding-top: 100px; /* Space for sticky header */
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--theme-text-heading);
+            margin: 1.5rem 0 1rem;
+            line-height: 1.3;
+        }
+
+        h1 { font-size: 2.5rem; }
+        h2 { font-size: 2rem; border-bottom: 2px solid var(--theme-border); padding-bottom: 0.5rem; }
+        h3 { font-size: 1.5rem; color: var(--theme-text-accent); }
+        h4 { font-size: 1.2rem; }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        a {
+            color: var(--theme-link);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        a:visited {
+            color: var(--theme-link-visited);
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        strong {
+            color: var(--theme-text-strong);
+        }
+
+        /* --- 3. Header & Navigation --- */
+        .main-header {
+            position: sticky;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--theme-bg-accent);
+            color: var(--theme-button-text);
+            padding: 0.5rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 2px 5px var(--theme-shadow);
+            flex-wrap: wrap;
+        }
+
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--theme-button-text);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .main-nav {
+            background-color: var(--theme-bg-accent);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 0.5rem 0;
+        }
+
+        .nav-button {
+            padding: 0.75rem 1rem;
+            background: none;
+            border: none;
+            color: var(--theme-button-text);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            border-radius: 6px;
+            margin: 0.25rem;
+        }
+
+        .nav-button:hover, .nav-button.active {
+            background-color: var(--theme-button-hover);
+            color: var(--theme-bg);
+        }
+
+        .control-button {
+            background: var(--theme-button-bg);
+            color: var(--theme-button-text);
+            border: 1px solid var(--theme-border);
+            padding: 0.5rem 0.75rem;
+            margin-left: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+        .control-button:hover {
+            background-color: var(--theme-button-hover);
+        }
+
+        /* --- 4. Theme Switcher --- */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+            margin-left: 1rem;
+        }
+        .theme-switch {
+            display: inline-block;
+            position: relative;
+            width: 50px;
+            height: 24px;
+        }
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--base01);
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--base3);
+            transition: .4s;
+            border-radius: 50%;
+        }
+        .slider-icon {
+            position: absolute;
+            font-size: 12px;
+            line-height: 24px;
+        }
+        .slider-icon.sun {
+            left: 5px;
+            color: var(--yellow);
+            display: none;
+        }
+        .slider-icon.moon {
+            right: 5px;
+            color: var(--yellow);
+        }
+        input:checked + .slider {
+            background-color: var(--base2);
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+            background-color: var(--base02);
+        }
+        html.solarized-dark .slider-icon.sun { display: block; }
+        html.solarized-dark .slider-icon.moon { display: none; }
+
+        /* --- 5. Main Content Sections --- */
+        .main-section {
+            display: none; /* Hidden by default */
+        }
+        .main-section.active {
+            display: block; /* Shown by JS */
+        }
+
+        /* --- 6. Lecture Content Styling --- */
+        details {
+            background-color: var(--theme-example-bg);
+            border: 1px solid var(--theme-border);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            overflow: hidden; /* For rounded corners */
+        }
+        summary {
+            padding: 1rem;
+            cursor: pointer;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--theme-text-heading);
+            background-color: var(--theme-bg-accent);
+            color: var(--theme-button-text);
+            border-bottom: 1px solid var(--theme-border);
+            list-style: none; /* Remove default marker */
+            position: relative;
+            padding-left: 2.5rem;
+        }
+        summary::before {
+            content: '►';
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%) rotate(0deg);
+            transition: transform 0.2s;
+            font-size: 0.9rem;
+        }
+        details[open] > summary::before {
+            transform: translateY(-50%) rotate(90deg);
+        }
+        details[open] > summary {
+            border-bottom: 1px solid var(--theme-border);
+        }
+        .details-content {
+            padding: 1.5rem;
+            border-top: 1px solid var(--theme-border);
+        }
+        .example-box {
+            background-color: var(--theme-example-bg);
+            border: 1px dashed var(--theme-example-border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .example-box strong {
+            color: var(--theme-text-accent);
+            font-weight: 600;
+        }
+
+        /* --- 7. Python Code Simulation --- */
+        .python-example {
+            border: 1px solid var(--theme-border);
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            background-color: var(--theme-code-bg);
+            overflow: hidden;
+        }
+        .python-example-header {
+            background-color: var(--theme-bg-accent);
+            color: var(--theme-button-text);
+            padding: 0.75rem 1rem;
+            font-family: monospace;
+            font-weight: bold;
+        }
+        .python-code {
+            padding: 1rem;
+            background-color: var(--theme-code-bg);
+            color: var(--theme-code-text);
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .python-controls {
+            padding: 0.5rem 1rem;
+            background-color: var(--theme-example-bg);
+            border-top: 1px solid var(--theme-border);
+        }
+        .python-controls button {
+            background: var(--theme-button-bg);
+            color: var(--theme-button-text);
+            border: 1px solid var(--theme-border);
+            padding: 0.5rem 0.75rem;
+            margin-right: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .python-controls button.run-btn {
+            background-color: var(--green);
+            color: var(--base3);
+        }
+        .python-controls button.clear-btn {
+            background-color: var(--red);
+            color: var(--base3);
+        }
+        .python-output {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9rem;
+            background-color: var(--theme-output-bg);
+            color: var(--theme-output-text);
+            padding: 1rem;
+            white-space: pre-wrap;
+            min-height: 2em;
+            border-top: 1px dashed var(--theme-border);
+        }
+        .python-output:empty::before {
+            content: "Output will appear here...";
+            color: var(--theme-text);
+            font-style: italic;
+        }
+
+        /* --- 8. Embedded SVGs --- */
+        .svg-diagram {
+            display: block;
+            margin: 1.5rem auto;
+            max-width: 100%;
+            background-color: var(--theme-bg);
+            border: 1px solid var(--theme-border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        .svg-diagram text, .svg-diagram tspan {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            fill: var(--theme-text);
+        }
+        .svg-diagram .box {
+            stroke: var(--theme-text-heading);
+            fill: var(--theme-bg-accent);
+            stroke-width: 2;
+            rx: 8;
+        }
+        .svg-diagram .box-text {
+            fill: var(--theme-button-text);
+            font-weight: bold;
+        }
+        .svg-diagram .arrow {
+            stroke: var(--theme-text-accent);
+            stroke-width: 2;
+            marker-end: url(#arrowhead);
+        }
+        .svg-diagram .label {
+            font-size: 14px;
+            fill: var(--theme-text-strong);
+        }
+        .svg-diagram .label-light {
+            font-size: 12px;
+            fill: var(--theme-text);
+        }
+        .svg-diagram .border {
+            stroke: var(--theme-text);
+            stroke-dasharray: 4 4;
+            fill: none;
+        }
+
+        /* --- 9. Exercises & Submission --- */
+        .exercise-question {
+            background-color: var(--theme-example-bg);
+            border: 1px solid var(--theme-border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .answer-box-wrapper {
+            margin-top: 1.5rem;
+            border: 1px solid var(--theme-input-border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .answer-box-toolbar {
+            background-color: var(--theme-bg-accent);
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        .answer-box-toolbar label {
+            background: var(--theme-button-bg);
+            color: var(--theme-button-text);
+            border: 1px solid var(--theme-border);
+            padding: 0.4rem 0.6rem;
+            margin-right: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+        .answer-box-toolbar label:hover {
+            background-color: var(--theme-button-hover);
+        }
+        .answer-box-toolbar input[type="file"] {
+            display: none;
+        }
+        .answer-box-toolbar span {
+            font-size: 0.8rem;
+            color: var(--theme-text);
+            font-style: italic;
+        }
+        .answer-box {
+            min-height: 200px;
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--theme-input-bg);
+            color: var(--theme-text);
+            border: none;
+            border-top: 1px solid var(--theme-input-border);
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: 1.6;
+            resize: vertical;
+        }
+        .answer-box:focus {
+            outline: 2px solid var(--theme-text-accent);
+        }
+        .answer-box img {
+            max-width: 90%;
+            height: auto;
+            border: 2px solid var(--theme-border);
+            border-radius: 4px;
+            margin: 0.5rem 0;
+        }
+
+        .submit-section {
+            margin-top: 2rem;
+            padding: 2rem;
+            border: 2px solid var(--theme-border);
+            border-radius: 8px;
+            background-color: var(--theme-example-bg);
+        }
+        .submit-section h2 {
+            margin-top: 0;
+        }
+        .submit-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .submit-field label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--theme-text-strong);
+        }
+        .submit-field input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--theme-input-border);
+            border-radius: 6px;
+            background-color: var(--theme-input-bg);
+            color: var(--theme-text);
+            font-size: 1rem;
+        }
+        .submit-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        .submit-buttons .submit-btn {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 6px;
+            border: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .submit-buttons .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px var(--theme-shadow);
+        }
+        .submit-btn.email-btn {
+            background-color: var(--blue);
+            color: var(--base3);
+        }
+        .submit-btn.download-btn {
+            background-color: var(--green);
+            color: var(--base3);
+        }
+        .submit-btn.copy-btn {
+            background-color: var(--cyan);
+            color: var(--base3);
+        }
+        .submit-info {
+            background-color: var(--theme-bg);
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px dashed var(--theme-border);
+        }
+        #copy-status {
+            display: inline-block;
+            margin-left: 1rem;
+            font-weight: bold;
+            color: var(--green);
+        }
+
+        /* --- 10. Evaluation Grid Table --- */
+        .evaluation-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            font-size: 0.9rem;
+        }
+        .evaluation-table th, .evaluation-table td {
+            border: 1px solid var(--theme-border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        .evaluation-table th {
+            background-color: var(--theme-bg-accent);
+            color: var(--theme-button-text);
+        }
+        .evaluation-table tr:nth-child(even) {
+            background-color: var(--theme-example-bg);
+        }
+        .evaluation-table .criteria {
+            width: 60%;
+        }
+        .evaluation-table .points {
+            width: 20%;
+            text-align: center;
+        }
+
+        /* --- 11. Password Modal --- */
+        .modal-overlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--theme-modal-shadow);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-box {
+            background-color: var(--theme-modal-bg);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px var(--theme-shadow);
+            width: 90%;
+            max-width: 400px;
+            z-index: 2001;
+        }
+        .modal-box h3 {
+            margin-top: 0;
+            color: var(--theme-text-heading);
+        }
+        .modal-box p {
+            font-size: 0.9rem;
+            color: var(--theme-text);
+            white-space: pre-line;
+            margin-bottom: 1rem;
+        }
+        .password-input-group {
+            position: relative;
+            margin: 1rem 0;
+        }
+        .modal-box input[type="password"], .modal-box input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            padding-right: 3rem; /* Space for eye icon */
+            border: 1px solid var(--theme-input-border);
+            border-radius: 6px;
+            background-color: var(--theme-input-bg);
+            color: var(--theme-text);
+            font-size: 1rem;
+        }
+        .password-toggle-eye {
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--theme-text);
+            font-size: 1.2rem;
+        }
+        .modal-box button {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            font-weight: bold;
+            background-color: var(--blue);
+            color: var(--base3);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .modal-error {
+            color: var(--red);
+            font-weight: bold;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            display: none; /* Hidden by default */
+        }
+
+        /* --- 12. Responsive Design --- */
+        @media (max-width: 768px) {
+            .main-header {
+                flex-direction: column;
+                position: static; /* No sticky on mobile */
+            }
+            .container {
+                padding-top: 1rem;
+            }
+            .header-title {
+                margin-bottom: 0.5rem;
+            }
+            .header-controls {
+                justify-content: center;
+                width: 100%;
+            }
+            .main-nav {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .nav-button {
+                text-align: center;
+            }
+            .submit-grid {
+                grid-template-columns: 1fr;
+            }
+            .submit-buttons {
+                flex-direction: column;
+            }
+            .submit-buttons .submit-btn {
+                width: 100%;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- SVG Definitions (for arrowheads) -->
+    <svg width="0" height="0" style="position:absolute">
+        <defs>
+            <marker
+                id="arrowhead"
+                markerWidth="10"
+                markerHeight="7"
+                refX="0"
+                refY="3.5"
+                orient="auto"
+                fill="var(--theme-text-accent)">
+                <polygon points="0 0, 10 3.5, 0 7" />
+            </marker>
+        </defs>
+    </svg>
+
+    <!-- Header & Navigation -->
+    <header class="main-header">
+        <div class="header-title">Software Testing</div>
+        <div class="header-controls">
+            <button class="control-button" id="expand-all-btn">Expand All</button>
+            <button class="control-button" id="collapse-all-btn">Collapse All</button>
+            <div class="theme-switch-wrapper">
+                <label class="theme-switch" for="theme-toggle">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="slider">
+                        <span class="slider-icon sun">☀️</span>
+                        <span class="slider-icon moon">🌙</span>
+                    </span>
+                </label>
+            </div>
+        </div>
+        <nav class="main-nav" id="main-nav">
+            <button class="nav-button active" data-section="lecture">1. Lecture</button>
+            <button class="nav-button" data-section="exercises">2. Exercises</button>
+            <button class="nav-button" data-section="tips">3. Tips</button>
+            <button class="nav-button" data-section="explanations">4. Explanations</button>
+            <button class="nav-button" data-section="answers">5. Answers</button>
+            <button class="nav-button" data-section="evaluation">6. Evaluation Grid</button>
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="container">
+
+        <!-- 1. Lecture Section -->
+        <section class="main-section active" id="lecture">
+            <h1>Lecture: Software Testing: From Components to Systems</h1>
+            
+            <h2>PART 1: COMPONENT-LEVEL TESTING</h2>
+
+            <details class="lecture-part" open>
+                <summary>[1.0] A Strategic Approach to Software Testing</summary>
+                <div class="details-content">
+                    <p>Welcome to our lecture on software testing. Testing is a set of activities that must be planned in advance and conducted systematically. It is not something we do just at the end; it's a phase that runs parallel to the entire development process. The goal is to uncover errors. A good test is one that has a high probability of finding a yet-undiscovered error.</p>
+                    <p>A common myth is that testing is a "safety net" to <em>add</em> quality. This is false. You cannot "test in" quality. Quality is <em>built in</em> through good design, solid engineering practices, and effective <a href="https://en.wikipedia.org/wiki/Software_peer_review" target="_blank">technical reviews</a>. Testing is the process we use to <em>confirm</em> that quality and to find the defects that- inevitably- creep in.</p>
+                    <p>Our strategy begins at the smallest level—the component—and works its way outward to the complete system.</p>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Building a new custom-designed house.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This example illustrates the concept of a testing strategy that starts small and grows. You wouldn't wait until the entire house is built to see if things work. You'd have a strategy.</p>
+                        <ul>
+                            <li>First, you inspect the foundation <em>before</em> you build walls on it (<strong>component testing</strong>).</li>
+                            <li>Then, you check the plumbing connections <em>between</em> the bathroom and the main line (<strong>integration testing</strong>).</li>
+                            <li>Finally, you do a "walk-through" of the finished house with the owner to make sure it meets their original requirements, like "a light switch for the patio is next to the back door" (<strong>validation testing</strong>).</li>
+                        </ul>
+                        <p>Just "testing" at the end by moving a family in and seeing what breaks is a recipe for disaster.</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[1.1] Verification and Validation (V&V)</summary>
+                <div class="details-content">
+                    <p>You will hear two key terms: Verification and Validation, often shortened to V&V. They are not the same thing.</p>
+                    <p><strong>Verification:</strong> Answers the question, "Are we building the product <strong>right</strong>?" This means we are checking that our work correctly implements the specific functions as they were designed. Does this <code>sort()</code> function actually sort the numbers? Does this <code>calculate_tax()</code> module match the technical specification we wrote for it?</p>
+                    <p><strong>Validation:</strong> Answers the question, "Are we building the <strong>right</strong> product?" This is a higher-level check against customer requirements. We might have <em>verified</em> that our <code>calculate_tax()</code> module works perfectly according to the spec, but validation asks if the spec itself was correct. Does the module charge the 5% tax the customer <em>actually</em> wanted, or did we build a perfect module for a 7% tax that was based on a requirements mistake?</p>
+                    
+                    <svg class="svg-diagram" viewBox="0 0 500 250" aria-labelledby="vv-title">
+                        <title id="vv-title">Verification vs. Validation Diagram</title>
+                        <defs>
+                            <marker id="arrowhead-vv" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto" fill="var(--theme-text-accent)">
+                                <polygon points="0 0, 10 3.5, 0 7" />
+                            </marker>
+                        </defs>
+                        <!-- Verification -->
+                        <rect class="box" x="20" y="20" width="200" height="60"></rect>
+                        <text class="box-text" x="120" y="55" text-anchor="middle">Design Specification</text>
+                        <rect class="box" x="280" y="20" width="200" height="60"></rect>
+                        <text class="box-text" x="380" y="55" text-anchor="middle">Software Product</text>
+                        <path class="arrow" marker-end="url(#arrowhead-vv)" d="M220,50 L280,50"></path>
+                        <text class="label" x="250" y="75" text-anchor="middle">Verification</text>
+                        <text class="label-light" x="250" y="95" text-anchor="middle">"Are we building it right?"</text>
+
+                        <!-- Validation -->
+                        <rect class="box" x="20" y="170" width="200" height="60"></rect>
+                        <text class="box-text" x="120" y="205" text-anchor="middle">Customer Requirements</text>
+                        <rect class="box" x="280" y="170" width="200" height="60"></rect>
+                        <text class="box-text" x="380" y="205" text-anchor="middle">Software Product</text>
+                        <path class="arrow" marker-end="url(#arrowhead-vv)" d="M220,200 L280,200"></path>
+                        <text class="label" x="250" y="225" text-anchor="middle">Validation</text>
+                        <text class="label-light" x="250" y="245" text-anchor="middle">"Are we building the right one?"</text>
+                    </svg>
+
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Building a new car engine.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This shows the difference between V&V. <strong>Verification</strong> would be running tests on the fuel injector to ensure it delivers <em>exactly</em> 10ml of gasoline per cycle, just as the engineering blueprints (the design) specified. We are verifying it <em>matches the design</em>. <strong>Validation</strong> would be putting the perfectly verified engine into the car and asking, "Does this car now meet the customer's requirement of 'going from 0-60 in 8 seconds'?" The injector might be "right" according to the design, but the design itself might be "wrong" for meeting the customer's actual performance goals.</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[1.2] Organizing for Testing: The Independent Test Group (ITG)</summary>
+                <div class="details-content">
+                    <p>There is a psychological conflict when a developer tests their own code. A developer's mindset is constructive; they want to <em>build</em> and <em>create</em>. Testing, however, has a "destructive" mindset; you are actively trying to <em>break</em> the software to find its flaws. A developer may unconsciously avoid the test cases that they <em>know</em> will break their code.</p>
+                    <p>To solve this, many large projects use an <a href="https://en.wikipedia.org/wiki/Independent_verification_and_validation" target="_blank">Independent Test Group (ITG)</a>. This is a team of testers separate from the development team. Their entire job is to find errors. This removes the conflict of interest and is highly effective at improving software quality because the ITG brings a fresh, skeptical perspective. The developer is still responsible for testing their own components first (unit testing), but the ITG handles the "official" integration and system-level tests.</p>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Writing a novel.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This demonstrates the value of an independent "tester." As the author (the developer), you write a chapter. You re-read it and fix typos you see (unit testing). However, you are too close to the work. You <em>know</em> what the plot is supposed to mean, so you read "what you meant" instead of "what you wrote." You then give the chapter to a professional editor (the ITG). The editor doesn't care about your feelings; they are paid to find problems. They will find plot holes, character inconsistencies, and grammar errors that you completely missed because they have an independent, unbiased perspective.</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[1.3] The Testing Process: From "In the Small" to "In the Large"</summary>
+                <div class="details-content">
+                    <p>Our testing strategy follows a clear progression, moving from a narrow scope to a broad one.</p>
+                    <ol>
+                        <li><strong>Unit Testing:</strong> Focuses on a single component (a function, a method, a class). We test it in isolation.</li>
+                        <li><strong>Integration Testing:</strong> We assemble the unit-tested components and test the <em>interfaces</em> between them.</li>
+                        <li><strong>Validation Testing:</strong> We test the complete, integrated system against the user's requirements.</li>
+                        <li><strong>System Testing:</strong> We test the software in the context of its full environment (hardware, other software, networks).</li>
+                    </ol>
+                    <p>This lecture will follow this same path, starting "in the small" with Unit Testing.</p>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Assembling a bicycle from a kit.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This maps the testing process to a physical assembly.</p>
+                        <ul>
+                            <li><strong>Unit Testing:</strong> You check each component in isolation. You spin the wheel to see if the axle is smooth. You squeeze the brake handle to see if the cable pulls.</li>
+                            <li><strong>Integration Testing:</strong> You attach the brake cable to the brake calipers. You now test the <em>interface</em>: does squeezing the handle (component A) correctly pull the cable and cause the calipers (component B) to close?</li>
+                            <li><strong>Validation Testing:</strong> The bike is fully assembled. You check it against the user's requirements (the box art!): "Is it a complete, rideable bicycle? Does it look like the picture?"</li>
+                            <li><strong>System Testing:</strong> You take the bike on the road (its environment). How does it handle on pavement? On gravel? Does the 'system' (bike + rider + road) work?</li>
+                        </ul>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[1.4] Unit Testing Fundamentals</summary>
+                <div class="details-content">
+                    <p><a href="https://en.wikipedia.org/wiki/Unit_testing" target="_blank">Unit testing</a> focuses verification on the smallest unit of software design: the component. This could be a single function or a method within a class. We test it in isolation from the rest of the program.</p>
+                    <p>Unit testing focuses on:</p>
+                    <ul>
+                        <li><strong>The Interface:</strong> Does it receive data correctly? Does it return data in the correct format?</li>
+                        <li><strong>Local Data:</strong> Does the function's internal data (e.g., local variables) get managed correctly?</li>
+                        <li><strong>Control Paths:</strong> Are all <code>if-else</code> branches and loops tested?</li>
+                        <li><strong>Boundary Conditions:</strong> Does it handle the "edges" (e.g., 0, -1, max value) correctly?</li>
+                        <li><strong>Error Handling:</strong> Does it behave properly when it receives bad data?</li>
+                    </ul>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing a toaster's "timer" knob.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This is a unit test of a single component (the knob). We aren't testing the heating elements or the spring-loaded pop-up mechanism yet. We are testing <em>only</em> the timer knob in isolation.</p>
+                        <ul>
+                            <li><strong>Interface:</strong> Does the knob send the correct electrical signal (e.g., 1V for 1 minute, 2V for 2 minutes) to the control board?</li>
+                            <li><strong>Local Data:</strong> Does the internal gear in the knob stop at "5 minutes" when turned there?</li>
+                            <li><strong>Control Paths:</strong> Can the knob be turned? Can it be turned off?</li>
+                            <li><strong>Boundary Conditions:</strong> What happens when you turn it to its "0" (off) position? What happens at its "Max" (10 minutes) position?</li>
+                            <li><strong>Error Handling:</strong> What if you try to turn it <em>past</em> "Max"? Does it break, or does it stop safely?</li>
+                        </ul>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[1.5] Scaffolding: Drivers and Stubs</summary>
+                <div class="details-content">
+                    <p>When you test a component in isolation, you have a problem: it's not a full program. If your component (e.g., <code>calculate_tax()</code>) is <em>called by</em> the main application and <em>itself calls</em> a database function, how do you test it?</p>
+                    <p>We build temporary, "throw-away" code called <a href="https://en.wikipedia.org/wiki/Test_stub" target="_blank">scaffolding</a>.</p>
+                    <ul>
+                        <li><strong>Drivers:</strong> A "driver" is a piece of code that <em>calls</em> your component. It's a fake "main program." It "drives" the test, providing the test data (e.g., "Here, <code>calculate_tax()</code>, test yourself with an input of 100").</li>
+                        <li><strong>Stubs:</strong> A "stub" is a piece of code that <em>is called by</em> your component. It's a fake "database" or "other module." If <code>calculate_tax()</code> needs to call <code>get_tax_rate_from_database()</code>, you write a stub for that function that just returns a fixed value (e.g., "return 0.05;") without actually touching a database.</li>
+                    </ul>
+                    
+                    <svg class="svg-diagram" viewBox="0 0 500 200" aria-labelledby="scaffold-title">
+                        <title id="scaffold-title">Driver and Stub Scaffolding Diagram</title>
+                        <defs>
+                            <marker id="arrowhead-scaffold" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto" fill="var(--theme-text-accent)">
+                                <polygon points="0 0, 10 3.5, 0 7" />
+                            </marker>
+                        </defs>
+                        <rect class="box" x="175" y="70" width="150" height="60"></rect>
+                        <text class="box-text" x="250" y="105" text-anchor="middle">Component</text>
+                        <text class="box-text" x="250" y="85" text-anchor="middle" font-size="12px">(Under Test)</text>
+
+                        <rect class="border" x="20" y="70" width="120" height="60"></rect>
+                        <text class="label" x="80" y="105" text-anchor="middle">Driver</text>
+                        
+                        <rect class="border" x="360" y="70" width="120" height="60"></rect>
+                        <text class="label" x="420" y="105" text-anchor="middle">Stub</text>
+
+                        <path class="arrow" marker-end="url(#arrowhead-scaffold)" d="M140,100 L175,100"></path>
+                        <text class="label-light" x="157" y="85" text-anchor="middle">calls</text>
+
+                        <path class="arrow" marker-end="url(#arrowhead-scaffold)" d="M325,100 L360,100"></path>
+                        <text class="label-light" x="342" y="85" text-anchor="middle">calls</text>
+                    </svg>
+
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing a car's transmission.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This demonstrates drivers and stubs. You can't test a new transmission just by holding it in your hands. You need to put it on a test rig.</p>
+                        <ul>
+                            <li><strong>Driver:</strong> The test rig's engine that connects to the transmission's input shaft is the <em>driver</em>. It's a fake "car" that provides the power and tells the transmission when to shift.</li>
+                            <li><strong>Stubs:</strong> The test rig's connectors that attach to the transmission's output shafts (where the wheels would go) are the <em>stubs</em>. They don't <em>go</em> anywhere, but they provide a place for the transmission to send its output power so it can be measured.</li>
+                        </ul>
+                    </div>
+
+                    <div class="python-example">
+                        <div class="python-example-header">PYTHON EXAMPLE: Unit Test with Driver and Stubs</div>
+                        <pre class="python-code" data-id="py-example-1">
+# --- The Component To Be Tested ---
+# This is the function we want to test.
+def get_total_price(item_id):
+    # It calls another function to get the base price.
+    base_price = get_base_price_from_db(item_id)
+    # It calls another function to get the tax rate.
+    tax_rate = get_current_tax_rate()
+    # It returns the final price.
+    return base_price * (1 + tax_rate)
+
+# --- Scaffolding (Stubs) ---
+# **This is a STUB.**
+# It's a fake version of the database function.
+def get_base_price_from_db(item_id):
+    # It doesn't connect to a real database.
+    # It just returns a fixed, predictable value for our test.
+    print(f"STUB: get_base_price_from_db called with {item_id}")
+    # We'll pretend item 'abc' costs 100.
+    if item_id == 'abc':
+        # Return 100.0
+        return 100.0
+    # Return 0.0 for any other item.
+    return 0.0
+
+# **This is another STUB.**
+# It's a fake version of the tax rate function.
+def get_current_tax_rate():
+    # It just returns a fixed, predictable rate.
+    print("STUB: get_current_tax_rate called")
+    # Return a 10% tax rate.
+    return 0.10
+
+# --- Scaffolding (Driver) ---
+# **This is the DRIVER.**
+# It's our "main program" that runs the test.
+def run_unit_test():
+    # Announce the test.
+    print("**DRIVER: Running test for get_total_price...**")
+    # Define the item we want to test.
+    test_item = 'abc'
+    # Define the *expected* result. We know 100 * (1 + 0.10) = 110.
+    expected_result = 110.0
+    
+    # Call the component under test.
+    actual_result = get_total_price(test_item)
+    
+    # Announce the results.
+    print(f"DRIVER: Expected={expected_result}, Actual={actual_result}")
+    
+    # Check if the test passed or failed.
+    if actual_result == expected_result:
+        # Print a success message.
+        print("***Test PASSED!***")
+    else:
+        # Print a failure message.
+        print("***Test FAILED!***")
+
+# --- Execution ---
+# This line runs our driver.
+run_unit_test()
+</pre>
+                        <div class="python-controls">
+                            <button class="run-btn" data-target="py-example-1">Run</button>
+                            <button class="clear-btn" data-target="py-example-1">Clear</button>
+                        </div>
+                        <pre class="python-output" id="output-py-example-1"></pre>
+                    </div>
+
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[1.6] White-Box Testing</summary>
+                <div class="details-content">
+                    <p><a href="https://en.wikipedia.org/wiki/White-box_testing" target="_blank">White-Box Testing</a> (also called "glass-box" or "structural" testing) is a testing philosophy where the tester has <em>full access</em> to the internal logic and source code of a component. You are "looking inside the box."</p>
+                    <p>The goal is not just to see <em>if</em> the output is right, but to ensure that <em>all the internal paths</em> of the code are exercised. For example, if you have an <code>if-else</code> statement, you will design two tests: one that makes the <code>if</code> condition <code>True</code>, and one that makes it <code>False</code>.</p>
+                    
+                    <svg class="svg-diagram" viewBox="0 0 500 220" aria-labelledby="box-title">
+                        <title id="box-title">White-Box vs. Black-Box Testing Diagram</title>
+                        <defs>
+                            <marker id="arrowhead-box" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto" fill="var(--theme-text-accent)">
+                                <polygon points="0 0, 10 3.5, 0 7" />
+                            </marker>
+                        </defs>
+                        <!-- White Box -->
+                        <text class="label" x="110" y="25" text-anchor="middle" font-size="16px">White-Box Testing</text>
+                        <rect class="border" x="20" y="40" width="180" height="150"></rect>
+                        <text class="label-light" x="110" y="180" text-anchor="middle">Tester sees inside</text>
+                        <path class="arrow" marker-end="url(#arrowhead-box)" d="M20, 70 L50, 70"></path>
+                        <text class="label-light" x="35" y="65" text-anchor="middle">In</text>
+                        <path class="arrow" marker-end="url(#arrowhead-box)" d="M150, 160 L180, 160"></path>
+                        <text class="label-light" x="165" y="155" text-anchor="middle">Out</text>
+                        <!-- Internal paths -->
+                        <path d="M50,70 C 80,70 70,110 100,110 S 120,70 150,70" stroke="var(--theme-text)" stroke-width="2" fill="none"/>
+                        <path d="M50,70 C 80,70 70,150 100,150 S 120,160 150,160" stroke="var(--theme-text)" stroke-width="2" fill="none" stroke-dasharray="4 4"/>
+                        <text class="label" x="100" y="130" text-anchor="middle">if/else</text>
+
+                        <!-- Black Box -->
+                        <text class="label" x="390" y="25" text-anchor="middle" font-size="16px">Black-Box Testing</text>
+                        <rect class="box" x="300" y="40" width="180" height="150"></rect>
+                        <text class="box-text" x="390" y="110" text-anchor="middle" font-size="40px">?</text>
+                        <text class="label-light" x="390" y="180" text-anchor="middle">Tester cannot see inside</text>
+                        <path class="arrow" marker-end="url(#arrowhead-box)" d="M250, 115 L300, 115"></path>
+                        <text class="label" x="275" y="105" text-anchor="middle">Input</text>
+                        <path class="arrow" marker-end="url(#arrowhead-box)" d="M480, 115 L530, 115"></path>
+                        <text class="label" x="505" y="105" text-anchor="middle">Output</text>
+                    </svg>
+
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing a hotel's automatic sliding door.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This shows the white-box approach. A black-box tester would just walk at the door and see if it opens. A <em>white-box</em> tester is the engineer who built it. They have the wiring diagram (the source code). They will test specific <em>internal</em> logic:</p>
+                        <ul>
+                            <li>"I will test the motion sensor (path 1) by waving my hand."</li>
+                            <li>"I will test the pressure-pad sensor (path 2) by stepping on the mat."</li>
+                            <li>"I will test the 'emergency open' button (path 3) by pressing it."</li>
+                        </ul>
+                        <p>They are not just testing the <em>function</em> (door opens), but <em>all the internal paths</em> that <em>cause</em> it to open.</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[1.7] White-Box: Basis Path Testing</summary>
+                <div class="details-content">
+                    <p>This is a specific, formal technique for white-box testing. It was developed by Tom McCabe and uses a concept called <strong><a href="https://en.wikipedia.org/wiki/Cyclomatic_complexity" target="_blank">Cyclomatic Complexity (V(G))</a></strong>.</p>
+                    <p>In simple terms, Cyclomatic Complexity is a number that measures the logical complexity of a program. It tells you <em>exactly</em> how many "independent paths" exist in a piece of code. This number is the <em>minimum number of test cases you need</em> to guarantee that you have executed every single line of code at least once.</p>
+                    <p>You calculate it by:</p>
+                    <ul>
+                        <li>Drawing a "flow graph" of the code (like a flowchart).</li>
+                        <li>Counting the number of "regions" in the graph (easiest way).</li>
+                        <li>Or, V(G) = E - N + 2 (where E = edges, N = nodes)</li>
+                        <li>Or, V(G) = P + 1 (where P = predicate nodes, i.e., <code>if</code>, <code>while</code> statements)</li>
+                    </ul>
+                    <p>If a function has a V(G) of 4, you know you need to design 4 specific tests to cover all "basis paths."</p>
+                    
+                    <div class="python-example">
+                        <div class="python-example-header">PYTHON EXAMPLE: Basis Path Testing & V(G)</div>
+                        <pre class="python-code" data-id="py-example-2">
+# --- The Component To Be Tested ---
+# This function has a few logical paths.
+def process_value(x):
+    # A single entry point (node 1)
+    print(f"Input: {x}")
+    
+    # A predicate node (P=1) (node 2)
+    if x < 10:
+        # Path 1
+        print("Path 1")
+    else:
+        # Path 2
+        print("Path 2")
+    
+    # Another predicate node (P=2) (node 3)
+    if x > 50:
+        # Path 3
+        print("Path 3")
+        
+    # A single exit point (node 4)
+    print("Done")
+
+# --- Analysis ---
+# This code has 2 predicate nodes ('if' statements).
+# Using the formula V(G) = P + 1:
+# V(G) = 2 + 1 = 3
+#
+# This tells us we need **3** basis path test cases
+# to cover all independent paths.
+#
+# A possible basis set of paths is:
+# Path A: (x < 10) is True, (x > 50) is False.  (e.g., x = 5)
+# Path B: (x < 10) is False, (x > 50) is False. (e.g., x = 30)
+# Path C: (x < 10) is False, (x > 50) is True.  (e.g., x = 100)
+#
+# (Note: Path (x < 10) True and (x > 50) True is impossible)
+
+# --- Driver and Test Cases ---
+# Announce the testing.
+print("--- Basis Path Testing ---")
+# **Test Case 1 (Path A: x = 5)**
+# This covers "Path 1" and skips "Path 3".
+print("\n**Test Case 1 (x=5):**")
+# Call the component.
+process_value(5)
+# **Test Case 2 (Path B: x = 30)**
+# This covers "Path 2" and skips "Path 3".
+print("\n**Test Case 2 (x=30):**")
+# Call the component.
+process_value(30)
+# **Test Case 3 (Path C: x = 100)**
+# This covers "Path 2" and "Path 3".
+print("\n**Test Case 3 (x=100):**")
+# Call the component.
+process_value(100)
+# We have now exercised every `print` statement with 3 tests.
+</pre>
+                        <div class="python-controls">
+                            <button class="run-btn" data-target="py-example-2">Run</button>
+                            <button class="clear-btn" data-target="py-example-2">Clear</button>
+                        </div>
+                        <pre class="python-output" id="output-py-example-2"></pre>
+                    </div>
+
+                    <svg class="svg-diagram" viewBox="0 0 250 350" aria-labelledby="basis-title">
+                        <title id="basis-title">Basis Path Flow Graph for V(G) = 3</title>
+                        <defs>
+                            <marker id="arrowhead-basis" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto" fill="var(--theme-text-accent)">
+                                <polygon points="0 0, 10 3.5, 0 7" />
+                            </marker>
+                        </defs>
+                        <text class="label" x="125" y="20" text-anchor="middle">Flow Graph (V(G) = 3)</text>
+                        
+                        <circle cx="125" cy="50" r="15" fill="var(--theme-bg)" stroke="var(--theme-text)" stroke-width="2"/>
+                        <text class="label" x="125" y="55" text-anchor="middle">1</text>
+                        
+                        <circle cx="125" cy="110" r="15" fill="var(--theme-bg)" stroke="var(--theme-text)" stroke-width="2"/>
+                        <text class="label" x="125" y="115" text-anchor="middle">2</text>
+                        <text class="label-light" x="150" y="115">(if x < 10)</text>
+
+                        <circle cx="75" cy="170" r="15" fill="var(--theme-bg)" stroke="var(--theme-text)" stroke-width="2"/>
+                        <text class="label" x="75" y="175" text-anchor="middle"> </text>
+                        <text class="label-light" x="50" y="175">Path 1</text>
+
+                        <circle cx="175" cy="170" r="15" fill="var(--theme-bg)" stroke="var(--theme-text)" stroke-width="2"/>
+                        <text class="label" x="175" y="175" text-anchor="middle"> </text>
+                        <text class="label-light" x="200" y="175">Path 2</text>
+
+                        <circle cx="125" cy="230" r="15" fill="var(--theme-bg)" stroke="var(--theme-text)" stroke-width="2"/>
+                        <text class="label" x="125" y="235" text-anchor="middle">3</text>
+                        <text class="label-light" x="150" y="235">(if x > 50)</text>
+
+                        <circle cx="125" cy="320" r="15" fill="var(--theme-bg)" stroke="var(--theme-text)" stroke-width="2"/>
+                        <text class="label" x="125" y="325" text-anchor="middle">4</text>
+
+                        <!-- Arrows -->
+                        <path class="arrow" marker-end="url(#arrowhead-basis)" d="M125,65 L125,95"></path>
+                        <path class="arrow" marker-end="url(#arrowhead-basis)" d="M115,125 L85,155"></path>
+                        <text class="label-light" x="100" y="135">T</text>
+                        <path class="arrow" marker-end="url(#arrowhead-basis)" d="M135,125 L165,155"></path>
+                        <text class="label-light" x="150" y="135">F</text>
+                        <path class="arrow" marker-end="url(#arrowhead-basis)" d="M85,185 L115,215"></path>
+                        <path class="arrow" marker-end="url(#arrowhead-basis)" d="M165,185 L135,215"></path>
+                        <path class="arrow" marker-end="url(#arrowhead-basis)" d="M125,245 L125,270"></path>
+                        <text class="label-light" x="140" y="260">F</text>
+                        <path class="arrow" marker-end="url(#arrowhead-basis)" d="M135,245 C 165,260 165,290 135,305"></path>
+                        <text class="label-light" x="160" y="275">T (Path 3)</text>
+                        <path class="arrow" d="M125,270 L125,305" stroke="var(--theme-text-accent)" stroke-width="2"></path>
+                    </svg>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[1.8] White-Box: Control Structure Testing (Loop Testing)</summary>
+                <div class="details-content">
+                    <p>Loops (<code>for</code>, <code>while</code>) are a common source of errors. Loop testing is a white-box technique that focuses exclusively on their validity. For a simple loop, we should test:</p>
+                    <ul>
+                        <li><strong>Skip the loop:</strong> Test what happens if the loop never runs (e.g., the list is empty).</li>
+                        <li><strong>One pass:</strong> Test the loop with only one item.</li>
+                        <li><strong>Two passes:</strong> Test with two items (to check for re-initialization errors).</li>
+                        <li><strong>m passes:</strong> Test with a "typical" number of items (where <em>m</em> < <em>n</em>, the max).</li>
+                        <li><strong>n-1, n, n+1 passes:</strong> Test at the <em>boundary</em> of the loop (if it has a known max <em>n</em>).</li>
+                    </ul>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing a new, high-tech elevator.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This demonstrates loop testing. The "loop" is the elevator's logic for processing its list of "floor requests."</p>
+                        <ul>
+                            <li><strong>Skip the loop:</strong> What happens if the elevator is at rest and <em>no buttons are pressed</em>? (It should do nothing).</li>
+                            <li><strong>One pass:</strong> A person gets in on floor 1 and presses "3". (Test a single request).</li>
+                            <li><strong>Two passes:</strong> A person on floor 1 presses "4", and another person on floor 2 presses "5". (Test a simple queue of requests).</li>
+                            <li><strong>m passes:</strong> Test with 5-6 requests in the queue.</li>
+                            <li><strong>n passes:</strong> Test with a <em>full</em> queue (the elevator's max, e.g., 10 requests). What happens if someone tries to add an 11th request? (This is the <em>n+1</em> test).</li>
+                        </ul>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[1.9] Black-Box Testing</summary>
+                <div class="details-content">
+                    <p>Now we switch to the opposite philosophy. <a href="https://en.wikipedia.org/wiki/Black-box_testing" target="_blank">Black-Box Testing</a> (also called "behavioral" or "functional" testing) treats the component as a "black box." The tester has <em>no knowledge</em> of the internal code or logic.</p>
+                    <p>The <em>only</em> thing the tester cares about is the <em>requirements</em>. They provide an input and check that the output is correct, according. They ask questions like:</p>
+                    <ul>
+                        <li>"How is functional validity tested?"</li>
+                        <li>"What classes of input will make good test cases?"</li>
+                        <li>"Is the system sensitive to certain input values?"</li>
+                    </ul>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing an ATM (Automated Teller Machine).</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This is the classic black-box example. As a user (a black-box tester), you have <em>no idea</em> what programming language the ATM uses. You don't have its source code. You are "outside the box." You test it based on its <em>expected behavior</em>:</p>
+                        <ul>
+                            <li><strong>Test 1:</strong> I put in my card, type my PIN (1234), request $100. <strong>Expected Output:</strong> The machine gives me $100 and a receipt.</li>
+                            <li><strong>Test 2:</strong> I put in my card, type a <em>wrong</em> PIN (9999), request $100. <strong>Expected Output:</strong> The machine shows an "Invalid PIN" error and gives no money.</li>
+                            <li><strong>Test 3:</strong> I put in my card, type my PIN, request $1,000,000. <strong>Expected Output:</strong> The machine shows an "Insufficient Funds" error.</li>
+                        </ul>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[1.10] Black-Box: Equivalence Partitioning</summary>
+                <div class="details-content">
+                    <p>This is a black-box technique for <em>reducing</em> the number of test cases. If an input field accepts a number from 1 to 100, you don't need to test all 100 values. Instead, you "partition" the input domain into "<a href="https://en.wikipedia.org/wiki/Equivalence_partitioning" target="_blank">equivalence classes</a>" where all values are treated the same <em>by the logic</em>. For "1 to 100", the partitions are:</p>
+                    <ul>
+                        <li><strong>Invalid:</strong> < 1 (e.g., -5, 0)</li>
+                        <li><strong>Valid:</strong> 1 to 100 (e.g., 50)</li>
+                        <li><strong>Invalid:</strong> > 100 (e.g., 101, 500)</li>
+                    </ul>
+                    <p>The theory is that a test with <em>50</em> will find the same bugs as a test with <em>30</em> or <em>70</em>. You only need to pick <em>one</em> value from each partition. This gives you 3 powerful test cases (-5, 50, 500) instead of hundreds of weak ones.</p>
+                    
+                    <svg class="svg-diagram" viewBox="0 0 600 150" aria-labelledby="ep-title">
+                        <title id="ep-title">Equivalence Partitioning Diagram</title>
+                        <defs>
+                            <marker id="arrowhead-ep" markerWidth="10" markerHeight="7" refX="5" refY="3.5" orient="auto" fill="var(--theme-text)">
+                                <polygon points="0 0, 10 3.5, 0 7" />
+                            </marker>
+                        </defs>
+                        <text class="label" x="300" y="20" text-anchor="middle">Equivalence Partitions for "1-100"</text>
+                        <!-- Number line -->
+                        <path d="M10, 70 L590, 70" stroke="var(--theme-text)" stroke-width="2" marker-end="url(#arrowhead-ep)" marker-start="url(#arrowhead-ep)"></path>
+                        
+                        <!-- Partition 1 (Invalid) -->
+                        <path d="M20, 90 L180, 90" stroke="var(--red)" stroke-width="3"></path>
+                        <text class="label" fill="var(--red)" x="100" y="110" text-anchor="middle">Partition 1: Invalid (< 1)</text>
+                        <text class="label" fill="var(--red)" x="100" y="130" text-anchor="middle">Test: -5</text>
+                        <path d="M190, 60 L190, 80" stroke="var(--theme-text)" stroke-width="2"></path>
+                        <text class="label-light" x="190" y="55" text-anchor="middle">1</text>
+
+                        <!-- Partition 2 (Valid) -->
+                        <path d="M200, 90 L390, 90" stroke="var(--green)" stroke-width="3"></path>
+                        <text class="label" fill="var(--green)" x="295" y="110" text-anchor="middle">Partition 2: Valid (1-100)</text>
+                        <text class="label" fill="var(--green)" x="295" y="130" text-anchor="middle">Test: 50</text>
+                        <path d="M400, 60 L400, 80" stroke="var(--theme-text)" stroke-width="2"></path>
+                        <text class="label-light" x="400" y="55" text-anchor="middle">100</text>
+
+                        <!-- Partition 3 (Invalid) -->
+                        <path d="M410, 90 L570, 90" stroke="var(--red)" stroke-width="3"></path>
+                        <text class="label" fill="var(--red)" x="490" y="110" text-anchor="middle">Partition 3: Invalid (> 100)</text>
+                        <text class="label" fill="var(--red)" x="490" y="130" text-anchor="middle">Test: 101</text>
+                    </svg>
+
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing a website's "Age" field for buying wine (must be 21 or older).</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This shows how to partition input data. The partitions are:</p>
+                        <ul>
+                            <li><strong>Invalid (Underage):</strong> Age < 21. (We'll pick: <em>17</em>)</li>
+                            <li><strong>Valid (Of Age):</strong> Age >= 21. (We'll pick: <em>35</em>)</li>
+                            <li>(We might also add partitions for absurd-but-possible inputs)</li>
+                            <li><strong>Invalid (Absurd low):</strong> Age < 0. (We'll pick: <em>-5</em>)</li>
+                            <li><strong>Invalid (Absurd high):</strong> Age > 130. (We'll pick: <em>200</em>)</li>
+                            <li><strong>Invalid (Type):</strong> Not a number. (We'll pick: <em>"hello"</em>)</li>
+                        </ul>
+                        <p>We now have 5 test cases (17, 35, -5, 200, "hello") that cover all logical partitions.</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[1.11] Black-Box: Boundary Value Analysis (BVA)</summary>
+                <div class="details-content">
+                    <p><a href="https://en.wikipedia.org/wiki/Boundary-value_analysis" target="_blank">Boundary Value Analysis (BVA)</a> is a partner to Equivalence Partitioning. It's based on the fact that a <em>huge</em> number of errors happen <em>at the boundaries</em> of an equivalence class. Programmers make "off-by-one" errors. They use <code><</code> (less than) when they meant <code><=</code> (less than or equal). So, for our "1 to 100" example, BVA says we must test <em>at</em> and <em>just next to</em> the boundaries:</p>
+                    <ul>
+                        <li><strong>Boundary 1 (Min):</strong> Test <strong>0</strong> (invalid), <strong>1</strong> (valid), <strong>2</strong> (valid).</li>
+                        <li><strong>Boundary 2 (Max):</strong> Test <strong>99</strong> (valid), <strong>100</strong> (valid), <strong>101</strong> (invalid).</li>
+                    </ul>
+                    <p>Combining BVA and Equivalence Partitioning is a very powerful way to design black-box tests.</p>
+                    
+                    <svg class="svg-diagram" viewBox="0 0 600 150" aria-labelledby="bva-title">
+                        <title id="bva-title">Boundary Value Analysis Diagram</title>
+                        <text class="label" x="300" y="20" text-anchor="middle">Boundary Value Analysis for "1-100"</text>
+                        <!-- Number line -->
+                        <path d="M10, 70 L590, 70" stroke="var(--theme-text)" stroke-width="2"></path>
+                        
+                        <!-- Min Boundary -->
+                        <text class="label" x="100" y="45" text-anchor="middle">Min Boundary</text>
+                        <path d="M100, 60 L100, 80" stroke="var(--theme-text-accent)" stroke-width="2"></path>
+                        <text class="label" x="100" y="100" text-anchor="middle">0</text>
+                        <path d="M130, 60 L130, 80" stroke="var(--theme-text-accent)" stroke-width="2"></path>
+                        <text class="label" x="130" y="100" text-anchor="middle">1</text>
+                        <path d="M160, 60 L160, 80" stroke="var(--theme-text-accent)" stroke-width="2"></path>
+                        <text class="label" x="160" y="100" text-anchor="middle">2</text>
+                        <rect x="90" y="50" width="100" height="60" stroke="var(--theme-text-accent)" stroke-dasharray="4 4" fill="none" rx="5"></rect>
+
+                        <!-- Max Boundary -->
+                        <text class="label" x="470" y="45" text-anchor="middle">Max Boundary</text>
+                        <path d="M440, 60 L440, 80" stroke="var(--theme-text-accent)" stroke-width="2"></path>
+                        <text class="label" x="440" y="100" text-anchor="middle">99</text>
+                        <path d="M470, 60 L470, 80" stroke="var(--theme-text-accent)" stroke-width="2"></path>
+                        <text class="label" x="470" y="100" text-anchor="middle">100</text>
+                        <path d="M500, 60 L500, 80" stroke="var(--theme-text-accent)" stroke-width="2"></path>
+                        <text class="label" x="500" y="100" text-anchor="middle">101</text>
+                        <rect x="430" y="50" width="80" height="60" stroke="var(--theme-text-accent)" stroke-dasharray="4 4" fill="none" rx="5"></rect>
+                    </svg>
+
+                    <div class="python-example">
+                        <div class="python-example-header">PYTHON EXAMPLE: Finding a Bug with BVA</div>
+                        <pre class="python-code" data-id="py-example-3">
+# --- The Component To Be Tested ---
+# This function has a bug! It uses '<' instead of '<='.
+def is_discount_code_valid(code):
+    # Check if the code is a number
+    if not isinstance(code, int):
+        # Path 1: Not an integer
+        return False
+    # Check if the code is in the valid range
+    # **BUG HERE!** Should be `code >= 1000`
+    if code > 1000 and code < 2000:
+        # Path 2: Valid
+        return True
+    else:
+        # Path 3: Out of range
+        return False
+
+# --- Driver (Test Cases using BVA) ---
+# We will test the boundaries: 1000 and 2000
+# Our test points will be: 999, 1000, 1001 and 1999, 2000, 2001
+# Announce the testing.
+print("--- Boundary Value Analysis (BVA) ---")
+
+# A helper function to run tests
+def run_bva_test(test_value, expected_result):
+    # Run the test
+    actual_result = is_discount_code_valid(test_value)
+    # Check the result
+    if actual_result == expected_result:
+        # Pass
+        print(f"Test {test_value}: PASSED (Expected: {expected_result})")
+    else:
+        # Fail
+        print(f"***Test {test_value}: FAILED! (Expected: {expected_result}, Got: {actual_result})***")
+
+# --- Test the 'min' boundary (1000) ---
+# Test just below the boundary
+run_bva_test(999, False)
+# Test *at* the boundary
+run_bva_test(1000, True)  # This test will FAIL and find our bug!
+# Test just above the boundary
+run_bva_test(1001, True)
+
+# --- Test the 'max' boundary (2000) ---
+# Test just below the boundary
+run_bva_test(1999, True)
+# Test *at* the boundary
+run_bva_test(2000, True)  # This test will ALSO FAIL!
+# Test just above the boundary
+run_bva_test(2001, False)
+</pre>
+                        <div class="python-controls">
+                            <button class="run-btn" data-target="py-example-3">Run</button>
+                            <button class="clear-btn" data-target="py-example-3">Clear</button>
+                        </div>
+                        <pre class="python-output" id="output-py-example-3"></pre>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[1.12] Object-Oriented (OO) Testing: Class Testing</summary>
+                <div class="details-content">
+                    <p>When we move to Object-Oriented (OO) programming, the "unit" is no longer a single function. The smallest testable unit is the <strong>Class</strong>. We can't just test a single method (function) in isolation, because that method might depend on the <strong>state</strong> of the object (i.e., its internal data or attributes).</p>
+                    <p>For example, a <code>BankAccount</code> class might have a <code>withdraw()</code> method. Testing it "in isolation" makes no sense. We <em>must</em> first call the <code>deposit()</code> method to change the object's <code>balance</code> attribute. Class testing, therefore, involves testing <strong>sequences</strong> of operations that change the object's state.</p>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing the <code>ShoppingCart</code> class for an e-commerce site.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This shows how OO testing requires testing "state" and "sequences." We can't just test the <code>checkout()</code> method. We have to test a <em>sequence</em> of method calls that represents a "life history" of the object:</p>
+                        <p><strong>Test Sequence 1 (Normal):</strong></p>
+                        <ol>
+                            <li><code>cart = new ShoppingCart()</code> (Test the <em>constructor</em>)</li>
+                            <li><code>cart.addItem("apple")</code> (Test <em>addItem</em>)</li>
+                            <li><code>cart.addItem("orange")</code></li>
+                            <li><code>total = cart.getTotal()</code> (Test <em>getTotal</em>. Should be > 0)</li>
+                            <li><code>cart.checkout()</code> (Test <em>checkout</em> in a valid state)</li>
+                        </ol>
+                        <p><strong>Test Sequence 2 (Error State):</strong></p>
+                        <ol>
+                            <li><code>cart = new ShoppingCart()</code></li>
+                            <li><code>cart.checkout()</code> (Test <em>checkout</em> when cart is empty. Should fail gracefully).</li>
+                        </ol>
+                        <p><strong>Test Sequence 3 (Remove item):</strong></p>
+                        <ol>
+                            <li><code>cart = new ShoppingCart()</code></li>
+                            <li><code>cart.addItem("apple")</code></li>
+                            <li><code>cart.removeItem("apple")</code> (Test <em>removeItem</em>)</li>
+                            <li><code>total = cart.getTotal()</code> (Test <em>getTotal</em>. Should be 0)</li>
+                            <li><code>cart.checkout()</code> (Test <em>checkout</em> when cart is now empty)</li>
+                        </ol>
+                    </div>
+                </div>
+            </details>
+            
+            <h2>PART 2: INTEGRATION-LEVEL TESTING</h2>
+
+            <details class="lecture-part">
+                <summary>[2.0] Introduction to Integration Testing</summary>
+                <div class="details-content">
+                    <p>We have successfully "unit tested" all our components. They all work perfectly... in isolation. Now, we must assemble them. <a href="https://en.wikipedia.org/wiki/Integration_testing" target="_blank">Integration testing</a> is a systematic technique for building the software architecture while <em>simultaneously</em> testing the interfaces between components. The goal is to find errors that occur <em>when components interact</em>.</p>
+                    <p>Common integration errors include:</p>
+                    <ul>
+                        <li><strong>Data loss:</strong> One component passes data, but the receiving component misinterprets it (e.g., "Is that value in feet or meters?").</li>
+                        <li><strong>Adverse effects:</strong> Component A works fine, but when it runs, it accidentally overwrites a piece of memory that Component B was using, causing B to fail.</li>
+                        <li><strong>Interface mismatch:</strong> Component A passes three arguments, but Component B was updated to only expect two.</li>
+                    </ul>
+                    <p>A "Big Bang" approach, where you combine <em>everything</em> at once and test, is a recipe for chaos. When a test fails, you have no idea <em>which</em> of the 100 new integrations caused the bug. We must use an incremental strategy.</p>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Building a car.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This shows the "Big Bang" failure vs. an incremental approach.</p>
+                        <ul>
+                            <li><strong>Big Bang:</strong> You build the engine, transmission, steering wheel, and brakes <em>all separately</em> and confirm they work (unit testing). Then, you bolt them <em>all</em> into the car at the same time. You turn the key, and the car lurches and crashes. What failed? Was it the engine-to-transmission connection? The steering-to-wheel connection? You have no idea.</li>
+                            <li><strong>Incremental:</strong>
+                                <ol>
+                                    <li>Connect <em>just</em> the engine to the transmission. Test that integration.</li>
+                                    <li><em>Then</em>, connect the transmission to the wheels. Test that integration.</li>
+                                    <li><em>Then</em>, connect the steering wheel to the steering rack. Test that.</li>
+                                </ol>
+                                This incremental approach lets you pinpoint failures at each new "interface."
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[2.1] Top-Down Integration</summary>
+                <div class="details-content">
+                    <p>This is an incremental strategy that starts at the "top" of the program: the main control module (e.g., the main menu or the <code>main()</code> function).</p>
+                    <ol>
+                        <li>You start with the <em>main</em> module.</li>
+                        <li>All modules that <em>main</em> calls are replaced with <strong>Stubs</strong>.</li>
+                        <li>You test the <em>main</em> module's logic.</li>
+                        <li>One by one, you replace a <em>Stub</em> with the <em>real</em> unit-tested component.</li>
+                        <li>You re-run your tests to make sure the new integration works.</li>
+                        <li>You repeat this, moving <em>downward</em> through the program's control hierarchy.</li>
+                    </ol>
+                    <p>This approach is good because it tests the major control and decision-making logic of the application very early.</p>
+                    
+                    <svg class="svg-diagram" viewBox="0 0 500 300" aria-labelledby="topdown-title">
+                        <title id="topdown-title">Top-Down Integration Diagram</title>
+                        <defs>
+                            <marker id="arrowhead-td" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto" fill="var(--theme-text-accent)">
+                                <polygon points="0 0, 10 3.5, 0 7" />
+                            </marker>
+                        </defs>
+                        <text class="label" x="250" y="20" text-anchor="middle">Top-Down Integration</text>
+                        <rect class="box" x="175" y="40" width="150" height="50"></rect>
+                        <text class="box-text" x="250" y="70" text-anchor="middle">Main Module</text>
+
+                        <rect class="box" x="40" y="140" width="120" height="50"></rect>
+                        <text class="box-text" x="100" y="170" text-anchor="middle">Module A</text>
+
+                        <rect class="border" x="190" y="140" width="120" height="50"></rect>
+                        <text class="label" x="250" y="170" text-anchor="middle">Stub B</text>
+
+                        <rect class="border" x="340" y="140" width="120" height="50"></rect>
+                        <text class="label" x="400" y="170" text-anchor="middle">Stub C</text>
+                        
+                        <rect class="border" x="40" y="240" width="120" height="50"></rect>
+                        <text class="label" x="100" y="270" text-anchor="middle">Stub A1</text>
+                        
+                        <rect class="border" x="190" y="240" width="120" height="50"></rect>
+                        <text class="label" x="250" y="270" text-anchor="middle">Stub A2</text>
+
+                        <!-- Arrows -->
+                        <path class="arrow" marker-end="url(#arrowhead-td)" d="M220,90 L130,140"></path>
+                        <path class="arrow" marker-end="url(#arrowhead-td)" d="M250,90 L250,140"></path>
+                        <path class="arrow" marker-end="url(#arrowhead-td)" d="M280,90 L370,140"></path>
+                        
+                        <path class="arrow" marker-end="url(#arrowhead-td)" d="M100,190 L100,240"></path>
+                        <path class="arrow" marker-end="url(#arrowhead-td)" d="M130,190 L220,240"></path>
+                    </svg>
+
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Integrating a new fast-food "Point of Sale" (POS) system.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This shows a top-down integration.</p>
+                        <ol>
+                            <li>Start with the "Main Menu" screen (the top-level module).</li>
+                            <li>The "Take Order," "Process Payment," and "Kitchen Report" buttons are all just <em>stubs</em>. Clicking "Process Payment" just shows a message: "STUB: Payment module called."</li>
+                            <li>Test the Main Menu logic (e.g., can you navigate between fake buttons?).</li>
+                            <li><strong>Integration Step 1:</strong> Replace the "Take Order" <em>stub</em> with the <em>real</em> "Order" module. Now you can test the <em>real</em> interaction between the Main Menu and the Order screen. The "Process Payment" button is <em>still a stub</em>.</li>
+                            <li><strong>Integration Step 2:</strong> Replace the "Process Payment" <em>stub</em> with the <em>real</em> "Payment" module. Now you can test the full flow: Main Menu -> Order -> Payment.</li>
+                        </ol>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[2.2] Bottom-Up Integration</summary>
+                <div class="details-content">
+                    <p>This is the opposite approach. It starts at the "bottom" with the lowest-level, most fundamental components (e.g., utility functions, database access modules).</p>
+                    <ol>
+                        <li>You group low-level components into "clusters" or "builds" that perform a specific sub-function.</li>
+                        <li>You use a <strong>Driver</strong> to call this cluster and test it.</li>
+                        <li>You gradually combine clusters, moving <em>upward</em> through the program structure.</li>
+                        <li>Drivers are removed as higher-level modules are added (since the higher-level modules become the new "drivers" for the cluster).</li>
+                    </ol>
+                    <p>This approach is good because it tests the fundamental, low-level utility and data-processing functions very early. You don't need stubs.</p>
+
+                    <svg class="svg-diagram" viewBox="0 0 500 300" aria-labelledby="bottomup-title">
+                        <title id="bottomup-title">Bottom-Up Integration Diagram</title>
+                        <defs>
+                            <marker id="arrowhead-bu" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto" fill="var(--theme-text-accent)">
+                                <polygon points="0 0, 10 3.5, 0 7" />
+                            </marker>
+                        </defs>
+                        <text class="label" x="250" y="20" text-anchor="middle">Bottom-Up Integration</text>
+                        <rect class="box" x="175" y="40" width="150" height="50"></rect>
+                        <text class="box-text" x="250" y="70" text-anchor="middle">Main Module</text>
+
+                        <rect class="box" x="80" y="140" width="120" height="50"></rect>
+                        <text class="box-text" x="140" y="170" text-anchor="middle">Module A</text>
+
+                        <rect class="box" x="190" y="140" width="120" height="50"></rect>
+                        <text class="box-text" x="250" y="170" text-anchor="middle">Module B</text>
+
+                        <rect class="box" x="340" y="140" width="120" height="50"></rect>
+                        <text class="box-text" x="400" y="170" text-anchor="middle">Module C</text>
+                        
+                        <rect class="box" x="80" y="240" width="120" height="50"></rect>
+                        <text class="box-text" x="140" y="270" text-anchor="middle">Module A1</text>
+                        
+                        <rect class="box" x="190" y="240" width="120" height="50"></rect>
+                        <text class="box-text" x="250" y="270" text-anchor="middle">Module A2</text>
+                        
+                        <rect class="border" x="10" y="140" width="60" height="50"></rect>
+                        <text class="label" x="40" y="170" text-anchor="middle">Driver</text>
+
+                        <!-- Arrows -->
+                        <path class="arrow" marker-end="url(#arrowhead-bu)" d="M70, 165 L80, 165"></path>
+                        <path class="arrow" marker-end="url(#arrowhead-bu)" d="M220,90 L140,140"></path>
+                        <path class="arrow" marker-end="url(#arrowhead-bu)" d="M250,90 L250,140"></path>
+                        <path class="arrow" marker-end="url(#arrowhead-bu)" d="M280,90 L370,140"></path>
+                        
+                        <path class="arrow" marker-end="url(#arrowhead-bu)" d="M140,190 L140,240"></path>
+                        <path class="arrow" marker-end="url(#arrowhead-bu)" d="M150,190 L220,240"></path>
+                    </svg>
+
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Integrating the same fast-food "Point of Sale" (POS) system.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This shows a bottom-up integration.</p>
+                        <ol>
+                            <li><strong>Integration Step 1:</strong> Start with the <em>lowest</em> level: the <code>DatabaseConnection</code> module and the <code>CreditCardValidation</code> module. Write a <em>Driver</em> (a test program) that calls these two modules together to form a "Payment" cluster. Test it thoroughly.</li>
+                            <li><strong>Integration Step 2:</strong> Now, build the "Take Order" module. Write a <em>Driver</em> that tests it.</li>
+                            <li><strong>Integration Step 3:</strong> Combine your "Payment" cluster and "Take Order" module into a higher-level "Full Transaction" module. The "Full Transaction" module now <em>is</em> the driver for the lower-level modules.</li>
+                            <li><strong>Final Step:</strong> Add the "Main Menu" module on top. It calls the "Full Transaction" module.</li>
+                        </ol>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[2.3] Continuous Integration (CI) and Smoke Testing</summary>
+                <div class="details-content">
+                    <p><strong><a href="https://en.wikipedia.org/wiki/Continuous_integration" target="_blank">Continuous Integration (CI)</a></strong> is a common practice in agile and DevOps teams. It's the practice of merging all developers' work into a central "mainline" branch <em>continuously</em>—often multiple times per day. Each merge triggers an automated build and test.</p>
+                    <p><strong><a href="https://en.wikipedia.org/wiki/Smoke_testing_(software)" target="_blank">Smoke Testing</a></strong> is the test that is run <em>every single time</em> a new build is created (e.g., by the CI system).</p>
+                    <ul>
+                        <li>It is a <em>shallow</em> and <em>wide</em> test, not a deep one.</li>
+                        <li>It's designed to answer one question: "Did this new change <em>break</em> the build so badly that we can't even test it?"</li>
+                        <li>It exercises the <em>entire</em> system from end-to-end, but only for its most critical, high-level functions.</li>
+                        <li>If the smoke test <em>fails</em>, the build is immediately rejected, and no more testing is done until it's fixed. It's called a smoke test because, in old hardware, if you turned it on and it didn't smoke, it was "good to go" for more testing.</li>
+                    </ul>
+
+                    <svg class="svg-diagram" viewBox="0 0 600 200" aria-labelledby="ci-title">
+                        <title id="ci-title">Continuous Integration (CI) and Smoke Testing Loop</title>
+                        <defs>
+                            <marker id="arrowhead-ci" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto" fill="var(--theme-text-accent)">
+                                <polygon points="0 0, 10 3.5, 0 7" />
+                            </marker>
+                        </defs>
+                        <rect class="box" x="20" y="70" width="100" height="60"></rect>
+                        <text class="box-text" x="70" y="105" text-anchor="middle">Developer</text>
+                        
+                        <rect class="box" x="160" y="70" width="100" height="60"></rect>
+                        <text class="box-text" x="210" y="105" text-anchor="middle">Commit</text>
+                        
+                        <rect class="box" x="300" y="70" width="100" height="60"></rect>
+                        <text class="box-text" x="350" y="95" text-anchor="middle">CI Server</text>
+                        <text class="box-text" x="350" y="115" text-anchor="middle" font-size="12px">(Build)</text>
+                        
+                        <rect class="box" x="440" y="70" width="120" height="60"></rect>
+                        <text class="box-text" x="500" y="95" text-anchor="middle">Smoke Test</text>
+                        
+                        <!-- Arrows -->
+                        <path class="arrow" marker-end="url(#arrowhead-ci)" d="M120,100 L160,100"></path>
+                        <path class="arrow" marker-end="url(#arrowhead-ci)" d="M260,100 L300,100"></path>
+                        <path class="arrow" marker-end="url(#arrowhead-ci)" d="M400,100 L440,100"></path>
+                        
+                        <!-- Loopback -->
+                        <path class="arrow" marker-end="url(#arrowhead-ci)" d="M500,130 L500,170 L70,170 L70,130"></path>
+                        <text class="label" x="285" y="185" text-anchor="middle">Pass / Fail Feedback</text>
+                    </svg>
+
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: A 10-person development team working on a new website.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This shows CI and smoke testing in action.</p>
+                        <ul>
+                            <li><strong>Without CI:</strong> All 10 developers work in isolation for a month. On "Integration Day," they all try to merge their code. It's chaos. Nothing works.</li>
+                            <li><strong>With CI:</strong>
+                                <ol>
+                                    <li>Developer A finishes a <em>small</em> new feature (e.g., changing a button color).</li>
+                                    <li>She <em>commits</em> her change to the central repository.</li>
+                                    <li>The <strong>CI Server</strong> (like Jenkins or GitHub Actions) automatically detects this change.</li>
+                                    <li>It <em>builds</em> the entire website.</li>
+                                    <li>It <em>runs the <strong>Smoke Test</strong></em>. The smoke test might just:
+                                        <ul>
+                                            <li>Load the Homepage.</li>
+                                            <li>Try to log in with a test account.</li>
+                                            <li>Visit the "Products" page.</li>
+                                            <li>Log out.</li>
+                                        </ul>
+                                    </li>
+                                    <li>This whole process takes 60 seconds. The test <em>passes</em>. The build is "green."</li>
+                                    <li>Developer B now commits <em>his</em> change. The CI server builds and runs the smoke test... which <em>FAILS</em>. The login page is broken.</li>
+                                    <li>The build is "red." The <em>entire team</em> is notified. Developer B <em>immediately</em> fixes the bug before it causes problems for anyone else.</li>
+                                </ol>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[2.4] Regression Testing</summary>
+                <div class="details-content">
+                    <p>Each time you add a new component or fix a bug, you create a risk. You might have <em>unintentionally</em> broken something else that <em>used to work</em>. This is called a "regression."</p>
+                    <p><strong><a href="https://en.wikipedia.org/wiki/Regression_testing" target="_blank">Regression Testing</a></strong> is the re-execution of a <em>subset</em> of tests that have already been conducted, to ensure that changes have not introduced new, unintended side effects. As you build your test suite, you "tag" certain tests as "regression tests." These are the most critical, end-to-end tests. Every time a major change is made, this "regression suite" is run to ensure the core functionality is still intact. This is often automated.</p>
+                    
+                    <div class="python-example">
+                        <div class="python-example-header">PYTHON EXAMPLE: Catching a Regression</div>
+                        <pre class="python-code" data-id="py-example-4">
+# --- The Original Component ---
+# This class worked perfectly.
+class Calculator_v1:
+    # The add method.
+    def add(self, a, b):
+        # Return the sum.
+        return a + b
+
+# --- The "Regression Test Suite" ---
+# This test was written for v1.
+def run_regression_suite(calculator_instance):
+    # Announce the test.
+    print(f"\n--- Running REGRESSION suite on {type(calculator_instance).__name__} ---")
+    # Define the test.
+    expected = 5
+    # Run the add test.
+    actual = calculator_instance.add(2, 3)
+    # Check the result.
+    if actual == expected:
+        # Pass
+        print("REGRESSION TEST (add): PASSED")
+        # Return True for success.
+        return True
+    else:
+        # Fail
+        print(f"***REGRESSION TEST (add): FAILED! (Expected {expected}, Got {actual})***")
+        # Return False for failure.
+        return False
+
+# --- The New Component (v2) ---
+# A developer adds a new 'multiply' method...
+# ...and *accidentally* introduces a bug in 'add'.
+class Calculator_v2:
+    # The add method.
+    def add(self, a, b):
+        # ***Accidental Bug!*** The developer broke this.
+        return a + b + 1  # Oops!
+    
+    # The new multiply method.
+    def multiply(self, a, b):
+        # Return the product.
+        return a * b
+
+# --- Driver (Test Execution) ---
+# Create an instance of the *old* version.
+calc_v1 = Calculator_v1()
+# Run regression tests on v1. It passes.
+run_regression_suite(calc_v1)
+
+# Now, the developer finishes v2.
+calc_v2 = Calculator_v2()
+# We run the *same regression test* on the *new version*.
+# **This test will catch the regression!**
+run_regression_suite(calc_v2)
+</pre>
+                        <div class="python-controls">
+                            <button class="run-btn" data-target="py-example-4">Run</button>
+                            <button class="clear-btn" data-target="py-example-4">Clear</button>
+                        </div>
+                        <pre class="python-output" id="output-py-example-4"></pre>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[2.5] Integration Testing in an Object-Oriented (OO) Context</summary>
+                <div class="details-content">
+                    <p>In OO systems, the "control hierarchy" is not as clear as in a top-down procedural program. Integration is driven by "collaborations" between classes. Two main strategies:</p>
+                    <ul>
+                        <li><strong>Thread-Based Testing:</strong> Integrates the set of classes required to respond to <em>one specific input</em> or <em>event</em> for the system. You test one "thread" of execution from start to finish. For example, you test the entire "User Login" thread, which might involve the <code>LoginForm</code> class, the <code>UserController</code> class, the <code>UserDatabase</code> class, and the <code>SessionManager</code> class.</li>
+                        <li><strong>Use-Based Testing:</strong> Starts by testing "independent" classes that use few (or no) other classes. Then, it tests "dependent" classes that use the first set. You build the system in layers of dependency.</li>
+                    </ul>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing a "Make Post" feature on a social media app.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This demonstrates Thread-Based Testing. The "Make Post" <em>thread</em> involves multiple classes: <code>TextBox</code> -> <code>PostButton</code> -> <code>PostController</code> -> <code>DatabaseService</code> -> <code>TimelineFeed</code></p>
+                        <p>A thread-based integration test would <em>not</em> test these classes one-by-one. It would test the <em>entire sequence</em> as a single integration test:</p>
+                        <ol>
+                            <li><strong>Test:</strong> Type text into the <code>TextBox</code>.</li>
+                            <li>Click the <code>PostButton</code>.</li>
+                            <li>Check that the <code>TimelineFeed</code> is <em>actually</em> updated.</li>
+                        </ol>
+                        <p>This single test verifies the integrations between all 5 classes in this "thread."</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[2.6] Scenario-Based Testing</summary>
+                <div class="details-content">
+                    <p>This is a higher-level integration testing method. It's similar to thread-based testing but focuses on the <em>user's perspective</em>. Instead of testing a single technical "thread," scenario-based testing focuses on "use cases" or "user stories." The goal is to design tests that model the <em>tasks a user actually performs</em>. This is excellent at finding "interaction errors"—bugs that only appear when a user combines features in a specific way.</p>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing a banking application.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This shows a user scenario. A <em>thread-based test</em> might be "Test <code>check_balance()</code>." A <em>scenario-based test</em> is:</p>
+                        <p><strong>Scenario: "User is worried about a check clearing."</strong></p>
+                        <ol>
+                            <li>User logs in (tests <code>Login</code> class).</li>
+                            <li>User checks their checking account balance (tests <code>Balance</code> module).</li>
+                            <li>User looks at their transaction history (tests <code>History</code> module).</li>
+                            <li>User sees the check hasn't cleared.</li>
+                            <li>User transfers $100 from "Savings" to "Checking" to be safe (tests <code>Transfer</code> module).</li>
+                            <li>User logs out (tests <code>Logout</code> class).</li>
+                        </ol>
+                        <p>This <em>one</em> scenario is a powerful integration test that weaves together 5 different modules, just as a real user would.</p>
+                    </div>
+                </div>
+            </details>
+            
+            <h2>PART 3: SPECIALIZED AND SYSTEM-LEVEL TESTING</h2>
+
+            <details class="lecture-part">
+                <summary>[3.0] Validation Testing</summary>
+                <div class="details-content">
+                    <p>We have finished unit testing and integration testing. We have <em>verified</em> that the product is "built right." Now, we must <em>validate</em> that we "built the <em>right</em> product."</p>
+                    <p><a href="https://en.wikipedia.org/wiki/Software_validation" target="_blank">Validation testing</a> begins at the end of integration. It's a series of tests to ensure the software conforms to <em>customer requirements</em>. This is high-level, black-box testing. The test cases are based directly on the <em>user stories</em> and <em>requirements documents</em> we gathered at the very beginning of the project.</p>
+                    <p>If a requirement was "The user must be able to undo a deletion," you write a validation test:</p>
+                    <ol>
+                        <li>Log in.</li>
+                        <li>Create a record.</li>
+                        <li>Delete the record.</li>
+                        <li>Click the "Undo" button.</li>
+                        <li><strong>Verify</strong> the record has reappeared.</li>
+                    </ol>
+                    <p>If this test passes, that requirement is <em>validated</em>.</p>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Validating a new pizza-ordering website.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This is testing against user requirements. The requirements document has a user story: "As a user, I want to order a 'Half-and-Half' pizza so I can share with my picky friend."</p>
+                        <p><strong>Validation Test:</strong></p>
+                        <ol>
+                            <li>Go to the website.</li>
+                            <li>Select "Large Pizza."</li>
+                            <li>Select the "Half-and-Half" option.</li>
+                            <li>Add "Pepperoni" to the <em>left</em> half.</li>
+                            <li>Add "Pineapple" to the <em>right</em> half.</li>
+                            <li>Add to cart and check out.</li>
+                        </ol>
+                        <p><strong>Expected Result:</strong> The final order summary clearly lists "Large Half-and-Half: (L) Pepperoni, (R) Pineapple." If this works, the requirement is validated.</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[3.1] Alpha and Beta Testing</summary>
+                <div class="details-content">
+                    <p>Validation testing is often done by the development team or ITG. But for software products built for a wide audience, there's a final step: <a href="https://en.wikipedia.org/wiki/Acceptance_testing" target="_blank">Acceptance Testing</a>. This is where the <em>customer</em> tests the software. This is often done in two phases:</p>
+                    <ul>
+                        <li><strong>Alpha Test:</strong> This is conducted <em>at the developer's site</em> (in a controlled environment). The "customers" (a select group of real users) are invited to come in and use the software. The developers "look over their shoulder," watch how they use it, and record any errors or usage problems.</li>
+                        <li><strong>Beta Test:</strong> This is conducted <em>at the end-user's sites</em> (in the "wild"). The developer is <em>not</em> present. The software is given to a wider group of external users (beta testers) who use it for their real, day-to-day work. They report bugs back to the developer. This is a "live" test in an uncontrolled environment and is invaluable for finding bugs related to real-world hardware, network conditions, and user behaviors.</li>
+                    </ul>
+
+                    <svg class="svg-diagram" viewBox="0 0 500 200" aria-labelledby="ab-title">
+                        <title id="ab-title">Alpha vs. Beta Testing Diagram</title>
+                        <!-- Alpha Test -->
+                        <rect class="box" x="20" y="40" width="220" height="120"></rect>
+                        <text class="box-text" x="130" y="70" text-anchor="middle">Alpha Test</text>
+                        <text class="box-text" x="130" y="100" text-anchor="middle" font-size="14px">Location: Developer's Site</text>
+                        <text class="box-text" x="130" y="120" text-anchor="middle" font-size="14px">Environment: Controlled</text>
+                        <text class="box-text" x="130" y="140" text-anchor="middle" font-size="14px">Users: Select few</text>
+
+                        <!-- Beta Test -->
+                        <rect class="box" x="260" y="40" width="220" height="120"></rect>
+                        <text class="box-text" x="370" y="70" text-anchor="middle">Beta Test</text>
+                        <text class="box-text" x="370" y="100" text-anchor="middle" font-size="14px">Location: User's Site ("Wild")</text>
+                        <text class="box-text" x="370" y="120" text-anchor="middle" font-size="14px">Environment: Uncontrolled</text>
+                        <text class="box-text" x="370" y="140" text-anchor="middle" font-size="14px">Users: Wide audience</text>
+                    </svg>
+
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Releasing a new video game.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This is the classic Alpha/Beta example.</p>
+                        <ul>
+                            <li><strong>Alpha Test:</strong> The game company invites 20 local fans to their headquarters for a "playtest" weekend. The fans play the game in the company's lab while developers watch, take notes, and ask questions. ("Did you find that level confusing?")</li>
+                            <li><strong>Beta Test:</strong> The company releases a "Closed Beta" or "Open Beta" version of the game on the internet. 500,000 people download it and play it <em>at home</em> on their <em>own PCs</em> and <em>own internet connections</em>. They discover that the game crashes on a specific graphics card (an environmental bug) and that one mission is "too hard" (a usability bug). They report this in a "bug report" forum.</li>
+                        </ul>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[3.2] Specialized Testing for Mobility</summary>
+                <div class="details-content">
+                    <p>When we test mobile applications (MobileApps), we have a new, unique set of challenges. The testing strategy must be specialized. Key issues include:</p>
+                    <ul>
+                        <li><strong>Device Compatibility:</strong> The app must work on hundreds of different device/OS combinations (iPhone 13 on iOS 17, Samsung Galaxy on Android 14, Google Pixel on Android 13, etc.).</li>
+                        <li><strong>Connectivity:</strong> The app must handle network <em>changes</em> gracefully. What happens when the user's connection switches from Wi-Fi to 5G? What happens when they go into an elevator and have <em>no connection</em>?</li>
+                        <li><strong>Performance:</strong> Mobile devices have less power, less memory, and (most importantly) a <em>battery</em>. Does your app drain the battery? Does it load quickly on a slow network?</li>
+                        <li><strong>Context:</strong> Mobile apps are "context-aware." They use GPS (Global Positioning System), the camera, the accelerometer. These must be tested.</li>
+                    </ul>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing a new mobile "running" app (like Strava or MapMyRun).</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This shows the unique challenges of mobile testing.</p>
+                        <ul>
+                            <li><strong>Device Compatibility:</strong> Does it work on both a new iPhone and a 3-year-old Android?</li>
+                            <li><strong>Connectivity:</strong> You start your run on home Wi-Fi. You run out the door (switches to 5G). You run into a park with bad service (switches to 3G or "no signal"). Does the app <em>crash</em>? Does it <em>lose</em> your run data? Or does it <em>recover</em> gracefully?</li>
+                            <li><strong>Performance:</strong> Does the app's GPS tracking drain the user's entire battery in 30 minutes?</li>
+                            <li><strong>Context:</strong> Does the "auto-pause" feature (using the accelerometer) correctly pause the timer when you stop at a crosswalk?</li>
+                        </ul>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[3.3] Mobile: User Experience (UX) Testing</summary>
+                <div class="details-content">
+                    <p>For mobile apps, <a href="https://en.wikipedia.org/wiki/Usability_testing" target="_blank">User Experience (UX)</a> is paramount. Users have very little patience. Testing the UX is critical. This includes:</p>
+                    <ul>
+                        <li><strong>Gesture Testing:</strong> Testing swipes, pinches, zooms, and scrolls on <em>actual devices</em>. Is it easy to "swipe to delete"? Or do 50% of users accidentally "tap" instead?</li>
+                        <li><strong>Virtual Keyboard Testing:</strong> When the virtual keyboard appears, does it <em>cover</em> the "Submit" button or the text field you're trying to read?</li>
+                        <li><strong>Voice Input Testing:</strong> Does voice recognition work in a <em>quiet room</em>? Does it work in a <em>noisy car</em>?</li>
+                        <li><strong>Alerts/Interruptions:</strong> What happens when you are in the middle of a purchase in the app, and you get a <em>phone call</em>? When you return to the app, is your shopping cart still there? Or did the interruption "crash" its state?</li>
+                    </ul>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing the "checkout" screen of a new mobile shopping app.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This is a UX test for interruptions.</p>
+                        <ul>
+                            <li><strong>Test:</strong> On the app, add an item to your cart. Go to the "Checkout" screen.</li>
+                            <li>Fill in your name and address.</li>
+                            <li><em>Before</em> you type your credit card, press the "Home" button.</li>
+                            <li>Open 3 other apps (e.g., email, a game, a web browser) to force the OS (Operating System) to potentially "hibernate" the shopping app.</li>
+                            <li>Now, re-open the shopping app.</li>
+                        </ul>
+                        <p><strong>Expected Result:</strong> You are <em>still</em> on the checkout screen with your name and address saved.</p>
+                        <p><strong>Failure Result:</strong> The app has reloaded to the <em>home page</em>, and your cart is empty. This is a "show-stopper" UX bug.</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[3.4] Web Application (WebApp) Testing Strategies</summary>
+                <div class="details-content">
+                    <p>WebApps, like MobileApps, have their own testing strategy. It follows a similar flow, starting with user-visible elements and moving to the back-end infrastructure.</p>
+                    <ol>
+                        <li><strong>Content Testing:</strong> Is the text accurate? Are the images correct?</li>
+                        <li><strong>Interface Testing:</strong> Do the buttons, forms, and menus work?</li>
+                        <li><strong>Navigation Testing:</strong> Do all the links work? Can you complete a "user journey"?</li>
+                        <li><strong>Component Testing:</strong> (Same as Part 1) Test individual back-end functions.</li>
+                        <li><strong>Configuration/Compatibility Testing:</strong> Does the site work on Chrome, Firefox, Safari, and Edge? On a desktop? On a tablet?</li>
+                        <li><strong>Security Testing:</strong> (See 3.8)</li>
+                        <li><strong>Performance Testing:</strong> (See 3.9)</li>
+                    </ol>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing a university's new "Course Registration" WebApp.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This shows the different facets of WebApp testing.</p>
+                        <ul>
+                            <li><strong>Content:</strong> Go to the "Computer Science" page. Does it <em>correctly</em> list "CS 101"? Or does it have a typo and list "CS 1001"?</li>
+                            <li><strong>Interface:</strong> Go to the "Register" form. Does the "Search" button work? When you type in the search box, does an auto-complete list appear?</li>
+                            <li><strong>Navigation:</strong> Can you successfully follow the path: Home -> Login -> Course Catalog -> Select Course -> Register -> View My Schedule?</li>
+                            <li><strong>Compatibility:</strong> Does this <em>entire</em> flow work on a student's iPad using Safari? Or does it <em>only</em> work on a desktop with Chrome?</li>
+                        </ul>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[3.5] WebApp: Content Testing</summary>
+                <div class="details-content">
+                    <p>Content testing has three main objectives:</p>
+                    <ul>
+                        <li><strong>Uncover Syntactic Errors:</strong> Typos, grammar mistakes, etc.</li>
+                        <li><strong>Uncover Semantic Errors:</strong> Errors in <em>accuracy</em>. Is the information <em>wrong</em>? Is a product price listed as $10.00 when it should be $100.00?</li>
+                        <li><strong>Uncover Organization Errors:</strong> Is the information presented logically? Are links provided for more information? Does the "About Us" page <em>actually</em> talk about the company, or does it incorrectly show the "Contact Us" info?</li>
+                    </ul>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing a "Movie Times" website.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This shows semantic vs. syntactic errors.</p>
+                        <ul>
+                            <li><strong>Syntactic Error:</strong> The movie is "Dune: Part Two". The site lists it as "Dune: Prt Two". This is a <em>typo</em>.</li>
+                            <li><strong>Semantic Error:</strong> The site lists "Dune: Part Two" as playing at "9:00 AM". You drive to the theater, but the movie <em>actually</em> starts at "9:00 PM". The data is <em>factually inaccurate</em> and has caused a major user-facing problem.</li>
+                            <li><strong>Organization Error:</strong> You click on "Dune" to see the times, but the page <em>also</em> shows you the times for "Kung Fu Panda 4." The content is jumbled and confusing.</li>
+                        </ul>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[3.6] WebApp: Interface Testing</summary>
+                <div class="details-content">
+                    <p>Interface testing validates the <em>mechanisms</em> of the user interface (UI).</p>
+                    <ul>
+                        <li><strong>Forms:</strong> Can you type in all form fields? Do "required field" validators work? Does the "Submit" button work?</li>
+                        <li><strong>Client-Side Scripting:</strong> If there is a dynamic price calculator (written in JavaScript), does it update the total <em>correctly</em> as you change quantities?</li>
+                        <li><strong>Aesthetics:</strong> Does the interface "look right"? Or is a "Submit" button halfway off the screen?</li>
+                        <li><strong>Usability:</strong> Is the interface <em>easy</em> to use?</li>
+                    </ul>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing the "Contact Us" form on a website.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This is a test of interface <em>mechanisms</em>.</p>
+                        <ul>
+                            <li><strong>Test 1 (Happy Path):</strong> Fill in Name, Email, and Message. Click "Submit." <strong>Expected:</strong> See a "Thank You" message.</li>
+                            <li><strong>Test 2 (Validator Test):</strong> Fill in Name and Message, but leave "Email" <em>blank</em>. Click "Submit." <strong>Expected:</strong> An error message "Email is required" should appear next to the email field.</li>
+                            <li><strong>Test 3 (Validator Test 2):</strong> Fill in Name, Message, and an <em>invalid</em> email (e.g., "hello.com"). Click "Submit." <strong>Expected:</strong> An error message "Please enter a valid email address" should appear.</li>
+                            <li><strong>Test 4 (Aesthetic):</strong> View the form on a mobile phone. Is the "Submit" button tiny and hard to press?</li>
+                        </ul>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[3.7] WebApp: Navigation Testing</summary>
+                <div class="details-content">
+                    <p>Navigation testing validates the "user's journey" through the site. It ensures all navigation mechanisms work.</p>
+                    <ul>
+                        <li><strong>Links:</strong> Check for <em>broken links</em> (404 errors).</li>
+                        <li><strong>Redirects:</strong> If you move a page from <code>.../old-url</code> to <code>.../new-url</code>, does the redirect work?</li>
+                        <li><strong>Site Map:</strong> Does the site map <em>accurately</em> reflect the site structure?</li>
+                        <li><strong>Bookmarks:</strong> If a user "bookmarks" a deep page (e.g., <code>.../products/widget/123</code>), can they return to that page directly? Or does it force them back to the Homepage?</li>
+                        <li><strong>Use Cases:</strong> Can you complete <em>every</em> major user story (like in 3.4) without getting "stuck" on a page with no "Back" or "Next" button?</li>
+                    </ul>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing a "Forgot Password" navigation flow.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This tests a critical navigation <em>path</em>.</p>
+                        <p><strong>Test:</strong></p>
+                        <ol>
+                            <li>Go to the "Login" page.</li>
+                            <li>Click the "Forgot Password" <em>link</em>. (Test 1: Does the link work?)</li>
+                            <li>Enter your email address and click "Submit."</li>
+                            <li>You see a message: "Email sent."</li>
+                            <li>Go to your email and find the password reset email.</li>
+                            <li>Click the <em>link</em> in the email. (Test 2: Is this a valid, un-broken, non-expired link?)</li>
+                        </ol>
+                        <p><strong>Expected:</strong> You are taken to a "Create New Password" page that is <em>already logged in</em> as you.</p>
+                        <p><strong>Failure:</strong> The link takes you to the <em>generic Homepage</em>, and you are not logged in. The navigation path is broken.</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[3.8] Security Testing</summary>
+                <div class="details-content">
+                    <p><a href="https://en.wikipedia.org/wiki/Security_testing" target="_blank">Security testing</a> is a specialized test that attempts to verify that protection mechanisms built into a system <em>actually work</em>. The tester adopts the mindset of an attacker. Security testing probes for vulnerabilities like:</p>
+                    <ul>
+                        <li><strong>Denial-of-Service (DoS):</strong> Can I "flood" your app with so much traffic that it crashes?</li>
+                        <li><strong>Data Theft:</strong> Can I "guess" the URL for another user's "My Account" page (<code>.../account/123</code>) and see <em>their</em> data? (This is called an "Insecure Direct Object Reference").</li>
+                        <li><strong>Injection Attacks:</strong> If a form asks for my "Username," what if I type in a "SQL (Structured Query Language)" command instead? (<code>' OR 1=1 --</code>). Will the system <em>execute</em> my command and log me in as an administrator?</li>
+                        <li><strong>Cross-Site Scripting (XSS):</strong> If I make a forum post, can I include malicious <code>&lt;script&gt;</code> tags that will <em>run</em> in the browser of <em>other users</em> who read my post?</li>
+                    </ul>
+
+                    <svg class="svg-diagram" viewBox="0 0 500 200" aria-labelledby="security-title">
+                        <title id="security-title">Security Testing (SQL Injection) Diagram</title>
+                        <defs>
+                            <marker id="arrowhead-sec" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto" fill="var(--theme-text-accent)">
+                                <polygon points="0 0, 10 3.5, 0 7" />
+                            </marker>
+                            <marker id="arrowhead-sec-bad" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto" fill="var(--red)">
+                                <polygon points="0 0, 10 3.5, 0 7" />
+                            </marker>
+                        </defs>
+                        <rect class="box" x="20" y="70" width="100" height="60"></rect>
+                        <text class="box-text" x="70" y="105" text-anchor="middle">Attacker</text>
+                        
+                        <rect class="box" x="270" y="20" width="100" height="60"></rect>
+                        <text class="box-text" x="320" y="50" text-anchor="middle">Firewall /</text>
+                        <text class="box-text" x="320" y="70" text-anchor="middle">Sanitizer</text>
+                        
+                        <rect class="box" x="270" y="120" width="100" height="60"></rect>
+                        <text class="box-text" x="320" y="150" text-anchor="middle">Database</text>
+                        
+                        <rect class="box" x="420" y="120" width="60" height="60"></rect>
+                        <text class="box-text" x="450" y="150" text-anchor="middle" font-size="30px">!</text>
+
+                        <!-- Attack Path -->
+                        <path class="arrow" marker-end="url(#arrowhead-sec-bad)" d="M120, 90 C 180, 50 240, 50 270, 50"></path>
+                        <text class="label-light" x="190" y="50" text-anchor="middle" fill="var(--red)">Input: ' OR 1=1</text>
+                        
+                        <!-- Blocked Path -->
+                        <path d="M370, 50 L450, 50 L450, 120" stroke="var(--red)" stroke-width="3" fill="none" stroke-dasharray="5 5"></path>
+                        <text class="label" x="410" y="30" text-anchor="middle" fill="var(--red)">BLOCKED</text>
+
+                        <!-- Normal Path -->
+                        <path class="arrow" marker-end="url(#arrowhead-sec)" d="M120, 110 C 180, 150 240, 150 270, 150"></path>
+                        <text class="label-light" x="190" y="165" text-anchor="middle">Input: 'John'</text>
+                        <path class="arrow" marker-end="url(#arrowhead-sec)" d="M370, 150 L420, 150"></path>
+                    </svg>
+
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Security testing a "User Profile" page.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This is a test for a common XSS vulnerability.</p>
+                        <p><strong>Test:</strong></p>
+                        <ol>
+                            <li>Log in as User A.</li>
+                            <li>Go to "Edit My Profile."</li>
+                            <li>In the "First Name" field, don't type "John". Instead, type: <code>&lt;script&gt;alert('You have been hacked');&lt;/script&gt;</code></li>
+                            <li>Save the profile.</li>
+                            <li>Now, log in as an <strong>Administrator</strong> (a different user).</li>
+                            <li>Go to the admin page to "View All Users" and find User A.</li>
+                        </ol>
+                        <p><strong>Failure:</strong> An alert box pops up on the <em>Administrator's</em> screen with the text "You have been hacked." This means User A's malicious script <em>ran</em> in the Administrator's browser. This is a critical XSS vulnerability.</p>
+                        <p><strong>Success:</strong> The page <em>literally</em> displays the text "<code>&lt;script&gt;alert...</code>" as User A's name. This means the system <em>correctly</em> sanitized the input and treated it as <em>text</em>, not <em>code</em>.</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[3.9] Performance Testing</summary>
+                <div class="details-content">
+                    <p><a href="https://en.wikipedia.org/wiki/Software_performance_testing" target="_blank">Performance testing</a> is designed to test the run-time performance of software. It answers questions like, "Is it <em>fast</em>?"</p>
+                    <ul>
+                        <li><strong>Response Time:</strong> How long does it take for the page to load after a user clicks a link?</li>
+                        <li><strong>Resource Utilization:</strong> How much CPU (Central Processing Unit) or memory does the app use? (On mobile, how much <em>battery</em> does it use?)</li>
+                        <li><strong>Throughput:</strong> How many <em>transactions</em> can the system handle per second?</li>
+                    </ul>
+                    <p>Performance testing is <em>not</em> focused on finding functional bugs, but on finding <em>bottlenecks</em>.</p>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing a "stock trading" application.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This shows why performance is a "non-functional" but <em>critical</em> requirement.</p>
+                        <ul>
+                            <li><strong>Functional Test:</strong> Click "Buy 100 shares of XYZ." <strong>Result:</strong> You bought 100 shares. <strong>(Pass)</strong></li>
+                            <li><strong>Performance Test:</strong> Click "Buy 100 shares of XYZ." <strong>Result:</strong> It took <strong>30 seconds</strong> for the "Confirm" page to load. <strong>(FAIL)</strong></li>
+                        </ul>
+                        <p>In the world of stock trading, a 30-second delay is a catastrophic failure. The function <em>worked</em>, but the <em>performance</em> was unacceptable. The performance test's goal is to find <em>what</em> caused that 30-second delay (e.g., a slow database query).</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[3.10] Load Testing and Stress Testing</summary>
+                <div class="details-content">
+                    <p>These are two specific <em>types</em> of performance testing.</p>
+                    <ul>
+                        <li><strong><a href="https://en.wikipedia.org/wiki/Load_testing" target="_blank">Load Testing</a>:</strong> Tests the system under <em>expected, realistic</em> loads. The goal is to see how the system behaves under <em>normal</em> and <em>peak</em> conditions. (e.g., "How does the server handle 1,000 concurrent users, which is our normal peak traffic?").</li>
+                        <li><strong><a href="https://en.wikipedia.org/wiki/Stress_testing" target="_blank">Stress Testing</a>:</strong> Tests the system <em>beyond</em> its expected limits. The goal is to <em>break</em> the system. We want to find the "breaking point" and, more importantly, <em>what happens</em> when it breaks. Does it crash and burn? Or does it <em>degrade gracefully</em>? (e.g., "Let's hit the server with 50,000 concurrent users. I <em>know</em> it will fail, but I want to see <em>how</em>. Does it show a 'Server Busy, please try again' page, or does it crash the database?").</li>
+                    </ul>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing an e-commerce website before Black Friday.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This shows the difference between Load and Stress testing.</p>
+                        <ul>
+                            <li><strong>Load Test:</strong> You <em>expect</em> 10,000 concurrent users at 9:00 AM on Black Friday. So, you run a test that <em>simulates</em> 10,000 users. You measure the response time. It's 2 seconds. The team decides this is "acceptable."</li>
+                            <li><strong>Stress Test:</strong> You want to find the breaking point. You start a test at 1,000 users and <em>increase</em> it... 10,000... 20,000... 30,000... At 35,000 users, the server response time hits 15 seconds. At 40,000 users, the server crashes.</li>
+                        </ul>
+                        <p><strong>Result:</strong> The breaking point is ~35,000 users.</p>
+                        <p><strong>Graceful Degradation:</strong> When it crashed, did it take the <em>whole database</em> with it? Or did it just stop accepting new connections? The "Stress Test" answers this.</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[3.11] Testing Artificial Intelligence (AI) Systems</summary>
+                <div class="details-content">
+                    <p>Testing <a href="https://en.wikipedia.org/wiki/Testing_of_artificial_intelligence" target="_blank">AI (Artificial Intelligence)</a> and Machine Learning (ML) systems is very different.</p>
+                    <ul>
+                        <li>You can't use traditional white-box testing. You can't check the "logic" of a neural network with 10 billion parameters.</li>
+                        <li>The system is "non-deterministic." It gives <em>probabilities</em>, not simple "right" or "wrong" answers.</li>
+                        <li>The "source code" is also the "data." The system's behavior is defined by the data it was <em>trained</em> on.</li>
+                    </ul>
+                    <p>Testing focuses on:</p>
+                    <ul>
+                        <li><strong>Data Validation:</strong> Is the training data biased? Does it have errors?</li>
+                        <li><strong>Model Validation:</strong> How <em>accurate</em> is the model? (e.g., "It correctly identifies 95% of cat pictures").</li>
+                        <li><strong>Robustness:</strong> What happens when you give it "adversarial" or "nonsense" input?</li>
+                    </ul>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing an AI "Spam Filter" for email.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This shows the non-deterministic, data-driven nature of AI testing.</p>
+                        <ul>
+                            <li><strong>Traditional Test:</strong> Fails. (We can't find an <code>if</code> statement that says <code>if(email.contains("viagra"))</code>).</li>
+                            <li><strong>AI Test:</strong>
+                                <ol>
+                                    <li>Get a "test set" of 10,000 emails <em>the model has never seen before</em>. This set has been <em>hand-labeled</em> by humans (5,000 spam, 5,000 not-spam).</li>
+                                    <li>Run all 10,000 emails <em>through the AI model</em>.</li>
+                                    <li>Measure the results:
+                                        <ul>
+                                            <li>The model caught 4,900 of the 5,000 spam emails. (98% <strong>Recall</strong>).</li>
+                                            <li>The model <em>incorrectly</em> flagged 50 <em>good</em> emails as spam. (1% <strong>False Positive Rate</strong>).</li>
+                                        </ul>
+                                    </li>
+                                </ol>
+                            </li>
+                        </ul>
+                        <p><strong>The Result:</strong> We don't say "it works." We say, "The model's performance on the test set is 98% recall with a 1% false positive rate." The <em>business</em> then decides if this is "good enough" to release.</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[3.12] Accessibility Testing</summary>
+                <div class="details-content">
+                    <p><a href="https://en.wikipedia.org/wiki/Accessibility_testing" target="_blank">Accessibility Testing</a> (often abbreviated as "a11y") is the process of verifying that <em>all</em> people can use the application, regardless of disability. This includes users who are:</p>
+                    <ul>
+                        <li>Visually impaired (blind, low-vision, color-blind)</li>
+                        <li>Hearing impaired</li>
+                        <li>Mobility impaired (cannot use a mouse)</li>
+                        <li>Cognitively impaired</li>
+                    </ul>
+                    <p>This testing involves:</p>
+                    <ul>
+                        <li><strong>Screen Readers:</strong> Can a blind user navigate the <em>entire</em> site using a screen reader (like JAWS or NVDA)? Is every button <em>labeled</em>? Is every image given "alt text"?</li>
+                        <li><strong>Keyboard Navigation:</strong> Can you use the <em>entire</em> site using <em>only</em> the "Tab" and "Enter" keys? Or are there "mouse-only" traps?</li>
+                        <li><strong>Color Contrast:</strong> Is the "light grey text on a white background" <em>readable</em> for a low-vision user? (There are tools to check this).</li>
+                        <li><strong>Captions:</strong> Are all videos captioned for hearing-impaired users?</li>
+                    </ul>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing a website's "Buy Now" button.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This is an accessibility test.</p>
+                        <ul>
+                            <li><strong>Sighted User:</strong> Sees a big, green "Buy Now" button. No problem.</li>
+                            <li><strong>Accessibility Test 1 (Screen Reader):</strong> A blind user navigates to the button.
+                                <ul>
+                                    <li><strong>Failure:</strong> The screen reader says "Button." (The user has no idea what this button does).</li>
+                                    <li><strong>Success:</strong> The screen reader says "Button: Buy Now, $19.99." (The <code>aria-label</code> attribute was set correctly in the HTML).</li>
+                                </ul>
+                            </li>
+                            <li><strong>Accessibility Test 2 (Keyboard):</strong> A user who cannot use a mouse presses the "Tab" key.
+                                <ul>
+                                    <li><strong>Failure:</strong> The "Tab" focus <em>skips</em> the button entirely. The user <em>cannot</em> purchase the item.</li>
+                                    <li><strong>Success:</strong> The "Tab" key puts a visible "focus ring" around the button, and pressing "Enter" activates it.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </details>
+
+            <details class="lecture-part">
+                <summary>[3.13] Documentation and Help Facility Testing</summary>
+                <div class="details-content">
+                    <p>Errors in documentation are as bad as errors in code. Nothing is more frustrating than following a "Help" guide <em>exactly</em> and having it fail. Documentation testing must be part of the test plan.</p>
+                    <ul>
+                        <li><strong>Technical Review:</strong> Is the document clear? Are there typos?</li>
+                        <li><strong>Live Test:</strong> Use the documentation <em>with the actual program</em>.
+                            <ul>
+                                <li>Follow the "How To" guide step-by-step. Does it <em>work</em>? Are the screenshots <em>up-to-date</em>?</li>
+                                <li>When the program shows an error message (e.g., "Error 5001"), does the documentation <em>have</em> an entry for "Error 5001"?</li>
+                                <li>Is the Table of Contents and Index accurate?</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <div class="example-box">
+                        <p><strong>EXAMPLE: Task: Testing the "IKEA Furniture" assembly manual.</strong></p>
+                        <p><strong>Relation to Lecture:</strong> This is a "live test" of documentation. You have the "Billy Bookcase" (the software) and the <em>manual</em> (the documentation).</p>
+                        <p><strong>Test:</strong></p>
+                        <ol>
+                            <li>Open the manual to Page 1.</li>
+                            <li>Manual says: "Get Part A (the side panel) and Screw C (the long one)."</li>
+                            <li>You look in the box. There <em>is no</em> "Part A". It's labeled "Part D". (Documentation Error!)</li>
+                            <li>You find Part D. The manual says "Insert Screw C".</li>
+                            <li>You try, but Screw C is too long. You realize you <em>actually</em> need "Screw F". (Documentation Error!)</li>
+                            <li>The manual's <em>diagram</em> shows the shelf being installed "right-side up," but the <em>actual shelf</em> only fits "upside down." (Documentation Error!)</li>
+                        </ol>
+                        <p>The "software" (the bookcase) was "built correctly," but the <em>documentation</em> failed, leading to a terrible user experience.</p>
+                    </div>
+                </div>
+            </details>
+
+        </section>
+
+        <!-- 2. Exercises Section -->
+        <section class="main-section" id="exercises">
+            <h1>Homework Assignments</h1>
+            
+            <div class="exercise-question">
+                <h3>[4.1] Homework Question 1: Comprehensive Test Strategy Design</h3>
+                <p><strong>The Scenario:</strong> You are the new Test Lead for "FoodZoom," a brand-new <strong>mobile application</strong> for restaurant delivery. The app has the following key features:</p>
+                <ul>
+                    <li>A "Login / Register" screen.</li>
+                    <li>A "Search" screen to find restaurants by name or food type.</li>
+                    <li>A "Restaurant Menu" screen where users add items to a cart.</li>
+                    <li>A "Shopping Cart" screen with a "Checkout" button.</li>
+                    <li>A "Checkout" screen where users enter their address and credit card.</li>
+                    <li>A "Live Order Tracking" screen (using GPS) to see the driver.</li>
+                </ul>
+                <p>The system has a <strong>WebApp</strong> for <strong>restaurant owners</strong> to manage their menus and a <strong>back-end server</strong> that handles all the logic.</p>
+                <p><strong>Your Task (Requires > 1 hour):</strong> Write a high-level "Test Plan" document (minimum 500 words). Your plan must explain <strong>what</strong> you will test and <strong>how</strong> (which strategy). You <strong>must</strong> include sections for:</p>
+                <ol>
+                    <li><strong>Component Testing:</strong> What are the "components" in this system? What's your strategy for (a) the mobile app components and (b) the back-end server components?</li>
+                    <li><strong>Integration Testing:</strong> What is your <em>integration strategy</em> (e.g., top-down, bottom-up, thread-based)? Justify your choice. Describe one critical "thread" you would test.</li>
+                    <li><strong>Specialized Mobile Testing:</strong> Describe the 3 most <em>critical</em> mobile-specific tests you will run and why they are so important for <em>this specific app</em>.</li>
+                    <li><strong>Specialized WebApp Testing:</strong> Describe the 2 most critical tests for the "Restaurant Owner" <em>WebApp</em>.</li>
+                    <li><strong>Validation Testing:</strong> How will you validate the "Live Order Tracking" feature against its requirements?</li>
+                    <li><strong>Performance Testing:</strong> Describe one "Load Test" scenario and one "Stress Test" scenario you would design.</li>
+                </ol>
+
+                <div class="answer-box-wrapper">
+                    <div class="answer-box-toolbar">
+                        <input type="file" id="import-q1" class="import-file-btn" accept="image/*,.txt,.md,text/plain,text/markdown" data-target="answer-box-q1">
+                        <label for="import-q1">Import Content</label>
+                        <span>(Images, .txt, or .md files only)</span>
+                    </div>
+                    <div id="answer-box-q1" class="answer-box" contenteditable="true" aria-label="Answer for Question 1"></div>
+                </div>
+            </div>
+
+            <div class="exercise-question">
+                <h3>[4.2] Homework Question 2: Bug Analysis and Test Case Design</h3>
+                <p><strong>The Scenario:</strong> You are a tester for a new video game. You find a bug.</p>
+                <p><strong>The Bug:</strong> "In the 'Ice Palace' level, if you are <strong>holding the 'Fire Sword'</strong> and you <strong>jump</strong> and then <strong>open your inventory</strong> (all at the same time), the game crashes."</p>
+                <p><strong>The Cause:</strong> The developer investigates and finds the cause. The game has a "player state" variable.</p>
+                <ul>
+                    <li>Jumping sets the state to <code>JUMPING</code>.</li>
+                    <li>Holding the Fire Sword sets the state to <code>ATTACK_READY</code>.</li>
+                    <li>Opening the inventory <em>while in the air</em> is supposed to set the state to <code>JUMPING_MENU</code>.</li>
+                    <li>The bug is: the "Fire Sword" code <em>overwrites</em> this, setting the state back to <code>ATTACK_READY</code> <em>while</em> the inventory menu is opening. The menu code does not know what to do with the <code>ATTACK_READY</code> state and crashes.</li>
+                </ul>
+                <p><strong>The Fix:</strong> The developer changes the logic so that <code>JUMPING_MENU</code> is a "priority" state that cannot be overwritten by a weapon.</p>
+                <p><strong>Your Task (Requires > 1 hour):</strong> This is a classic "interaction" bug found during <em>integration</em> or <em>scenario</em> testing.</p>
+                <ol>
+                    <li><strong>Bug Classification:</strong> What <em>kind</em> of testing <em>should</em> have caught this? (e.g., unit, integration, validation, etc.). What <em>specific technique</em> (e.g., BVA, Basis Path, Scenario) would be best at <em>finding more bugs like this</em>? Justify your answers.</li>
+                    <li><strong>Regression Test:</strong> Design a <em>specific</em>, <em>detailed</em>, <em>step-by-step</em> <strong>Regression Test Case</strong> for the bug report. This test will be run on <em>all future builds</em> of the game to ensure this bug <em>never comes back</em>. Use a formal test case template (Test Case ID, Description, Steps, Expected Result).</li>
+                    <li><strong>Design "Negative" Test Cases:</strong> The fix (making <code>JUMPING_MENU</code> a "priority" state) could <em>create new bugs</em>. Design <strong>at least 3</strong> "negative test cases" that <em>specifically</em> try to break the <em>new fix</em>. (e.g., What if you do <em>other</em> things while in the <code>JUMPING_MENU</code> state?).</li>
+                </ol>
+
+                <div class="answer-box-wrapper">
+                    <div class="answer-box-toolbar">
+                        <input type="file" id="import-q2" class="import-file-btn" accept="image/*,.txt,.md,text/plain,text/markdown" data-target="answer-box-q2">
+                        <label for="import-q2">Import Content</label>
+                        <span>(Images, .txt, or .md files only)</span>
+                    </div>
+                    <div id="answer-box-q2" class="answer-box" contenteditable="true" aria-label="Answer for Question 2"></div>
+                </div>
+            </div>
+
+            <!-- Submit Section -->
+            <section class="submit-section">
+                <h2>Submit Your Work</h2>
+                <div class="submit-grid">
+                    <div class="submit-field">
+                        <label for="student-name">Your Name</label>
+                        <input type="text" id="student-name" placeholder="Enter your full name">
+                    </div>
+                    <div class="submit-field">
+                        <label for="student-id">Student ID</label>
+                        <input type="text" id="student-id" placeholder="Enter your student ID">
+                    </div>
+                </div>
+                <div class="submit-buttons">
+                    <a href="#" class="submit-btn email-btn" id="send-email-btn">Send Answers via Email</a>
+                    <button class="submit-btn download-btn" id="download-answers-btn">Download Answers (.txt)</button>
+                    <button class="submit-btn copy-btn" id="copy-answers-btn">Copy Answers to Clipboard</button>
+                    <span id="copy-status"></span>
+                </div>
+                <div class="submit-info">
+                    <h4>How to Submit:</h4>
+                    <p>1. <strong>(Recommended)</strong> Click <strong>"Download Answers (.txt)"</strong>. This will save a plain text file of your answers to your computer. Attach this file to a new email and send it to <strong>asengroa@hotmail.com</strong>.</p>
+                    <p>2. <strong>(Alternate)</strong> Click <strong>"Send Answers via Email"</strong>. This will try to open your computer's default email client (like Outlook or Apple Mail) with a pre-filled email. <strong>This may not work</strong> if you use web-based email (like Gmail in a browser) or if your browser blocks it. This method also does not support images.</p>
+                    <p>3. <strong>(Manual)</strong> Click <strong>"Copy Answers to Clipboard"</strong>, then manually paste your answers into a document or email.</p>
+                    <p><strong>Note on Hyperlinks:</strong> All hyperlinks (e.g., to Wikipedia) are provided as supplementary, un-checked educational resources. They are standard, well-known domains and are not part of the core lecture material.</p>
+                </div>
+            </section>
+        </section>
+
+        <!-- 3. Tips Section -->
+        <section class="main-section" id="tips">
+            <h1>Homework Tips</h1>
+            
+            <details class="lecture-part" open>
+                <summary>Tips for Question 1 (FoodZoom Test Plan)</summary>
+                <div class="details-content">
+                    <p>Think about the <strong>risks</strong>. What is the <strong>worst thing</strong> that could happen to a user? (e.g., paying for food that never comes? Data breach?). What is the worst thing for the <strong>restaurant owner</strong>? (e.g., listing a $100 bottle of wine for $1.00?). Focus your testing on these high-risk areas.</p>
+                    <p>For integration, think about "user stories" or "scenarios" (like Scenario-Based Testing). A user journey like "Search -> Add to Cart -> Checkout" is a perfect example of an integration thread.</p>
+                    <p>Don't forget the different *types* of software. The Mobile App, the WebApp, and the Back-End Server all have different testing needs. Your plan should reflect this.</p>
+                </div>
+            </details>
+
+            <details class="lecture-part" open>
+                <summary>Tips for Question 2 (Video Game Bug)</summary>
+                <div class="details-content">
+                    <p>For "Bug Classification," think about <strong>how many</strong> components are interacting. Is it one component (unit) or multiple (integration)? The bug description gives you a big clue: "if you are... holding... and you... jump... and then... open inventory". That's three systems interacting!</p>
+                    <p>For the "Regression Test," be extremely specific. Your steps should be so clear that someone who has never played the game could follow them and find the bug. "Press 'Spacebar'" is better than "Jump".</p>
+                    <p>For the "Negative Test Cases," think like a <strong>real gamer</strong>. Gamers are chaotic. They will press <em>all</em> the buttons. What <em>else</em> could they do while jumping and opening the menu? What if they get hit by an enemy? What if they use a potion? What if they fall off a cliff? The fix (<code>JUMPING_MENU</code> priority) might stop the original crash but could cause these *new* interactions to fail.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- 4. Explanations Section -->
+        <section class="main-section" id="explanations">
+            <h1>Homework Explanations</h1>
+
+            <details class="lecture-part" open>
+                <summary>Explanation for Question 1 (FoodZoom Test Plan)</summary>
+                <div class="details-content">
+                    <p>This question is designed to make you think like a Test Lead. A good answer isn't just a list of tests; it's a <strong>strategy</strong> that prioritizes work based on risk. The system has three distinct parts (Mobile, Web, Back-end) and they all need different types of testing.</p>
+                    <ul>
+                        <li><strong>Component Testing:</strong> You need to show you understand that the back-end (<code>calculate_delivery_fee()</code>) is tested with white-box/black-box techniques (like BVA), while the mobile app components (<code>CartViewModel</code>) are tested for their internal logic.</li>
+                        <li><strong>Integration Testing:</strong> A "Thread-Based" or "Scenario-Based" strategy is the correct choice. A "Big Bang" approach would be a disaster. You must justify <em>why</em> you chose it (e.g., "It tests a full user story and finds interaction bugs").</li>
+                        <li><strong>Mobile Tests:</strong> This is the key. You must identify tests <em>unique</em> to mobile. "Connectivity" is #1 for a delivery app. What if the order fails to send? "Interruptions" (a phone call) is #2. "GPS" (Context) is #3.</li>
+                        <li><strong>WebApp Tests:</strong> Again, think of the user (the restaurant owner). The biggest risks are 1) "Content" (showing the wrong price) and 2) "Security" (seeing another restaurant's data).</li>
+                        <li><strong>Validation:</strong> You must link the test back to the <em>user story</em>. The user wants to know where their driver is. Your test must validate *that*.</li>
+                        <li><strong>Performance:</strong> You must show you know the difference between Load (peak *normal* traffic) and Stress (*breaking* the system). "Lunch rush" is a perfect load test. "How many drivers can track at once" is a perfect stress test.</li>
+                    </ul>
+                    <p>This answer demonstrates an understanding that a modern system is not "one thing" but a collection of components that must be tested at all levels with different, specialized strategies.</p>
+                </div>
+            </details>
+
+            <details class="lecture-part" open>
+                <summary>Explanation for Question 2 (Video Game Bug)</summary>
+                <div class="details-content">
+                    <p>This question tests your ability to analyze a bug and think critically about its consequences.</p>
+                    <ul>
+                        <li><strong>Bug Classification:</strong> This is a classic <strong>Integration Testing</strong> bug (or System Testing). It's <em>not</em> a unit test bug.</li>
+                        <li><strong>Justification:</strong> The bug is not in one component, but in the <em>interaction</em> between three separate systems: the Player State system (Jumping), the Weapon system (Fire Sword state), and the UI system (Inventory). Each of these components likely passed its unit tests in isolation. The bug <em>only</em> appeared when these three "correct" systems <strong>interacted</strong> in a specific, time-sensitive way.</li>
+                        <li><strong>Specific Technique:</strong> The best technique for finding more bugs <em>like this</em> is <strong>Scenario-Based Testing</strong> or <strong>State-Transition Testing</strong>. The tester needs to invent and test <em>chaotic user scenarios</em> (e.g., "What happens if I jump, attack, and use a potion <em>at the same time</em>?"). A tester could also formally <em>diagram</em> all the "player states" (<code>JUMPING</code>, <code>IDLE</code>, <code>ATTACKING</code>, <code>MENU</code>) and test <em>every possible transition</em> between them to find illegal or untested combinations.</li>
+                    </ul>
+                    <p><strong>Regression Test Case:</strong></p>
+                    <ul>
+                        <li><strong>Test Case ID:</strong> REG_BUG_8801</li>
+                        <li><strong>Description:</strong> Verify that the game does <em>not</em> crash when opening the inventory while jumping with the Fire Sword equipped.</li>
+                        <li><strong>Pre-conditions:</strong> Player is in any level (e.g., "Ice Palace"). Player has the "Fire Sword" in their inventory.</li>
+                        <li><strong>Steps:</strong>
+                            <ol>
+                                <li>Equip the "Fire Sword."</li>
+                                <li>Perform a "Jump" action (e.g., press 'Spacebar' on PC, 'A' on Xbox).</li>
+                                <li>While the player character is in the air (between leaving the ground and landing), press the "Inventory" key (e.g., 'I' on PC, 'Y' on Xbox).</li>
+                                <li>Observe the result.</li>
+                                <li>Close the inventory menu.</li>
+                            </ol>
+                        </li>
+                        <li><strong>Expected Result:</strong> The game <strong>must not crash</strong>. The inventory menu <strong>must</strong> open successfully. The player should land normally after the menu is closed.</li>
+                    </ul>
+                    <p><strong>Negative Test Cases (for the fix):</strong></p>
+                    <ul>
+                        <li><strong>Test Case 1 (Priority state stuck):</strong>
+                            <ol>
+                                <li>Get into the "Jumping Menu" state (Jump + Inventory).</li>
+                                <li>While in the air, close the menu.</li>
+                                <li>Land on the ground.</li>
+                                <li>Immediately try to attack with the Fire Sword.</li>
+                            </ol>
+                            <p><strong>Expected:</strong> The player attacks normally.</p>
+                            <p><strong>Failure:</strong> The player is "stuck" in a <code>MENU</code> state and can no longer attack. The priority state <em>never cleared</em>.</p>
+                        </li>
+                        <li><strong>Test Case 2 (Escape the priority state):</strong>
+                            <ol>
+                                <li>Get into the "Jumping Menu" state (Jump + Inventory).</li>
+                                <li>While the menu is open and the player is in the air, press the "Attack" button.</li>
+                            </ol>
+                            <p><strong>Expected:</strong> Nothing should happen, or a "cannot do that now" sound should play.</p>
+                            <p><strong>Failure:</strong> The game crashes, or the player attacks <em>while the menu is open</em> (bypassing the fix).</p>
+                        </li>
+                        <li><strong>Test Case 3 (New state interaction):</strong>
+                            <ol>
+                                <li>Go to the edge of a ledge.</li>
+                                <li>Perform a "Jump" action and press "Inventory" (enter <code>JUMPING_MENU</code> state).</li>
+                                <li>While in the air with the menu open, move the character off the ledge, triggering a <code>FALLING</code> state.</li>
+                            </ol>
+                            <p><strong>Expected:</strong> The menu should either close automatically, or the player should continue falling <em>with</em> the menu open. The game <strong>must not crash</strong>.</p>
+                            <p><strong>Failure:</strong> The <code>JUMPING_MENU</code> state + <code>FALLING</code> state interaction causes a new, different crash.</p>
+                        </li>
+                    </ul>
+                </div>
+            </details>
+
+        </section>
+
+        <!-- 5. Answers Section -->
+        <section class="main-section" id="answers">
+            <h1>Homework Answers</h1>
+            <div id="answers-content" class="hidden-content">
+                <p>The following are high-level summaries and examples of what a complete answer would look like. Your own answer should be more detailed, especially for the 500-word test plan.</p>
+
+                <details class="lecture-part" open>
+                    <summary>Possible Answer Summary for Question 1</summary>
+                    <div class="details-content">
+                        <h4>High-Level Summary of "FoodZoom" Test Plan</h4>
+                        <p>A good answer would propose a multi-layered strategy:</p>
+                        <ol>
+                            <li>
+                                <p><strong>Component Testing:</strong></p>
+                                <ul>
+                                    <li><strong>Back-end:</strong> Unit test each discrete function (e.g., <code>calculate_delivery_fee()</code>, <code>process_payment()</code>) in isolation using stubs/drivers. Use BVA/Equivalence on <code>calculate_delivery_fee()</code> based on distance. Use white-box testing on <code>process_payment()</code> to ensure all error-handling paths (e.g., "Card Declined", "Fraud Alert") are covered.</li>
+                                    <li><strong>Mobile App:</strong> Unit test each screen's logic (e.g., the <code>CartViewModel</code>) in isolation. Mock the data layer to verify that a call to <code>addItem()</code> correctly updates the <code>totalPrice</code> property.</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <p><strong>Integration Testing:</strong></p>
+                                <ul>
+                                    <li><strong>Strategy:</strong> A "Thread-Based" or "Scenario-Based" strategy is best, justified because it mirrors real user flows and is most effective at finding interaction bugs between the app, the back-end, and third-party APIs (like payment).</li>
+                                    <li><strong>Critical Thread: "Successful Order."</strong> This thread integrates: <code>Login</code> -> <code>Search</code> -> <code>Menu</code> -> <code>Cart</code> -> <code>Checkout</code> -> <code>PaymentGateway</code> -> <code>Database</code>. This single end-to-end test verifies the entire "happy path" integration.</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <p><strong>Specialized Mobile Tests:</strong></p>
+                                <ol>
+                                    <li><strong>Connectivity Testing: (Critical!)</strong> Test what happens if the user's signal drops <em>after</em> they click "Place Order." Does it charge them? Do they get a "failed" message? Does it re-try automatically when connection returns?</li>
+                                    <li><strong>Interruption Testing: (Critical!)</strong> Test what happens if the user gets a <em>phone call</em> or <em>text message</em> while on the "Checkout" screen (credit card info entered). When they return to the app, is their data still there?</li>
+                                    <li><strong>Context/GPS Testing:</strong> Test the GPS accuracy for the driver tracking. Test the app's behavior if the user denies "Location Permissions".</li>
+                                </ol>
+                            </li>
+                            <li>
+                                <p><strong>Specialized WebApp Tests (for Owners):</strong></p>
+                                <ol>
+                                    <li><strong>Content Testing (Semantic): (Critical!)</strong> Test that if an owner sets a price for "Large Pizza" at "$15.00", it <em>actually</em> shows "$15.00" to the user, not "$1.50" or "$150.00". Test that "Mark as Out of Stock" <em>immediately</em> removes the item from the mobile app.</li>
+                                    <li><strong>Security Testing (Authorization):</strong> Can Restaurant A (logged in) <em>see or edit</em> the menu or sales data for Restaurant B (e.g., by guessing a URL)?</li>
+                                </ol>
+                            </li>
+                            <li>
+                                <p><strong>Validation Testing:</strong></p>
+                                <ul>
+                                    <li>Validation for "Live Order Tracking" would be based on the user story: "As a user, I want to see where my driver is so I know when to meet them."</li>
+                                    <li><strong>Test:</strong> Place a real order with a test driver (User B). Have User A watch the app. Have User B report their location via phone.</li>
+                                    <li><strong>Validate:</strong> "Is the map icon within 100 meters of the <em>actual</em> driver location?" and "Does the '5 minutes away' estimate <em>match</em> the actual GPS-calculated ETA?"</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <p><strong>Performance Testing:</strong></p>
+                                <ul>
+                                    <li><strong>Load Test:</strong> Simulate 5,000 users all browsing menus, and 100 users per minute all clicking "Checkout" (simulating a "lunch rush"). Measure response time; ensure it stays under 3 seconds.</li>
+                                    <li><strong>Stress Test:</strong> Find the breaking point. How many <em>drivers</em> can be "live tracking" on the map at the <em>exact same time</em> before the map server (or map API) crashes or becomes unacceptably slow?</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                </details>
+
+                <details class="lecture-part" open>
+                    <summary>Possible Answer Summary for Question 2</summary>
+                    <div class="details-content">
+                        <h4>Bug Analysis and Test Case Design</h4>
+                        <ol>
+                            <li>
+                                <p><strong>Bug Classification:</strong></p>
+                                <ul>
+                                    <li><strong>Kind of Testing:</strong> This is a classic <strong>Integration Testing</strong> or <strong>System Testing</strong> bug. It is <em>not</em> a unit test bug.</li>
+                                    <li><strong>Justification:</strong> The bug is not in one component, but in the <em>interaction</em> between three separate systems: the Player State system (Jumping), the Weapon system (Fire Sword state), and the UI system (Inventory). Each of these components likely passed its unit tests in isolation. The bug <em>only</em> appeared when these three "correct" systems <strong>interacted</strong> in a specific, time-sensitive way.</li>
+                                    <li><strong>Specific Technique:</strong> The best technique for finding more bugs <em>like this</em> is <strong>Scenario-Based Testing</strong> or <strong>State-Transition Testing</strong>. The tester needs to invent and test <em>chaotic user scenarios</em> (e.g., "What happens if I jump, attack, and use a potion <em>at the same time</em>?"). A tester could also formally <em>diagram</em> all the "player states" (<code>JUMPING</code>, <code>IDLE</code>, <code>ATTACKING</code>, <code>MENU</code>) and test <em>every possible transition</em> between them to find illegal or untested combinations.</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <p><strong>Regression Test Case:</strong></p>
+                                <ul>
+                                    <li><strong>Test Case ID:</strong> REG_BUG_8801</li>
+                                    <li><strong>Description:</strong> Verify that the game does <em>not</em> crash when opening the inventory while jumping with the Fire Sword equipped.</li>
+                                    <li><strong>Pre-conditions:</strong> Player is in any level (e.g., "Ice Palace"). Player has the "Fire Sword" in their inventory.</li>
+                                    <li><strong>Steps:</strong>
+                                        <ol>
+                                            <li>Equip the "Fire Sword."</li>
+                                            <li>Perform a "Jump" action (e.g., press 'Spacebar' on PC, 'A' on Xbox).</li>
+                                            <li>While the player character is in the air (between leaving the ground and landing), press the "Inventory" key (e.g., 'I' on PC, 'Y' on Xbox).</li>
+                                            <li>Observe the result.</li>
+                                            <li>Close the inventory menu.</li>
+                                        </ol>
+                                    </li>
+                                    <li><strong>Expected Result:</strong> The game <strong>must not crash</strong>. The inventory menu <strong>must</strong> open successfully. The player should land normally after the menu is closed.</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <p><strong>Negative Test Cases (for the fix):</strong></p>
+                                <ul>
+                                    <li><strong>Test Case 1 (Priority state stuck):</strong>
+                                        <ol>
+                                            <li>Get into the "Jumping Menu" state (Jump + Inventory).</li>
+                                            <li>While in the air, close the menu.</li>
+                                            <li>Land on the ground.</li>
+                                            <li>Immediately try to attack with the Fire Sword.</li>
+                                        </ol>
+                                        <p><strong>Expected:</strong> The player attacks normally.</p>
+                                        <p><strong>Failure:</strong> The player is "stuck" in a <code>MENU</code> state and can no longer attack. The priority state <em>never cleared</em>.</p>
+                                    </li>
+                                    <li><strong>Test Case 2 (Escape the priority state):</strong>
+                                        <ol>
+                                            <li>Get into the "Jumping Menu" state (Jump + Inventory).</li>
+                                            <li>While the menu is open and the player is in the air, press the "Attack" button.</li>
+                                        </ol>
+                                        <p><strong>Expected:</strong> Nothing should happen, or a "cannot do that now" sound should play.</p>
+                                        <p><strong>Failure:</strong> The game crashes, or the player attacks <em>while the menu is open</em> (bypassing the fix).</p>
+                                    </li>
+                                    <li><strong>Test Case 3 (New state interaction):</strong>
+                                        <ol>
+                                            <li>Go to the edge of a ledge.</li>
+                                            <li>Perform a "Jump" action and press "Inventory" (enter <code>JUMPING_MENU</code> state).</li>
+                                            <li>While in the air with the menu open, move the character off the ledge, triggering a <code>FALLING</code> state.</li>
+                                        </ol>
+                                        <p><strong>Expected:</strong> The menu should either close automatically, or the player should continue falling <em>with</em> the menu open. The game <strong>must not crash</strong>.</p>
+                                        <p><strong>Failure:</strong> The <code>JUMPING_MENU</code> state + Sound <code>FALLING</code> state interaction causes a new, different crash.</p>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- 6. Evaluation Grid Section -->
+        <section class="main-section" id="evaluation">
+            <h1>Evaluation Grid</h1>
+            <p>Your answers will be graded based on the following criteria. This is not an exhaustive list, but provides a guideline on what to focus on.</p>
+
+            <table class="evaluation-table">
+                <thead>
+                    <tr>
+                        <th>Question</th>
+                        <th class="criteria">Criteria</th>
+                        <th class="points">Max. Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td rowspan="6">Question 1</td>
+                        <td><strong>Component Testing Strategy:</strong> Clear differentiation between back-end (functional, BVA) and mobile (logic, viewmodel) component testing.</td>
+                        <td>15</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Integration Testing Strategy:</strong> Correctly identifies and justifies a thread/scenario-based strategy. Clearly describes a critical end-to-end test thread.</td>
+                        <td>20</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Specialized Mobile Testing:</strong> Identifies and justifies 3 <em>critical, high-risk</em> mobile-specific tests (e.g., connectivity, interruption, context).</td>
+                        <td>20</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Specialized WebApp Testing:</strong> Identifies and justifies 2 <em>critical, high-risk</em> tests for the restaurant owner's webapp (e.g., data accuracy, security).</td>
+                        <td>15</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Validation Testing Strategy:</strong> Correctly links the test case back to a specific user story and defines clear, measurable pass/fail criteria.</td>
+                        <td>15</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Performance Testing Strategy:</strong> Correctly differentiates between Load and Stress testing with relevant, specific scenarios for the app.</td>
+                        <td>15</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="3">Question 2</td>
+                        <td><strong>Bug Classification:</strong> Correctly identifies the bug as an Integration/System bug and provides a strong justification. Correctly identifies a relevant testing technique (e.g., Scenario, State-Transition) to find similar bugs.</td>
+                        <td>30</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Regression Test Case:</strong> Provides a formal, specific, and repeatable test case with all required parts (ID, Description, Pre-conditions, Steps, Expected Result).</td>
+                        <td>30</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Negative Test Cases:</strong> Demonstrates critical thinking by designing at least 3 plausible and distinct test cases that target potential failures <em>in the fix itself</em>.</td>
+                        <td>40</td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </section>
+
+    </main>
+
+    <!-- Password Modal -->
+    <div class="modal-overlay" id="password-modal-overlay">
+        <div class="modal-box" id="password-modal-box">
+            <h3>Password Required</h3>
+            <p>Please enter the password to view the answers.
+If you want to Cancel the action, click outside the "Password Required" box.
+You can see the entered password by clicking on the "eye" icon.</p>
+            <div class="password-input-group">
+                <input type="password" id="password-input" placeholder="Enter password...">
+                <span class="password-toggle-eye" id="password-toggle-eye">👁️</span>
+            </div>
+            <button id="password-submit-btn">Unlock Answers</button>
+            <div class="modal-error" id="password-error">Incorrect password. Please try again.</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- 1. Theme Switcher ---
+            const themeToggle = document.getElementById('theme-toggle');
+            const htmlElement = document.documentElement;
+
+            // Check for saved theme in localStorage
+            if (localStorage.getItem('theme') === 'dark') {
+                htmlElement.classList.add('solarized-dark');
+                themeToggle.checked = true;
+            } else {
+                htmlElement.classList.add('solarized-light');
+            }
+
+            themeToggle.addEventListener('change', () => {
+                if (themeToggle.checked) {
+                    htmlElement.classList.remove('solarized-light');
+                    htmlElement.classList.add('solarized-dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    htmlElement.classList.remove('solarized-dark');
+                    htmlElement.classList.add('solarized-light');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+
+            // --- 2. Main Navigation (SPA-like) ---
+            const navButtons = document.querySelectorAll('.nav-button');
+            const mainSections = document.querySelectorAll('.main-section');
+            const answersButton = document.querySelector('.nav-button[data-section="answers"]');
+            const answersSection = document.getElementById('answers-content');
+            const passwordModalOverlay = document.getElementById('password-modal-overlay');
+            const passwordModalBox = document.getElementById('password-modal-box');
+
+            const activateSection = (sectionId) => {
+                // Toggle active class on buttons
+                navButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.section === sectionId);
+                });
+                // Toggle active class on sections
+                mainSections.forEach(section => {
+                    section.classList.toggle('active', section.id === sectionId);
+                });
+            };
+
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const sectionId = button.dataset.section;
+                    
+                    if (sectionId === 'answers') {
+                        // Check if already unlocked
+                        if (sessionStorage.getItem('answersUnlocked') === 'true') {
+                            activateSection(sectionId);
+                            answersSection.style.display = 'block';
+                        } else {
+                            // Show password modal
+                            passwordModalOverlay.style.display = 'flex';
+                        }
+                    } else {
+                        activateSection(sectionId);
+                    }
+                });
+            });
+
+            // --- 3. Password Modal Logic ---
+            const passwordInput = document.getElementById('password-input');
+            const passwordSubmit = document.getElementById('password-submit-btn');
+            const passwordError = document.getElementById('password-error');
+            const passwordToggle = document.getElementById('password-toggle-eye');
+            const correctPasswordHash = 'c3R1ZGVudH5+MjAyNQ=='; // btoa('student~~2025')
+
+            passwordToggle.addEventListener('click', () => {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    passwordToggle.textContent = '🙈';
+                } else {
+                    passwordInput.type = 'password';
+                    passwordToggle.textContent = '👁️';
+                }
+            });
+
+            passwordModalOverlay.addEventListener('click', (e) => {
+                if (e.target === passwordModalOverlay) {
+                    passwordModalOverlay.style.display = 'none';
+                    passwordError.style.display = 'none';
+                    passwordInput.value = '';
+                }
+            });
+
+            passwordSubmit.addEventListener('click', () => {
+                try {
+                    // btoa(passwordInput.value)
+                    const enteredHash = btoa(passwordInput.value);
+                    if (enteredHash === correctPasswordHash) {
+                        // Correct
+                        sessionStorage.setItem('answersUnlocked', 'true');
+                        passwordModalOverlay.style.display = 'none';
+                        passwordError.style.display = 'none';
+                        passwordInput.value = '';
+                        answersSection.style.display = 'block';
+                        activateSection('answers');
+                    } else {
+                        // Incorrect
+                        passwordError.style.display = 'block';
+                    }
+                } catch (e) {
+                    // Handle potential btoa errors (e.g., invalid characters)
+                    console.error("Password encoding error:", e);
+                    passwordError.style.display = 'block';
+                }
+            });
+
+            // --- 4. Expand/Collapse All ---
+            const expandAllBtn = document.getElementById('expand-all-btn');
+            const collapseAllBtn = document.getElementById('collapse-all-btn');
+            
+            expandAllBtn.addEventListener('click', () => {
+                const activeSection = document.querySelector('.main-section.active');
+                if (!activeSection) return;
+                
+                activeSection.querySelectorAll('details').forEach(detail => {
+                    detail.open = true;
+                });
+            });
+
+            collapseAllBtn.addEventListener('click', () => {
+                const activeSection = document.querySelector('.main-section.active');
+                if (!activeSection) return;
+
+                activeSection.querySelectorAll('details').forEach(detail => {
+                    detail.open = false;
+                });
+            });
+
+            // --- 5. Python Code Simulation ---
+            const runButtons = document.querySelectorAll('.run-btn');
+            const clearButtons = document.querySelectorAll('.clear-btn');
+
+            // Pre-computed outputs for the Python examples
+            const pyOutputs = {
+                'py-example-1': `**DRIVER: Running test for get_total_price...**
+STUB: get_base_price_from_db called with abc
+STUB: get_current_tax_rate called
+DRIVER: Expected=110.0, Actual=110.0
+***Test PASSED!***`,
+                'py-example-2': `--- Basis Path Testing ---
+
+**Test Case 1 (x=5):**
+Input: 5
+Path 1
+Done
+
+**Test Case 2 (x=30):**
+Input: 30
+Path 2
+Done
+
+**Test Case 3 (x=100):**
+Input: 100
+Path 2
+Path 3
+Done`,
+                'py-example-3': `--- Boundary Value Analysis (BVA) ---
+Test 999: PASSED (Expected: False)
+***Test 1000: FAILED! (Expected: True, Got: False)***
+Test 1001: PASSED (Expected: True)
+Test 1999: PASSED (Expected: True)
+***Test 2000: FAILED! (Expected: True, Got: False)***
+Test 2001: PASSED (Expected: False)`,
+                'py-example-4': `
+--- Running REGRESSION suite on Calculator_v1 ---
+REGRESSION TEST (add): PASSED
+
+--- Running REGRESSION suite on Calculator_v2 ---
+***REGRESSION TEST (add): FAILED! (Expected 5, Got 6)***`
+            };
+
+            runButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.dataset.target;
+                    const outputElement = document.getElementById(`output-${targetId}`);
+                    if (outputElement && pyOutputs[targetId]) {
+                        outputElement.textContent = pyOutputs[targetId].trim();
+                    }
+                });
+            });
+
+            clearButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.dataset.target;
+                    const outputElement = document.getElementById(`output-${targetId}`);
+                    if (outputElement) {
+                        outputElement.textContent = '';
+                    }
+                });
+            });
+
+            // --- 6. Exercise Answer Box Import ---
+            const fileImportInputs = document.querySelectorAll('.import-file-btn');
+            
+            fileImportInputs.forEach(input => {
+                input.addEventListener('change', (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    const targetBoxId = input.dataset.target;
+                    const answerBox = document.getElementById(targetBoxId);
+                    if (!answerBox) return;
+
+                    const reader = new FileReader();
+
+                    if (file.type.startsWith('image/')) {
+                        // Handle images
+                        reader.onload = (e) => {
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.style.maxWidth = '90%'; // Style for editor
+                            answerBox.appendChild(img);
+                        };
+                        reader.readAsDataURL(file);
+                    } else if (file.type === 'text/plain' || file.type === 'text/markdown' || file.name.endsWith('.txt') || file.name.endsWith('.md')) {
+                        // Handle text files
+                        reader.onload = (e) => {
+                            const textNode = document.createTextNode(e.target.result + '\n');
+                            answerBox.appendChild(textNode);
+                        };
+                        reader.readAsText(file);
+                    } else {
+                        // Unsupported file type
+                        const errorMsg = document.createTextNode(`\n[File '${file.name}' is not supported. Please use images, .txt, or .md files.]\n`);
+                        answerBox.appendChild(errorMsg);
+                    }
+
+                    // Reset file input to allow re-uploading the same file
+                    event.target.value = null;
+                });
+            });
+
+            // --- 7. Submit Work Section ---
+            const studentNameInput = document.getElementById('student-name');
+            const studentIdInput = document.getElementById('student-id');
+            const sendEmailBtn = document.getElementById('send-email-btn');
+            const downloadAnswersBtn = document.getElementById('download-answers-btn');
+            const copyAnswersBtn = document.getElementById('copy-answers-btn');
+            const copyStatus = document.getElementById('copy-status');
+
+            const getAnswersContent = (asHtml = false) => {
+                let content = "SOFTWARE TESTING - HOMEWORK SUBMISSION\n";
+                content += "========================================\n\n";
+                content += `Name: ${studentNameInput.value || 'Not provided'}\n`;
+                content += `Student ID: ${studentIdInput.value || 'Not provided'}\n\n`;
+
+                document.querySelectorAll('.exercise-question').forEach((question, index) => {
+                    content += `--- QUESTION ${index + 1} ---\n\n`;
+                    const answerBox = question.querySelector('.answer-box');
+                    let answerText;
+
+                    if (asHtml) {
+                        answerText = answerBox.innerHTML;
+                    } else {
+                        // Simple HTML to Text conversion
+                        answerText = answerBox.innerHTML
+                            .replace(/<img src="data:.*?" style=".*?"\/?>/g, '\n[Embedded Image]\n') // Note images
+                            .replace(/<div>/g, '\n') // div to newline
+                            .replace(/<\/div>/g, '')
+                            .replace(/<br\s*[\/]?>/g, '\n') // br to newline
+                            .replace(/&nbsp;/g, ' ')
+                            .replace(/<[^>]+>/g, ''); // Strip other tags
+                        answerText = answerText.trim();
+                    }
+                    
+                    content += (answerText || '[No answer provided]') + '\n\n';
+                });
+                return content;
+            };
+
+            // Download Answers Button
+            downloadAnswersBtn.addEventListener('click', () => {
+                const textContent = getAnswersContent(false);
+                const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'copied_content.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+
+            // Copy to Clipboard Button
+            copyAnswersBtn.addEventListener('click', () => {
+                const textContent = getAnswersContent(false);
+                if (document.execCommand) {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = textContent;
+                    textarea.style.position = 'fixed'; // Prevent scrolling to bottom
+                    textarea.style.opacity = 0;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    try {
+                        const successful = document.execCommand('copy');
+                        if (successful) {
+                            copyStatus.textContent = 'Copied!';
+                            setTimeout(() => copyStatus.textContent = '', 2000);
+                        } else {
+                            copyStatus.textContent = 'Failed.';
+                        }
+                    } catch (err) {
+                        copyStatus.textContent = 'Failed.';
+                    }
+                    document.body.removeChild(textarea);
+                } else {
+                    // Fallback for very old browsers or if execCommand is disabled
+                    alert('Copying to clipboard is not supported in this environment. Please use the Download button.');
+                }
+            });
+            
+            // Send Email Button
+            sendEmailBtn.addEventListener('click', (e) => {
+                const textContent = getAnswersContent(false);
+                const subject = `Homework Submission - ${studentNameInput.value || 'Unknown Student'} - Software Testing`;
+                const mailto_link = 'mailto:asengroa@hotmail.com'
+                    + '?subject=' + encodeURIComponent(subject)
+                    + '&body=' + encodeURIComponent(textContent);
+                
+                // Check length. mailto has limits (around 2000 chars)
+                if (mailto_link.length > 2000) {
+                    alert('Your answer is too long to send via email directly. Please use the "Download Answers (.txt)" button and attach the file to your email manually.');
+                    e.preventDefault(); // Stop the link
+                } else {
+                    sendEmailBtn.href = mailto_link;
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>
