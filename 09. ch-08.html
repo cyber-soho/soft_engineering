@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSP to prevent XSS and external attacks while allowing internal scripts/styles -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
+    <title>Principles of Software Delivery & Deployment</title>
+    <style>
+        /* SOLARIZED THEME VARIABLES */
+        :root {
+            /* Light Theme Defaults */
+            --base03: #002b36;
+            --base02: #073642;
+            --base01: #586e75;
+            --base00: #657b83;
+            --base0: #839496;
+            --base1: #93a1a1;
+            --base2: #eee8d5;
+            --base3: #fdf6e3;
+            --yellow: #b58900;
+            --orange: #cb4b16;
+            --red: #dc322f;
+            --magenta: #d33682;
+            --violet: #6c71c4;
+            --blue: #268bd2;
+            --cyan: #2aa198;
+            --green: #859900;
+
+            /* Application Semantics (Default Light) */
+            --bg-color: var(--base3);
+            --text-color: var(--base00);
+            --header-bg: var(--base2);
+            --header-text: var(--base01);
+            --link-color: var(--blue);
+            --border-color: var(--base1);
+            --code-bg: var(--base2);
+            --input-bg: #ffffff;
+            --section-bg: #ffffff;
+            --shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* Dark Theme Class */
+        body.dark-theme {
+            --bg-color: var(--base03);
+            --text-color: var(--base0);
+            --header-bg: var(--base02);
+            --header-text: var(--base1);
+            --link-color: var(--blue);
+            --border-color: var(--base01);
+            --code-bg: var(--base02);
+            --input-bg: var(--base02);
+            --section-bg: var(--base02);
+            --shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        /* RESET & LAYOUT */
+        body {
+            font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding-top: 80px; /* Space for sticky header */
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* HEADER & NAV */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--header-bg);
+            border-bottom: 2px solid var(--border-color);
+            z-index: 1000;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .brand {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--header-text);
+        }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        nav {
+            margin-top: 10px;
+            background-color: var(--bg-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 20px;
+            position: fixed;
+            top: 60px; /* Below header */
+            left: 0;
+            right: 0;
+            z-index: 999;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1rem;
+            margin-right: 20px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        nav button:hover, nav button.active {
+            background-color: var(--blue);
+            color: white;
+        }
+
+        /* CONTROLS */
+        .btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            background-color: var(--base2);
+            color: var(--base01);
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+        
+        .dark-theme .btn {
+            background-color: var(--base02);
+            color: var(--base1);
+        }
+
+        .btn:hover {
+            background-color: var(--base1);
+            color: var(--base3);
+        }
+
+        /* TOGGLE SWITCH */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        .theme-switch {
+            display: inline-block;
+            height: 24px;
+            position: relative;
+            width: 50px;
+        }
+        .theme-switch input {
+            display: none;
+        }
+        .slider {
+            background-color: var(--base1);
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            background-color: white;
+            bottom: 4px;
+            content: "";
+            height: 16px;
+            left: 4px;
+            position: absolute;
+            transition: .4s;
+            width: 16px;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--yellow);
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* MAIN CONTENT */
+        main {
+            max-width: 1000px;
+            margin: 40px auto; /* Adjust for double header */
+            padding: 20px;
+        }
+
+        section {
+            display: none; /* Hidden by default for SPA feel */
+            animation: fadeIn 0.4s ease-in;
+        }
+        
+        section.active-section {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-block {
+            background-color: var(--section-bg);
+            padding: 30px;
+            margin-bottom: 25px;
+            border-radius: 5px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        /* TYPOGRAPHY */
+        h1 { color: var(--magenta); border-bottom: 2px solid var(--magenta); padding-bottom: 10px; }
+        h2 { color: var(--blue); margin-top: 30px; border-bottom: 1px solid var(--border-color); }
+        h3 { color: var(--green); }
+        a { color: var(--link-color); text-decoration: none; border-bottom: 1px dotted; }
+        a:hover { border-bottom: 1px solid; }
+
+        /* CODE BLOCKS */
+        pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+        code { font-family: "Consolas", monospace; color: var(--cyan); }
+        .keyword { color: var(--green); font-weight: bold; }
+        .string { color: var(--cyan); }
+        .comment { color: var(--base01); font-style: italic; }
+
+        /* DIAGRAMS */
+        .diagram-container {
+            text-align: center;
+            padding: 20px;
+            background: white; /* Always white for SVGs to look right */
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+        }
+        .caption { font-size: 0.9em; color: #666; margin-top: 10px; font-style: italic; }
+
+        /* INTERACTIVE ELEMENTS */
+        .exercise-box {
+            border-left: 5px solid var(--orange);
+            background-color: var(--section-bg);
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .answer-area {
+            width: 100%;
+            min-height: 150px;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-family: inherit;
+        }
+        
+        .imported-content {
+            border: 1px dashed var(--border-color);
+            padding: 10px;
+            margin-top: 5px;
+            background: rgba(0,0,0,0.02);
+            font-size: 0.9em;
+        }
+        
+        .imported-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .toolbar {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            font-size: 0.85em;
+        }
+
+        .console-output {
+            background-color: #000;
+            color: #0f0;
+            padding: 10px;
+            font-family: monospace;
+            margin-top: 10px;
+            display: none;
+            border-radius: 4px;
+        }
+
+        /* PASSWORD MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal {
+            background: var(--bg-color);
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+        .pwd-input-group {
+            position: relative;
+            margin: 20px 0;
+        }
+        .pwd-input-group input {
+            width: 80%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--text-color);
+        }
+        .pwd-toggle {
+            position: absolute;
+            right: 10%;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+
+        /* TABLES */
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid var(--border-color); padding: 12px; text-align: left; }
+        th { background-color: var(--base2); color: var(--base01); }
+        .dark-theme th { background-color: var(--base02); color: var(--base1); }
+
+        /* SUBMIT SECTION */
+        .submit-section {
+            border-top: 4px solid var(--blue);
+            background-color: var(--bg-color);
+            padding: 40px 20px;
+            margin-top: 50px;
+        }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--input-bg); color: var(--text-color); }
+        
+        .alert-box {
+            padding: 15px;
+            background-color: rgba(203, 75, 22, 0.1); /* Orange tint */
+            border-left: 4px solid var(--orange);
+            margin: 20px 0;
+        }
+
+        /* COLLAPSE/EXPAND */
+        details { margin-bottom: 15px; }
+        summary { cursor: pointer; font-weight: bold; color: var(--blue); padding: 10px; background: rgba(0,0,0,0.03); border-radius: 4px; list-style: none; }
+        summary:hover { background: rgba(0,0,0,0.06); }
+        summary::-webkit-details-marker { display: none; }
+        summary:after { content: "+"; float: right; font-weight: bold; }
+        details[open] summary:after { content: "-"; }
+        details[open] summary { border-bottom: 1px solid var(--border-color); margin-bottom: 10px; }
+
+    </style>
+</head>
+<body>
+
+<!-- TOP HEADER -->
+<header>
+    <div class="brand">Principles of Software Delivery & Deployment</div>
+    <div class="nav-controls">
+        <button class="btn" onclick="toggleAllDetails(true)">Expand All</button>
+        <button class="btn" onclick="toggleAllDetails(false)">Collapse All</button>
+        
+        <div class="theme-switch-wrapper">
+            <span style="font-size:0.8em; margin-right:5px">Theme</span>
+            <label class="theme-switch" for="checkbox">
+                <input type="checkbox" id="checkbox" onchange="toggleTheme()">
+                <div class="slider"></div>
+            </label>
+        </div>
+    </div>
+</header>
+
+<!-- TOP NAVIGATION -->
+<nav>
+    <button onclick="showSection('lecture')" class="active" id="nav-lecture">Lecture</button>
+    <button onclick="showSection('exercises')" id="nav-exercises">Exercises</button>
+    <button onclick="showSection('tips')" id="nav-tips">Tips</button>
+    <button onclick="showSection('explanations')" id="nav-explanations">Explanations</button>
+    <button onclick="showSection('answers')" id="nav-answers">Answers &#128274;</button>
+    <button onclick="showSection('evaluation')" id="nav-evaluation">Evaluation Grid</button>
+</nav>
+
+<main>
+
+    <!-- SECTION 1: LECTURE CONTENT -->
+    <section id="lecture" class="active-section">
+        <div class="content-block">
+            <h1>Lecture: Principles of Software Deployment</h1>
+            <p><strong>Course:</strong> Advanced Software Engineering (SE400) | <strong>Source:</strong> <em>Software Engineering: A Practitioner’s Approach</em></p>
+            
+            <details open>
+                <summary>1. Introduction to Deployment</summary>
+                <p>Deployment encompasses three distinct actions: Delivery, Support, and Feedback. In modern DevOps, this happens frequently, increasing risk. Adhering to these principles reduces "Deployment Anxiety."</p>
+            </details>
+
+            <details open>
+                <summary>2. Principle 1: Managing Customer Expectations</summary>
+                <p><strong>The Theory:</strong> Disappointment is the gap between expectation and reality. Teams must manage expectations regarding features and delivery dates.</p>
+                <div class="diagram-container">
+                    <svg width="400" height="200" viewBox="0 0 600 300">
+                        <line x1="50" y1="250" x2="550" y2="250" stroke="black" stroke-width="2" />
+                        <line x1="50" y1="250" x2="50" y2="50" stroke="black" stroke-width="2" />
+                        <text x="50" y="40" font-family="sans-serif">Satisfaction</text>
+                        <text x="550" y="270" font-family="sans-serif">Time</text>
+                        <path d="M50 200 Q 200 50 300 50 T 550 200" fill="none" stroke="#dc322f" stroke-width="3" stroke-dasharray="5,5" />
+                        <text x="320" y="40" font-family="sans-serif" fill="#dc322f">Unmanaged (Hype)</text>
+                        <path d="M50 200 Q 200 180 300 180 T 550 150" fill="none" stroke="#268bd2" stroke-width="3" />
+                        <text x="320" y="140" font-family="sans-serif" fill="#268bd2">Managed (Alignment)</text>
+                    </svg>
+                    <div class="caption">Figure 1: Managed vs. Unmanaged Expectations</div>
+                </div>
+                <h3>Python Example: Feature Flags</h3>
+                <p>Use feature flags to merge code but hide it from users until ready.</p>
+                <pre>
+<span class="keyword">class</span> FeatureFlagManager:
+    <span class="keyword">def</span> __init__(self):
+        self.features = { <span class="string">"ai_module"</span>: <span class="keyword">False</span>, <span class="string">"basic_dash"</span>: <span class="keyword">True</span> }
+    
+    <span class="keyword">def</span> is_enabled(self, name):
+        <span class="keyword">return</span> self.features.get(name, <span class="keyword">False</span>)
+
+<span class="comment"># Usage</span>
+manager = FeatureFlagManager()
+<span class="keyword">if</span> manager.is_enabled(<span class="string">"ai_module"</span>):
+    print(<span class="string">"Showing AI"</span>)
+<span class="keyword">else</span>:
+    print(<span class="string">"AI Hidden"</span>)</pre>
+                <div class="toolbar">
+                    <button class="btn" onclick="runPython('p1')">Run Code</button>
+                    <button class="btn" onclick="clearPython('p1')">Clear</button>
+                </div>
+                <div id="console-p1" class="console-output"></div>
+            </details>
+
+            <details open>
+                <summary>3. Principle 2: Assembly and Testing</summary>
+                <p><strong>The Theory:</strong> A software delivery is a package: Executable + Data + Docs + Config. Test the <em>package</em> on a neutral environment, not just the code on the developer's machine.</p>
+                <div class="diagram-container">
+                    <svg width="500" height="150" viewBox="0 0 700 250">
+                        <rect x="20" y="100" width="100" height="60" rx="5" fill="#eee" stroke="#333"/>
+                        <text x="70" y="135" text-anchor="middle">Code</text>
+                        <rect x="180" y="80" width="120" height="100" rx="5" fill="#268bd2" stroke="none"/>
+                        <text x="240" y="135" text-anchor="middle" fill="white">Assembly</text>
+                        <rect x="360" y="80" width="120" height="100" rx="5" fill="#cb4b16" stroke="none"/>
+                        <text x="420" y="135" text-anchor="middle" fill="white">Staging</text>
+                        <line x1="120" y1="130" x2="170" y2="130" stroke="#333" stroke-width="2"/>
+                        <line x1="300" y1="130" x2="350" y2="130" stroke="#333" stroke-width="2"/>
+                    </svg>
+                    <div class="caption">Figure 2: The Assembly Pipeline</div>
+                </div>
+                <h3>Python Example: Package Verification</h3>
+                <pre>
+<span class="keyword">import</span> os
+
+required = [<span class="string">"app.exe"</span>, <span class="string">"config.json"</span>, <span class="string">"manual.pdf"</span>]
+<span class="comment"># Simulating a directory check</span>
+<span class="keyword">def</span> verify(files_found):
+    print(<span class="string">"Checking package..."</span>)
+    <span class="keyword">for</span> f <span class="keyword">in</span> required:
+        <span class="keyword">if</span> f <span class="keyword">in</span> files_found:
+            print(f<span class="string">"[OK] {f}"</span>)
+        <span class="keyword">else</span>:
+            print(f<span class="string">"[MISSING] {f}"</span>)
+
+verify([<span class="string">"app.exe"</span>, <span class="string">"manual.pdf"</span>]) <span class="comment"># Missing config.json</span></pre>
+                <div class="toolbar">
+                    <button class="btn" onclick="runPython('p2')">Run Code</button>
+                    <button class="btn" onclick="clearPython('p2')">Clear</button>
+                </div>
+                <div id="console-p2" class="console-output"></div>
+            </details>
+
+            <details open>
+                <summary>4. Principle 3: Support Regimen</summary>
+                <p><strong>The Theory:</strong> Support must be established <em>before</em> delivery. Who answers the phone? How are tickets triaged?</p>
+                <p><strong>Example:</strong> The "Email Black Hole" happens when no specific person monitors the support inbox.</p>
+                <h3>Python Example: Ticket Router</h3>
+                <pre>
+<span class="keyword">def</span> route_ticket(issue):
+    issue = issue.lower()
+    <span class="keyword">if</span> <span class="string">"password"</span> <span class="keyword">in</span> issue:
+        <span class="keyword">return</span> <span class="string">"L1 Support"</span>
+    <span class="keyword">elif</span> <span class="string">"crash"</span> <span class="keyword">in</span> issue:
+        <span class="keyword">return</span> <span class="string">"Engineering"</span>
+    <span class="keyword">else</span>:
+        <span class="keyword">return</span> <span class="string">"General"</span>
+
+print(f<span class="string">"Ticket: 'App crash on load' -> {route_ticket('App crash on load')}"</span>)</pre>
+                <div class="toolbar">
+                    <button class="btn" onclick="runPython('p3')">Run Code</button>
+                    <button class="btn" onclick="clearPython('p3')">Clear</button>
+                </div>
+                <div id="console-p3" class="console-output"></div>
+            </details>
+
+            <details open>
+                <summary>5. Principle 4: Instructional Materials</summary>
+                <p><strong>The Theory:</strong> The capability is useless if the user doesn't know how to use it. Provide training, docs, and "What's New" guides.</p>
+            </details>
+
+            <details open>
+                <summary>6. Principle 5: Buggy Software</summary>
+                <p><strong>The Theory:</strong> Fix first, deliver later. The cost of fixing a bug post-release is exponentially higher than pre-release.</p>
+                <div class="diagram-container">
+                    <svg width="400" height="200" viewBox="0 0 600 300">
+                        <line x1="50" y1="250" x2="550" y2="250" stroke="black" stroke-width="2" />
+                        <line x1="50" y1="250" x2="50" y2="50" stroke="black" stroke-width="2" />
+                        <path d="M50 240 Q 200 240 300 150 T 550 50" fill="none" stroke="#dc322f" stroke-width="4" />
+                        <text x="300" y="140" font-family="sans-serif" fill="#dc322f">Cost to Fix</text>
+                    </svg>
+                    <div class="caption">Figure 3: Cost of Change Curve</div>
+                </div>
+                <h3>Python Example: Quality Gate</h3>
+                <pre>
+bugs = [{<span class="string">"sev"</span>: <span class="string">"critical"</span>}, {<span class="string">"sev"</span>: <span class="string">"low"</span>}]
+<span class="keyword">def</span> quality_gate(bugs):
+    <span class="keyword">for</span> b <span class="keyword">in</span> bugs:
+        <span class="keyword">if</span> b[<span class="string">"sev"</span>] == <span class="string">"critical"</span>:
+            print(<span class="string">"[FATAL] Deployment Aborted. Critical bug found."</span>)
+            <span class="keyword">return</span>
+    print(<span class="string">"[SUCCESS] Deployment Proceeding."</span>)
+
+quality_gate(bugs)</pre>
+                <div class="toolbar">
+                    <button class="btn" onclick="runPython('p5')">Run Code</button>
+                    <button class="btn" onclick="clearPython('p5')">Clear</button>
+                </div>
+                <div id="console-p5" class="console-output"></div>
+            </details>
+
+            <div class="alert-box">
+                <h4>External Resources (Verified Safe)</h4>
+                <ul>
+                    <li><a href="https://www.pmi.org" target="_blank" rel="noopener noreferrer">Project Management Institute (PMI)</a></li>
+                    <li><a href="https://iso25000.com/en/iso-25000-standards/iso-25010" target="_blank" rel="noopener noreferrer">ISO/IEC 25010 (Software Quality)</a></li>
+                    <li><a href="https://www.python.org" target="_blank" rel="noopener noreferrer">Python Software Foundation</a></li>
+                    <li><a href="https://www.atlassian.com" target="_blank" rel="noopener noreferrer">Atlassian (CI/CD)</a></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: EXERCISES -->
+    <section id="exercises">
+        <div class="content-block">
+            <h1>Exercises</h1>
+            <p>Complete the following exercises based on the lecture material. You can type directly or import content from your local device.</p>
+
+            <details open>
+                <summary>Exercise 1: Managing Expectations</summary>
+                <div class="exercise-box">
+                    <p><strong>Scenario:</strong> You are the Lead Developer. Your Marketing Director just sold a feature called "Voice Command" to a major client for a release due in 5 days. You haven't even started coding it. It will take 3 weeks to build properly.</p>
+                    <p><strong>Question:</strong> Using Principle 1, draft an email to the Marketing Director. How do you manage this expectation without ruining the client relationship?</p>
+                    
+                    <textarea class="answer-area" id="ans1" placeholder="Type your answer here..."></textarea>
+                    <div id="preview1"></div>
+                    <div class="toolbar">
+                        <input type="file" id="file1" style="display:none" onchange="importFile(this, 'ans1', 'preview1')">
+                        <button class="btn" onclick="document.getElementById('file1').click()">Import Content (Txt/Img)</button>
+                        <span style="font-size:0.8em; margin-left:10px; color:var(--base01)">Supports: .txt, .md, .html, .png, .jpg</span>
+                    </div>
+                </div>
+            </details>
+
+            <details open>
+                <summary>Exercise 2: Assembly Checklist</summary>
+                <div class="exercise-box">
+                    <p><strong>Task:</strong> Create a "Deployment Checklist" for a web application. List at least 5 distinct items that must be in the "package" (Principle 2) besides the source code.</p>
+                    
+                    <textarea class="answer-area" id="ans2" placeholder="1. Database Schema SQL..."></textarea>
+                    <div id="preview2"></div>
+                    <div class="toolbar">
+                        <input type="file" id="file2" style="display:none" onchange="importFile(this, 'ans2', 'preview2')">
+                        <button class="btn" onclick="document.getElementById('file2').click()">Import Content</button>
+                    </div>
+                </div>
+            </details>
+
+            <details open>
+                <summary>Exercise 3: Support Triage</summary>
+                <div class="exercise-box">
+                    <p><strong>Task:</strong> Define the "Triage" logic for a Support Regimen. If a user emails "I want a refund" and another emails "The server is down (Error 500)", who should receive each ticket? Why?</p>
+                    
+                    <textarea class="answer-area" id="ans3" placeholder="Type your answer here..."></textarea>
+                    <div id="preview3"></div>
+                    <div class="toolbar">
+                        <input type="file" id="file3" style="display:none" onchange="importFile(this, 'ans3', 'preview3')">
+                        <button class="btn" onclick="document.getElementById('file3').click()">Import Content</button>
+                    </div>
+                </div>
+            </details>
+
+            <!-- SUBMIT YOUR WORK AREA -->
+            <div class="submit-section">
+                <h2>Submit Your Work</h2>
+                <div class="alert-box">
+                    <p><strong>How to use:</strong></p>
+                    <ol>
+                        <li>Fill in your details below.</li>
+                        <li>Click "Copy Answers to File" to save a local backup.</li>
+                        <li>Click "Send Answers via Email" to open your mail client with the answers pre-filled.</li>
+                        <li>If the email button doesn't work, manually email the "copied_content.txt" to <strong>asengroa@hotmail.com</strong>.</li>
+                    </ol>
+                </div>
+                
+                <div class="form-group">
+                    <label>Student Name:</label>
+                    <input type="text" id="studentName" placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label>Student ID:</label>
+                    <input type="text" id="studentID" placeholder="12345678">
+                </div>
+                
+                <div class="toolbar" style="margin-top:20px;">
+                    <button class="btn" style="background-color: var(--blue); color:white;" onclick="copyAndDownload()">Copy & Download Answers (.txt)</button>
+                    <button class="btn" style="background-color: var(--green); color:white;" onclick="sendEmail()">Send Answers via Email</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: TIPS -->
+    <section id="tips">
+        <div class="content-block">
+            <h1>Tips for Exercises</h1>
+            <ul>
+                <li><strong>Ex 1:</strong> Focus on the "Definition of Done". Consider offering a partial release or a beta version. Never promise the impossible.</li>
+                <li><strong>Ex 2:</strong> Don't forget environmental variables, API keys (safely stored), and legal documents like EULA or Privacy Policy.</li>
+                <li><strong>Ex 3:</strong> Engineers are expensive resources. They should only see technical bugs, not billing disputes.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- SECTION 4: EXPLANATIONS -->
+    <section id="explanations">
+        <div class="content-block">
+            <h1>Explanations</h1>
+            <p>These explanations clarify the intent of the questions.</p>
+            <h3>Why ask about Expectations?</h3>
+            <p>Most software projects fail not because the code is bad, but because the client expected something else. Communication is a technical skill.</p>
+            <h3>Why the Assembly Checklist?</h3>
+            <p>The "works on my machine" error is the most common deployment issue. Forcing you to list dependencies helps you understand the complexity of an environment.</p>
+        </div>
+    </section>
+
+    <!-- SECTION 5: ANSWERS (PROTECTED) -->
+    <section id="answers">
+        <div class="content-block">
+            <h1>Model Answers</h1>
+            
+            <div id="password-gate">
+                <div class="alert-box" style="text-align:center;">
+                    Please enter the password to view the answers.<br>
+                    If you want to Cancel the action, click outside the "Password Required" box.<br>
+                    You can see the entered password by clicking on the "eye" icon.
+                </div>
+                <button class="btn" onclick="openPasswordModal()" style="display:block; margin:0 auto;">Unlock Answers</button>
+            </div>
+
+            <div id="hidden-answers" style="display:none;">
+                <div class="alert-box" style="border-left-color: var(--green); background: rgba(133, 153, 0, 0.1);">
+                    <strong>Access Granted.</strong> These are model answers.
+                </div>
+
+                <h3>Ex 1: Managing Expectations</h3>
+                <p><em>"Dear Director, we cannot deliver the full Voice Command feature in 5 days with high quality. Releasing it now would likely break the app and upset the client. However, we can release the visual interface (UI) in 5 days as a 'Preview' and deliver the functional voice logic in the following sprint (3 weeks). This manages their excitement while giving us time to build it right."</em></p>
+
+                <h3>Ex 2: Checklist</h3>
+                <ol>
+                    <li>Executable Code (.exe/.py)</li>
+                    <li>Database Migration Scripts (.sql)</li>
+                    <li>Configuration Files (env variables, config.json)</li>
+                    <li>Third-party Dependencies (node_modules, DLLs)</li>
+                    <li>User Manual / Release Notes</li>
+                </ol>
+
+                <h3>Ex 3: Triage</h3>
+                <p>Refund -> <strong>Sales/Billing Dept</strong> (No technical skill needed).<br>
+                   Server 500 -> <strong>L3 Engineering</strong> (Requires code investigation).<br>
+                   Password Reset -> <strong>L1 Support</strong> (Scripted response).</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 6: EVALUATION GRID -->
+    <section id="evaluation">
+        <div class="content-block">
+            <h1>Evaluation Grid</h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Criteria</th>
+                        <th>Excellent (90-100%)</th>
+                        <th>Good (70-89%)</th>
+                        <th>Poor (0-69%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Understanding Principles</td>
+                        <td>Applies principles to novel scenarios creatively.</td>
+                        <td>Repeats definitions from lecture accurately.</td>
+                        <td>Fails to link answers to the 5 principles.</td>
+                    </tr>
+                    <tr>
+                        <td>Completeness</td>
+                        <td>All exercises answered; robust checklists.</td>
+                        <td>Most exercises answered; some details missing.</td>
+                        <td>Significant sections left blank.</td>
+                    </tr>
+                    <tr>
+                        <td>Communication</td>
+                        <td>Professional tone in emails/docs.</td>
+                        <td>Clear but informal.</td>
+                        <td>Hard to understand or rude tone.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+<!-- MODAL FOR PASSWORD -->
+<div class="modal-overlay" id="pwdModal" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+        <h3>Password Required</h3>
+        <p>Enter <strong>the required password</strong> to continue.</p>
+        <div class="pwd-input-group">
+            <input type="password" id="pwdInput" placeholder="Password">
+            <span class="pwd-toggle" onclick="togglePwdVisibility()">&#128065;</span>
+        </div>
+        <p id="pwdError" style="color:var(--red); display:none;">Incorrect Password</p>
+        <button class="btn" onclick="checkPassword()">Submit</button>
+        <button class="btn" onclick="document.getElementById('pwdModal').style.display='none'">Cancel</button>
+    </div>
+</div>
+
+<!-- JAVASCRIPT LOGIC -->
+<script>
+    // --- THEME MANAGEMENT ---
+    function toggleTheme() {
+        document.body.classList.toggle('dark-theme');
+    }
+
+    // --- NAVIGATION ---
+    function showSection(id) {
+        // Hide all sections
+        document.querySelectorAll('section').forEach(sec => sec.classList.remove('active-section'));
+        document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+        
+        // Show target
+        document.getElementById(id).classList.add('active-section');
+        document.getElementById('nav-' + id).classList.add('active');
+        
+        // Scroll to top
+        window.scrollTo(0, 0);
+    }
+
+    // --- EXPAND/COLLAPSE ALL ---
+    function toggleAllDetails(shouldOpen) {
+        const activeSec = document.querySelector('section.active-section');
+        // Do not affect Evaluation Grid as it has no details, but good practice to limit scope
+        if (activeSec && activeSec.id !== 'evaluation') {
+            const details = activeSec.querySelectorAll('details');
+            details.forEach(d => {
+                if(shouldOpen) d.setAttribute('open', 'true');
+                else d.removeAttribute('open');
+            });
+        }
+    }
+
+    // --- PYTHON SIMULATION ---
+    const pythonOutputs = {
+        'p1': 'AI Hidden',
+        'p2': 'Checking package...\n[OK] app.exe\n[OK] manual.pdf\n[MISSING] config.json',
+        'p3': "Ticket: 'App crash on load' -> Engineering",
+        'p5': '[FATAL] Deployment Aborted. Critical bug found.'
+    };
+
+    function runPython(id) {
+        const consoleDiv = document.getElementById('console-' + id);
+        consoleDiv.style.display = 'block';
+        consoleDiv.innerText = "> Running script...\n" + pythonOutputs[id];
+    }
+
+    function clearPython(id) {
+        const consoleDiv = document.getElementById('console-' + id);
+        consoleDiv.style.display = 'none';
+        consoleDiv.innerText = "";
+    }
+
+    // --- FILE IMPORT LOGIC ---
+    function importFile(input, textareaId, previewId) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        const dest = document.getElementById(textareaId);
+        const preview = document.getElementById(previewId);
+
+        // Simple check for PDF/Docx (Complex types)
+        if (file.type.includes('pdf') || file.type.includes('word') || file.type.includes('officedocument')) {
+            alert("Security Notice: Complex document conversion (PDF/Word) requires external servers which are blocked in this secure file. Please convert your document to Text or HTML first, or copy-paste the content.");
+            return;
+        }
+
+        if (file.type.startsWith('image/')) {
+            reader.onload = function(e) {
+                // For images, we append an IMG tag to the preview area
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.maxWidth = "100%";
+                img.style.marginTop = "10px";
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'imported-content';
+                wrapper.innerHTML = `<strong>Imported Image: ${file.name}</strong><br>`;
+                wrapper.appendChild(img);
+                
+                preview.appendChild(wrapper);
+                
+                // Also add a text marker in the textarea so it's included in the submission
+                dest.value += `\n[ATTACHMENT: ${file.name} (See rendered view)]\n`;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            // Text/HTML/Markdown
+            reader.onload = function(e) {
+                dest.value += `\n--- IMPORTED CONTENT (${file.name}) ---\n` + e.target.result + `\n--- END IMPORT ---\n`;
+            };
+            reader.readAsText(file);
+        }
+    }
+
+    // --- PASSWORD PROTECTION ---
+    // Base64 for the password is "c3R1ZGVudCYmJjIwMjU="
+    const CORRECT_HASH = "c3R1ZGVudCYmJjIwMjU="; 
+
+    function openPasswordModal() {
+        document.getElementById('pwdModal').style.display = 'flex';
+        document.getElementById('pwdInput').value = '';
+        document.getElementById('pwdError').style.display = 'none';
+    }
+
+    function closeModal(e) {
+        if (e.target.id === 'pwdModal') {
+            document.getElementById('pwdModal').style.display = 'none';
+        }
+    }
+
+    function togglePwdVisibility() {
+        const input = document.getElementById('pwdInput');
+        input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function checkPassword() {
+        const input = document.getElementById('pwdInput').value;
+        // Simple btoa check
+        if (btoa(input) === CORRECT_HASH) {
+            document.getElementById('pwdModal').style.display = 'none';
+            document.getElementById('password-gate').style.display = 'none';
+            document.getElementById('hidden-answers').style.display = 'block';
+        } else {
+            document.getElementById('pwdError').style.display = 'block';
+        }
+    }
+
+    // --- SUBMISSION LOGIC ---
+    function getSubmissionData() {
+        const name = document.getElementById('studentName').value || "Unknown_Student";
+        const id = document.getElementById('studentID').value || "No_ID";
+        const ans1 = document.getElementById('ans1').value;
+        const ans2 = document.getElementById('ans2').value;
+        const ans3 = document.getElementById('ans3').value;
+
+        return `COURSE: Principles of Software Delivery & Deployment\n` +
+               `STUDENT: ${name}\nID: ${id}\n\n` +
+               `--- EXERCISE 1 ---\n${ans1}\n\n` +
+               `--- EXERCISE 2 ---\n${ans2}\n\n` +
+               `--- EXERCISE 3 ---\n${ans3}\n\n` +
+               `--- END OF SUBMISSION ---`;
+    }
+
+    function copyAndDownload() {
+        const content = getSubmissionData();
+        
+        // 1. Copy to Clipboard
+        navigator.clipboard.writeText(content).then(() => {
+            alert("Answers copied to clipboard!");
+        }).catch(err => {
+            console.error("Clipboard failed", err);
+        });
+
+        // 2. Download File
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "copied_content.txt"; // As requested
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+
+    function sendEmail() {
+        const content = getSubmissionData();
+        const subject = encodeURIComponent("Software Deployment Exercises Submission");
+        const body = encodeURIComponent(content);
+        const mailtoLink = `mailto:asengroa@hotmail.com?subject=${subject}&body=${body}`;
+        window.location.href = mailtoLink;
+    }
+
+</script>
+</body>
+</html>
+
+
