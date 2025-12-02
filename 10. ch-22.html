@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Configuration Management (SCM) - Mastering Change</title>
+    <style>
+        /* --- Solarized Theme Variables --- */
+        :root {
+            --base03: #002b36;
+            --base02: #073642;
+            --base01: #586e75;
+            --base00: #657b83;
+            --base0: #839496;
+            --base1: #93a1a1;
+            --base2: #eee8d5;
+            --base3: #fdf6e3;
+            --yellow: #b58900;
+            --orange: #cb4b16;
+            --red: #dc322f;
+            --magenta: #d33682;
+            --violet: #6c71c4;
+            --blue: #268bd2;
+            --cyan: #2aa198;
+            --green: #859900;
+
+            /* Default to Solarized Light */
+            --bg-color: var(--base3);
+            --text-color: var(--base00);
+            --heading-color: var(--base01);
+            --nav-bg: var(--base2);
+            --nav-text: var(--base01);
+            --card-bg: #ffffff;
+            --border-color: var(--base1);
+            --code-bg: var(--base2);
+            --input-bg: #ffffff;
+            --btn-primary: var(--blue);
+            --btn-text: #ffffff;
+            --accent: var(--orange);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: var(--base03);
+            --text-color: var(--base0);
+            --heading-color: var(--base1);
+            --nav-bg: var(--base02);
+            --nav-text: var(--base1);
+            --card-bg: var(--base02);
+            --border-color: var(--base01);
+            --code-bg: #00212b;
+            --input-bg: var(--base02);
+            --btn-primary: var(--blue);
+            --btn-text: #ffffff;
+            --accent: var(--yellow);
+        }
+
+        /* --- Global Styles --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--heading-color);
+            margin-top: 1.5em;
+        }
+
+        a {
+            color: var(--blue);
+            text-decoration: none;
+            border-bottom: 1px dotted var(--blue);
+        }
+
+        a:hover {
+            color: var(--red);
+        }
+
+        /* --- Sticky Top Header --- */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: var(--nav-bg);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 0.5rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .header-left {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--heading-color);
+        }
+
+        .header-center {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--nav-text);
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background-color: var(--base1);
+            color: var(--base3);
+        }
+
+        [data-theme="dark"] .nav-btn:hover, [data-theme="dark"] .nav-btn.active {
+            color: var(--base03);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-btn {
+            background-color: var(--base01);
+            color: var(--base3);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        .control-btn:hover {
+            background-color: var(--accent);
+        }
+
+        /* Switch Toggle */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        .theme-switch {
+            display: inline-block;
+            height: 24px;
+            position: relative;
+            width: 48px;
+        }
+        .theme-switch input {
+            display:none;
+        }
+        .slider {
+            background-color: var(--base01);
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            background-color: #fff;
+            bottom: 3px;
+            content: "";
+            height: 18px;
+            left: 3px;
+            position: absolute;
+            transition: .4s;
+            width: 18px;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* --- Main Content Layout --- */
+        main {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 20px;
+            padding-bottom: 100px;
+        }
+
+        section {
+            display: none; /* Hidden by default for SPA feel */
+            animation: fadeIn 0.5s;
+        }
+
+        section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .content-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Collapsible details */
+        details {
+            margin-bottom: 10px;
+        }
+        
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--heading-color);
+            padding: 10px;
+            background-color: rgba(0,0,0,0.03);
+            border-radius: 4px;
+            outline: none;
+        }
+
+        summary:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+
+        /* --- Diagram / Image placeholders --- */
+        .diagram-container {
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+        }
+        
+        [data-theme="dark"] .diagram-container {
+            background-color: #e0e0e0; /* Light bg for SVGs even in dark mode for visibility */
+        }
+
+        /* --- Code Sandbox --- */
+        .code-block {
+            background-color: var(--code-bg);
+            color: var(--base01);
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: auto;
+            border-left: 4px solid var(--accent);
+            white-space: pre-wrap;
+        }
+        
+        [data-theme="dark"] .code-block {
+             color: var(--base1);
+        }
+
+        .sandbox-controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .output-console {
+            background-color: #000;
+            color: #0f0;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            min-height: 40px;
+            display: none;
+        }
+
+        /* --- Forms & Inputs --- */
+        .student-input-area {
+            margin-top: 15px;
+            border-top: 2px dashed var(--border-color);
+            padding-top: 15px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .import-controls {
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: var(--base01);
+        }
+
+        /* --- Modal (Password) --- */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 2000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.5); 
+            backdrop-filter: blur(2px);
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            margin: 15% auto; 
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .password-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        #passwordInput {
+            padding: 10px;
+            width: 70%;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .eye-icon {
+            cursor: pointer;
+            position: absolute;
+            right: 15%;
+            top: 10px;
+            user-select: none;
+        }
+
+        /* --- Footer / Submit Section --- */
+        .submit-section {
+            margin-top: 50px;
+            padding: 30px;
+            background-color: var(--base2);
+            border-radius: 8px;
+            border: 1px solid var(--accent);
+        }
+
+        [data-theme="dark"] .submit-section {
+            background-color: var(--base02);
+        }
+
+        .submit-form-group {
+            margin-bottom: 15px;
+        }
+        
+        .submit-form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .submit-form-group input {
+            padding: 8px;
+            width: 100%;
+            max-width: 300px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .action-btn {
+            background-color: var(--btn-primary);
+            color: var(--btn-text);
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .action-btn:hover {
+            filter: brightness(1.1);
+        }
+
+        /* Responsiveness */
+        @media (max-width: 768px) {
+            .header-center {
+                display: none; /* Simple burger menu could be added here, for now keeping it simple */
+            }
+            header {
+                flex-wrap: wrap;
+            }
+            .header-center {
+                display: flex;
+                width: 100%;
+                order: 3;
+                margin-top: 10px;
+                padding-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body data-theme="light">
+
+    <!-- Top Header -->
+    <header>
+        <div class="header-left">
+            Software Configuration Management (SCM)
+        </div>
+
+        <nav class="header-center">
+            <button class="nav-btn active" onclick="showSection('lecture')">Lecture</button>
+            <button class="nav-btn" onclick="showSection('exercises')">Exercises</button>
+            <button class="nav-btn" onclick="showSection('tips')">Tips</button>
+            <button class="nav-btn" onclick="showSection('explanations')">Explanations</button>
+            <button class="nav-btn" onclick="checkPasswordAndShow('answers')">Answers</button>
+            <button class="nav-btn" onclick="showSection('evaluation')">Evaluation Grid</button>
+        </nav>
+
+        <div class="header-right">
+            <button class="control-btn" onclick="expandAll()">Expand All</button>
+            <button class="control-btn" onclick="collapseAll()">Collapse All</button>
+            
+            <div class="theme-switch-wrapper">
+                <label class="theme-switch" for="checkbox">
+                    <input type="checkbox" id="checkbox" onclick="toggleTheme()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main>
+
+        <!-- SECTION 1: LECTURE -->
+        <section id="lecture" class="active">
+            <h1>Software Configuration Management (SCM)</h1>
+            <h3>Mastering Change in Software Engineering</h3>
+
+            <div class="content-card">
+                <details open>
+                    <summary>1. Introduction to SCM</summary>
+                    <p>Welcome to this in-depth lecture on <strong>Software Configuration Management (SCM)</strong>. If there is one universal truth in the universe of software engineering, it is this: <strong>Change is inevitable</strong>.</p>
+                    <p>When you build computer software, change happens. It happens because customers change their minds, because new technologies emerge, and because business conditions shift. If these changes are not managed, they lead to "entropy"—the tendency of a software system to degrade into chaos. SCM is the discipline that stands between order and chaos.</p>
+                    
+                    <div class="diagram-container">
+                        <!-- SVG Diagram: Order vs Chaos -->
+                        <svg width="400" height="150" viewBox="0 0 400 150">
+                            <rect x="10" y="50" width="100" height="50" fill="#dc322f" rx="10" />
+                            <text x="60" y="80" text-anchor="middle" fill="white" font-weight="bold">CHAOS</text>
+                            
+                            <rect x="290" y="50" width="100" height="50" fill="#859900" rx="10" />
+                            <text x="340" y="80" text-anchor="middle" fill="white" font-weight="bold">ORDER</text>
+                            
+                            <path d="M120 75 L280 75" stroke="#268bd2" stroke-width="4" marker-end="url(#arrow)" />
+                            <circle cx="200" cy="75" r="30" fill="#2aa198" />
+                            <text x="200" y="80" text-anchor="middle" fill="white" font-size="12">SCM</text>
+                            
+                            <defs>
+                                <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#268bd2" />
+                                </marker>
+                            </defs>
+                        </svg>
+                        <p><em>Fig 1: SCM acts as the filter between Chaos (Uncontrolled Change) and Order (Productivity).</em></p>
+                    </div>
+
+                    <p>As <a href="https://en.wikipedia.org/wiki/Software_configuration_management" target="_blank" rel="noopener noreferrer">Babich</a> suggests, SCM is the "art of identifying, organizing, and controlling modifications to the software being built by a programming team."</p>
+                    
+                    <h4>The First Law of System Engineering</h4>
+                    <blockquote>"No matter where you are in the system life cycle, the system will change, and the desire to change it will persist throughout the life cycle."</blockquote>
+                    
+                    <h4>Real-Life Example: The Renovation Blueprint</h4>
+                    <p><strong>The Situation:</strong> Imagine renovating a hotel with plumbers, electricians, and carpenters.</p>
+                    <ul>
+                        <li><strong>Without SCM:</strong> Chaos. The electrician moves a socket; the carpenter builds a cabinet over it.</li>
+                        <li><strong>With SCM:</strong> A master blueprint (Configuration). Changes are requested, approved, and the master is updated for everyone.</li>
+                    </ul>
+                </details>
+            </div>
+
+            <div class="content-card">
+                <details>
+                    <summary>2. SCM Roles & Stakeholders</summary>
+                    <p>Key roles in the SCM process:</p>
+                    <ul>
+                        <li><strong>Project Manager (PM):</strong> Monitors progress, views SCM as an audit mechanism.</li>
+                        <li><strong>Configuration Manager:</strong> In charge of SCM procedures and policies.</li>
+                        <li><strong>Software Engineers:</strong> Develop code, need SCM to prevent collisions.</li>
+                        <li><strong>The Customer:</strong> Requests changes and reports bugs.</li>
+                    </ul>
+
+                    <h4>Real-Life Example: The Restaurant Kitchen</h4>
+                    <p><strong>The Customer (Diner):</strong> Requests a change (Fries -> Salad).</p>
+                    <p><strong>The Waiter (PM/Interface):</strong> Enters request into POS (Repository).</p>
+                    <p><strong>The Head Chef (Config Manager):</strong> Prioritizes and coordinates the change.</p>
+                    <p><strong>Line Cooks (Engineers):</strong> Execute the tasks based on the coordinate plan.</p>
+                </details>
+            </div>
+
+            <div class="content-card">
+                <details>
+                    <summary>3. Elements of SCM</summary>
+                    <p>According to Susan Dart (SEI), there are four essential elements:</p>
+                    <ol>
+                        <li><strong>Component Elements:</strong> Tools & Database (File management).</li>
+                        <li><strong>Process Elements:</strong> Procedures and tasks (The "Human Algorithm").</li>
+                        <li><strong>Construction Elements:</strong> Build tools (Compilers, Jenkins).</li>
+                        <li><strong>Human Elements:</strong> Team dynamics and tool usage.</li>
+                    </ol>
+                </details>
+            </div>
+
+            <div class="content-card">
+                <details>
+                    <summary>4. Baselines</summary>
+                    <p>A <strong>baseline</strong> is a milestone. It is a specification or product that has been formally reviewed and agreed upon.</p>
+                    <p><em>Crucially:</em> You can change a baseline, but only through <strong>formal change control procedures</strong>.</p>
+                    
+                    <div class="diagram-container">
+                        <!-- SVG: Baseline Concept -->
+                        <svg width="500" height="120" viewBox="0 0 500 120">
+                            <line x1="10" y1="60" x2="480" y2="60" stroke="#93a1a1" stroke-width="2" stroke-dasharray="5,5" />
+                            
+                            <circle cx="50" cy="60" r="10" fill="#859900" />
+                            <text x="50" y="90" text-anchor="middle" font-size="12" fill="#586e75">Start</text>
+                            
+                            <path d="M50 60 Q 150 10, 250 60" stroke="#cb4b16" stroke-width="2" fill="none" />
+                            <text x="150" y="30" text-anchor="middle" font-size="10" fill="#cb4b16">Informal Changes</text>
+                            
+                            <rect x="240" y="40" width="20" height="40" fill="#268bd2" />
+                            <text x="250" y="100" text-anchor="middle" font-weight="bold" fill="#268bd2">BASELINE</text>
+                            
+                            <path d="M260 60 Q 360 110, 460 60" stroke="#d33682" stroke-width="2" fill="none" />
+                            <text x="360" y="100" text-anchor="middle" font-size="10" fill="#d33682">Formal Change Control</text>
+                            
+                            <circle cx="460" cy="60" r="10" fill="#859900" />
+                        </svg>
+                        <p><em>Fig 2: Informal changes happen before the baseline. Formal control applies after.</em></p>
+                    </div>
+
+                    <h4>Python Code Example: Creating a Baseline Hash</h4>
+                    <p>This code simulates how SCM tools (like Git) use hashing to detect changes.</p>
+                    
+                    <div class="code-block" id="code1">import hashlib
+
+def create_baseline(content):
+    # Create a SHA-256 hash of the content
+    hasher = hashlib.sha256()
+    hasher.update(content.encode('utf-8'))
+    return hasher.hexdigest()
+
+# 1. Define original spec (The Baseline)
+spec_v1 = "The software shall allow users to login with email."
+baseline_hash = create_baseline(spec_v1)
+print(f"Baseline (v1) Hash: {baseline_hash}")
+
+# 2. Simulate a small change
+spec_v1_modified = "The software shall allow users to login with email or phone."
+new_hash = create_baseline(spec_v1_modified)
+print(f"Modified Hash:      {new_hash}")
+
+# 3. Check for violation
+if baseline_hash != new_hash:
+    print("ALERT: Baseline has been modified without a new version number!")</div>
+                    
+                    <div class="sandbox-controls">
+                        <button class="control-btn" onclick="runPython('code1', 'output1')">▶ Run Code</button>
+                        <button class="control-btn" onclick="clearOutput('output1')">✖ Clear Output</button>
+                    </div>
+                    <div id="output1" class="output-console"></div>
+                </details>
+            </div>
+
+            <div class="content-card">
+                <details>
+                    <summary>5. Software Configuration Items (SCIs)</summary>
+                    <p>An <strong>SCI</strong> is a fundamental unit of management (e.g., a document, a file `login.py`, a logo). SCIs are organized into Configuration Objects.</p>
+                    <h4>Real-Life Example: Car Parts</h4>
+                    <p><strong>SCI:</strong> Fuel Pump. <br><strong>Configuration Object:</strong> Fuel System.<br><strong>Relationship:</strong> Upgrade the pump -> Must upgrade the fuel lines (Dependency).</p>
+                </details>
+            </div>
+
+            <div class="content-card">
+                <details>
+                    <summary>6. The SCM Repository</summary>
+                    <p>The repository (Project Database) ensures data integrity.</p>
+                    <ul>
+                        <li><strong>Versioning:</strong> Storing all versions.</li>
+                        <li><strong>Dependency Tracking:</strong> Linking components.</li>
+                        <li><strong>Audit Trails:</strong> Who changed what, when?</li>
+                    </ul>
+                </details>
+            </div>
+
+            <div class="content-card">
+                <details>
+                    <summary>7. Version Control Systems (VCS)</summary>
+                    <p>Tools like <a href="https://git-scm.com/" target="_blank">Git</a>, Subversion, or Perforce allow branching and merging.</p>
+                    
+                    <div class="diagram-container">
+                        <!-- SVG: Branching -->
+                        <svg width="400" height="150" viewBox="0 0 400 150">
+                            <!-- Main Branch -->
+                            <line x1="50" y1="75" x2="350" y2="75" stroke="#268bd2" stroke-width="4" />
+                            <circle cx="50" cy="75" r="8" fill="#268bd2" />
+                            <circle cx="150" cy="75" r="8" fill="#268bd2" />
+                            <circle cx="350" cy="75" r="8" fill="#268bd2" />
+                            <text x="360" y="80" fill="#268bd2" font-weight="bold">Main</text>
+
+                            <!-- Feature Branch -->
+                            <path d="M150 75 Q 200 25, 250 25 L 300 25 Q 325 25, 350 75" stroke="#d33682" stroke-width="3" fill="none" stroke-dasharray="5,5" />
+                            <circle cx="250" cy="25" r="6" fill="#d33682" />
+                            <circle cx="300" cy="25" r="6" fill="#d33682" />
+                            <text x="250" y="15" fill="#d33682" text-anchor="middle">Feature Branch</text>
+                            
+                            <text x="310" y="60" fill="#859900" font-size="10">Merge</text>
+                        </svg>
+                    </div>
+
+                    <h4>Python Code Example: Simple Version Manager</h4>
+                    <div class="code-block" id="code2">class SimpleVCS:
+    def __init__(self):
+        self.versions = {}
+        self.current_version = 0
+    
+    def commit(self, content):
+        self.current_version += 1
+        self.versions[self.current_version] = content
+        print(f"Committed Version {self.current_version}")
+    
+    def checkout(self, version_id):
+        if version_id in self.versions:
+            return self.versions[version_id]
+        return "Version not found."
+
+# Instantiate VCS
+vcs = SimpleVCS()
+vcs.commit("print('Hello World')")      # v1
+vcs.commit("print('Hello Universe')")   # v2
+vcs.commit("print('Hello Multiverse')") # v3
+
+print(f"Retrieving V1: {vcs.checkout(1)}")
+print(f"Retrieving V3: {vcs.checkout(3)}")</div>
+
+                    <div class="sandbox-controls">
+                        <button class="control-btn" onclick="runPython('code2', 'output2')">▶ Run Code</button>
+                        <button class="control-btn" onclick="clearOutput('output2')">✖ Clear Output</button>
+                    </div>
+                    <div id="output2" class="output-console"></div>
+                </details>
+            </div>
+
+            <div class="content-card">
+                <details>
+                    <summary>8. Continuous Integration (CI)</summary>
+                    <p>CI involves integrating code changes frequently. Tools: Jenkins, Travis CI.</p>
+                    <p><strong>Real-Life:</strong> Spell-check in Word. It checks <em>as you type</em> (CI), rather than waiting until the end of the document.</p>
+                </details>
+            </div>
+            
+            <div class="content-card">
+                <details>
+                    <summary>9-11. Process, Mobility & Content Management</summary>
+                    <h4>The Change Process Layers</h4>
+                    <ol>
+                        <li>Identification</li>
+                        <li>Change Control (Requests -> Orders)</li>
+                        <li>Configuration Audit (Did we build it right?)</li>
+                        <li>Status Reporting</li>
+                    </ol>
+                    <h4>Agile SCM</h4>
+                    <p>Agile relies on automated tools and "lean" processes (e.g., Wikipedia editing vs Britannica).</p>
+                    <h4>Content Management</h4>
+                    <p>Separating the "Player" (Code) from the "Movie" (Content). Examples: Netflix CMS.</p>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 2: EXERCISES -->
+        <section id="exercises">
+            <h1>Exercises</h1>
+            <p>Please answer the following questions. You can type directly or import content.</p>
+
+            <div class="content-card">
+                <details open>
+                    <summary>Question 1: The Dependency Nightmare</summary>
+                    <p><strong>Scenario:</strong> You are the Config Manager for a bank. A developer wants to change `InterestRateCalculation` to support negative interest rates.</p>
+                    <p><strong>Task:</strong> Describe consequences using Impact Analysis. Create a mock Traceability Matrix listing 3 components that might break.</p>
+                    
+                    <div class="student-input-area">
+                        <label><strong>Your Answer:</strong></label>
+                        <textarea id="answer1" placeholder="Type your answer here..."></textarea>
+                        
+                        <div class="import-controls">
+                            <input type="file" id="file1" accept=".txt,.md,.html" onchange="importFile(this, 'answer1')" style="display:none;">
+                            <button class="control-btn" onclick="document.getElementById('file1').click()">📂 Import Content (txt/md)</button>
+                            <small><em>Supported: Text, Markdown. For Word/PDF, please copy-paste due to browser security limits.</em></small>
+                        </div>
+                    </div>
+                </details>
+            </div>
+
+            <div class="content-card">
+                <details open>
+                    <summary>Question 2: Agile vs. Safety-Critical SCM</summary>
+                    <p><strong>Scenario:</strong> Compare SCM for a "Candy Crush" game vs. Commercial Airliner Autopilot.</p>
+                    <p><strong>Task:</strong> Design a flowchart (in text) for a "Change Request" in both. Contrast "Time to Deploy" vs "Risk of Failure".</p>
+                    
+                    <div class="student-input-area">
+                        <label><strong>Your Answer:</strong></label>
+                        <textarea id="answer2" placeholder="Type your answer here..."></textarea>
+                        
+                        <div class="import-controls">
+                            <input type="file" id="file2" accept=".txt,.md,.html" onchange="importFile(this, 'answer2')" style="display:none;">
+                            <button class="control-btn" onclick="document.getElementById('file2').click()">📂 Import Content (txt/md)</button>
+                            <small><em>Supported: Text, Markdown. For Word/PDF, please copy-paste due to browser security limits.</em></small>
+                        </div>
+                    </div>
+                </details>
+            </div>
+            
+            <!-- SUBMIT SECTION (Only visible below Exercises) -->
+            <div class="submit-section">
+                <details open>
+                    <summary>Submit Your Work</summary>
+                    <div class="submit-form-group" style="margin-top: 20px;">
+                        <label for="studentName">Name:</label>
+                        <input type="text" id="studentName" placeholder="John Doe">
+                    </div>
+                    <div class="submit-form-group">
+                        <label for="studentID">Student ID:</label>
+                        <input type="text" id="studentID" placeholder="12345678">
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <button class="action-btn" onclick="copyAndSave()">
+                            <span>💾</span> Copy to File
+                        </button>
+                        <button class="action-btn" onclick="sendEmail()">
+                            <span>📧</span> Send via Email
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 15px; font-size: 0.9rem; color: var(--base01);">
+                        <strong>How to use:</strong><br>
+                        1. <strong>Copy to File:</strong> Downloads a file named 'copied_content.txt' with your answers.<br>
+                        2. <strong>Send via Email:</strong> Opens your default mail client with answers pre-filled. Add the attachment if needed.<br>
+                        <em>Note: If the email button doesn't open, manually email 'copied_content.txt' to <strong>asengroa@hotmail.com</strong>.</em>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 3: TIPS -->
+        <section id="tips">
+            <h1>Tips for Success</h1>
+            <div class="content-card">
+                <details open>
+                    <summary>Tip for Question 1 (Dependencies)</summary>
+                    <p>Think about where "interest" is actually used in a banking system. It is not just for charging the customer.</p>
+                    <ul>
+                        <li>Does the bank pay interest to savings accounts?</li>
+                        <li>Do financial reports calculate profit based on interest?</li>
+                        <li>What happens if a mathematical function expects an unsigned integer (always positive) and receives a negative number?</li>
+                    </ul>
+                </details>
+            </div>
+            <div class="content-card">
+                <details open>
+                    <summary>Tip for Question 2 (Agile vs Safety)</summary>
+                    <p>Focus on the <strong>Cost of Error</strong>.</p>
+                    <ul>
+                        <li>If the game crashes, the user is annoyed (Low Cost).</li>
+                        <li>If the plane crashes, people die (Infinite Cost).</li>
+                        <li>How does this change who sits on the <strong>Change Control Authority (CCA)</strong>? Is it just the developer, or a federal board?</li>
+                    </ul>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 4: EXPLANATIONS -->
+        <section id="explanations">
+            <h1>Explanations</h1>
+            <div class="content-card">
+                <details open>
+                    <summary>Understanding Interdependencies</summary>
+                    <p>SCM is not just about saving files; it's about understanding how <strong>File A</strong> affects <strong>File B</strong>. In the banking example, the `InterestRateCalculation` is a "core" SCI. Changing it ripples through the entire Configuration Object.</p>
+                </details>
+            </div>
+            <div class="content-card">
+                <details open>
+                    <summary>Scalability of SCM</summary>
+                    <p>SCM is not "one size fits all." The level of SCM rigor (bureaucracy) must match the risk level of the application. The <strong>Process Elements</strong> of the SCM system change entirely based on the domain (Game vs. Avionics).</p>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 5: ANSWERS (Protected) -->
+        <section id="answers">
+            <h1>Model Answers</h1>
+            <p style="color: var(--accent);"><em>These answers are for review purposes only.</em></p>
+            
+            <div class="content-card">
+                <details open>
+                    <summary>Answer 1: Dependency Analysis</summary>
+                    <p><strong>Possible Impact Points:</strong></p>
+                    <ol>
+                        <li><strong>Savings Accounts:</strong> System might start <em>charging</em> customers money instead of paying them.</li>
+                        <li><strong>Tax Reporting Module:</strong> Might fail if fields expect positive integers, leading to crashes or incorrect tax filings.</li>
+                        <li><strong>Loan Amortization:</strong> Formulas dividing by rate might break or produce imaginary numbers.</li>
+                    </ol>
+                </details>
+            </div>
+
+            <div class="content-card">
+                <details open>
+                    <summary>Answer 2: Process Flow Comparison</summary>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div style="background: rgba(0,0,0,0.05); padding: 10px; border-radius: 5px;">
+                            <h4>Game Flow (Agile)</h4>
+                            <p>Bug found -> Fix code -> Auto Test (CI) -> Deploy.</p>
+                            <p><strong>Time:</strong> ~2 Hours</p>
+                            <p><strong>CCA:</strong> The Developer</p>
+                        </div>
+                        <div style="background: rgba(0,0,0,0.05); padding: 10px; border-radius: 5px;">
+                            <h4>Autopilot Flow (Critical)</h4>
+                            <p>Anomaly -> Formal CR -> Safety Board Review -> Dev -> Sim Test -> Hardware Test -> Certification -> Deploy.</p>
+                            <p><strong>Time:</strong> ~6 Months</p>
+                            <p><strong>CCA:</strong> Regulatory Board + Seniors</p>
+                        </div>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- SECTION 6: EVALUATION GRID -->
+        <section id="evaluation">
+            <h1>Evaluation Grid</h1>
+            <p>Your exercises will be graded based on the following criteria:</p>
+            
+            <div class="content-card">
+                <details open>
+                    <summary>Grading Criteria</summary>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background-color: var(--base1); color: var(--base3);">
+                                <th style="padding: 10px; text-align: left;">Criteria</th>
+                                <th style="padding: 10px; text-align: left;">Excellent (A)</th>
+                                <th style="padding: 10px; text-align: left;">Satisfactory (B/C)</th>
+                                <th style="padding: 10px; text-align: left;">Needs Improvement (D/F)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: 10px;"><strong>Impact Analysis</strong></td>
+                                <td style="padding: 10px;">Identifies 3+ logical failures; clear link between code and business logic.</td>
+                                <td style="padding: 10px;">Identifies 1-2 generic failures.</td>
+                                <td style="padding: 10px;">Fails to identify downstream effects.</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: 10px;"><strong>Traceability Matrix</strong></td>
+                                <td style="padding: 10px;">Matrix clearly links Requirement -> Component -> Test Case.</td>
+                                <td style="padding: 10px;">List provided but lacks clear linkage.</td>
+                                <td style="padding: 10px;">Missing or incoherent.</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: 10px;"><strong>Process Logic</strong></td>
+                                <td style="padding: 10px;">Clearly differentiates between Agile and Critical paths (Time/Authority).</td>
+                                <td style="padding: 10px;">General understanding but vague on details.</td>
+                                <td style="padding: 10px;">Treats both scenarios the same.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </details>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Password Modal -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <h3>Password Required</h3>
+            <div style="text-align: left; font-size: 0.9rem; margin-bottom: 15px; color: var(--base01);">
+                <p>Please enter the password to view the answers.</p>
+                <p>If you want to Cancel the action, click outside the "Password Required" box.</p>
+                <p>You can see the entered password by clicking on the "eye" icon.</p>
+            </div>
+            
+            <div class="password-container">
+                <input type="password" id="passwordInput" placeholder="Enter Password">
+                <span class="eye-icon" onclick="togglePasswordVisibility()">👁️</span>
+            </div>
+            
+            <button class="action-btn" onclick="verifyPassword()">Submit</button>
+            <div id="passwordError" style="color: var(--red); display: none; margin-top: 10px;">Incorrect Password</div>
+        </div>
+    </div>
+
+    <script>
+        /* --- 1. Navigation & View Logic --- */
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('main section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+            // Show target
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Update Menu Active State
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // Find button that calls this function (rough approximation)
+            const buttons = document.querySelectorAll('.nav-btn');
+            // Logic to highlight correct button based on simple index mapping or text
+            // For simplicity, we assume order matches.
+        }
+
+        /* --- 2. Expand / Collapse All --- */
+        function expandAll() {
+            const activeSection = document.querySelector('section.active');
+            if(activeSection) {
+                activeSection.querySelectorAll('details').forEach(d => d.open = true);
+            }
+        }
+
+        function collapseAll() {
+            const activeSection = document.querySelector('section.active');
+            if(activeSection) {
+                activeSection.querySelectorAll('details').forEach(d => d.open = false);
+            }
+        }
+
+        /* --- 3. Theme Toggle --- */
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', newTheme);
+        }
+
+        /* --- 4. Python Sandbox Simulation --- */
+        function runPython(codeId, outputId) {
+            const outputDiv = document.getElementById(outputId);
+            outputDiv.style.display = 'block';
+            outputDiv.innerText = "Running...";
+            
+            // Simulate processing time
+            setTimeout(() => {
+                if (codeId === 'code1') {
+                    outputDiv.innerText = `Baseline (v1) Hash: a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e\nModified Hash:      e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nALERT: Baseline has been modified without a new version number!`;
+                } else if (codeId === 'code2') {
+                    outputDiv.innerText = `Committed Version 1\nCommitted Version 2\nCommitted Version 3\nRetrieving V1: print('Hello World')\nRetrieving V3: print('Hello Multiverse')`;
+                } else {
+                    outputDiv.innerText = "Error: Unknown code block.";
+                }
+            }, 500);
+        }
+
+        function clearOutput(outputId) {
+            const outputDiv = document.getElementById(outputId);
+            outputDiv.innerText = "";
+            outputDiv.style.display = 'none';
+        }
+
+        /* --- 5. File Import Logic --- */
+        function importFile(inputElement, targetTextareaId) {
+            const file = inputElement.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const textarea = document.getElementById(targetTextareaId);
+                // Append content if textarea not empty, else replace
+                if(textarea.value.trim() !== "") {
+                    textarea.value += "\n\n--- Imported Content ---\n" + content;
+                } else {
+                    textarea.value = content;
+                }
+            };
+            
+            // Simple check for text types
+            if (file.type.match('text.*') || file.name.endsWith('.md')) {
+                reader.readAsText(file);
+            } else {
+                alert("Cannot read binary files (Word/PDF) directly in this secure sandbox. Please save your document as .txt or .md, or copy-paste the text.");
+            }
+        }
+
+        /* --- 6. Security: Password Protection --- */
+        // CORRECTED HASH FOR "students@@2025"
+        const PROTECTED_HASH = "c3R1ZGVudHNAQDIwMjU="; 
+        let isAuthenticated = false;
+
+        function checkPasswordAndShow(sectionId) {
+            if (isAuthenticated) {
+                showSection(sectionId);
+            } else {
+                const modal = document.getElementById('passwordModal');
+                modal.style.display = 'block';
+                
+                // Click outside to cancel
+                window.onclick = function(event) {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                        document.getElementById('passwordError').style.display = 'none';
+                        document.getElementById('passwordInput').value = '';
+                    }
+                }
+            }
+        }
+
+        function verifyPassword() {
+            const input = document.getElementById('passwordInput').value;
+            // Decode matched against input
+            if (input === atob(PROTECTED_HASH)) { 
+                isAuthenticated = true;
+                document.getElementById('passwordModal').style.display = 'none';
+                showSection('answers');
+            } else {
+                document.getElementById('passwordError').style.display = 'block';
+            }
+        }
+
+        function togglePasswordVisibility() {
+            const passInput = document.getElementById('passwordInput');
+            if (passInput.type === "password") {
+                passInput.type = "text";
+            } else {
+                passInput.type = "password";
+            }
+        }
+
+        /* --- 7. Submission Logic --- */
+        function copyAndSave() {
+            const name = document.getElementById('studentName').value || "Unknown_Student";
+            const id = document.getElementById('studentID').value || "N/A";
+            const q1 = document.getElementById('answer1').value;
+            const q2 = document.getElementById('answer2').value;
+
+            const finalContent = `STUDENT: ${name} (ID: ${id})\n\n` +
+                                 `--- Question 1 Answer ---\n${q1}\n\n` +
+                                 `--- Question 2 Answer ---\n${q2}\n\n` +
+                                 `Generated on: ${new Date().toLocaleString()}`;
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(finalContent).then(() => {
+                alert("Answers copied to clipboard!");
+            }).catch(err => {
+                console.error("Clipboard failed", err);
+            });
+
+            // Create file for download
+            const blob = new Blob([finalContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'copied_content.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function sendEmail() {
+            const name = document.getElementById('studentName').value || "Student";
+            const q1 = document.getElementById('answer1').value;
+            const q2 = document.getElementById('answer2').value;
+            
+            const subject = encodeURIComponent(`SCM Exercise Submission - ${name}`);
+            const body = encodeURIComponent(
+                `Student Name: ${name}\n\nQ1 Answer:\n${q1}\n\nQ2 Answer:\n${q2}`
+            );
+
+            window.location.href = `mailto:asengroa@hotmail.com?subject=${subject}&body=${body}`;
+        }
+    </script>
+</body>
+</html>
