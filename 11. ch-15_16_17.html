@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Engineering: Quality, Reviews & Assurance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Chart Container Styling */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .transition-all {
+            transition-property: all;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 300ms;
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals & Professional Blues -->
+    <!-- Background: slate-50, Text: slate-800 -->
+    <!-- Primary Accents: blue-600 (Assurance), amber-500 (Warnings/Bugs), emerald-600 (Success/Quality) -->
+
+    <!-- Application Structure Plan:
+         1. Hero Section: High-level introduction to the triad of Quality, Reviews, and Assurance.
+         2. Cost of Quality (CoQ) Simulator: Interactive calculator to demonstrate the financial impact of early detection. Allows users to "feel" the exponential cost curve.
+         3. Dimensions Explorer: A grid of interactive cards explaining Garvin's dimensions using the Ride-Sharing App example for concrete understanding.
+         4. The Review Filter: A simulation of the Defect Amplification Model. Users adjust review efficiency to see how bugs "leak" to production.
+         5. Reliability & Safety Hub: Tools to calculate Availability and distinguish between Reliability and Safety.
+         6. Statistical SQA Dashboard: A Pareto Chart visualization to demonstrate data-driven quality improvement (Six Sigma concepts).
+         Rationale: This structure moves from abstract concepts (Cost/Dimensions) to process (Reviews) to measurement (Reliability/Stats), mirroring the logical flow of engineering management.
+    -->
+
+    <!-- Visualization & Content Choices:
+         1. CoQ Simulator -> Goal: Inform/Change -> Stacked Bar Chart (Chart.js) -> Users adjust prevention/appraisal spend -> Justification: Shows the trade-off visually.
+         2. Review Filter -> Goal: Compare -> Grouped Bar Chart (Chart.js) -> Compare "With Reviews" vs "Without Reviews" -> Justification: Visualizes the "Filter" concept and Defect Amplification.
+         3. Reliability Calc -> Goal: Calculate/Inform -> Text/HTML update -> Inputs for MTTF/MTTR -> Justification: Direct application of the formula.
+         4. Pareto Chart -> Goal: Organize/Prioritize -> Bar/Line Combo Chart (Chart.js) -> Justification: Standard Six Sigma tool for identifying root causes.
+         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold text-blue-900 tracking-tight">Software Quality Assurance</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <button onclick="scrollToSection('cost-quality')" class="text-slate-600 hover:text-blue-600 font-medium">Cost of Quality</button>
+                    <button onclick="scrollToSection('dimensions')" class="text-slate-600 hover:text-blue-600 font-medium">Dimensions</button>
+                    <button onclick="scrollToSection('reviews')" class="text-slate-600 hover:text-blue-600 font-medium">Reviews & Filtering</button>
+                    <button onclick="scrollToSection('sqa')" class="text-slate-600 hover:text-blue-600 font-medium">SQA & Reliability</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="bg-white border-b border-slate-200">
+        <div class="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl font-extrabold text-slate-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
+                Beyond the Code
+            </h1>
+            <p class="mt-4 max-w-2xl mx-auto text-xl text-slate-500">
+                Explore the critical infrastructure of software engineering: Quality Concepts, Technical Reviews, and Quality Assurance. 
+            </p>
+            <div class="mt-8 flex justify-center gap-4">
+                <div class="px-4 py-2 bg-blue-50 rounded-lg border border-blue-100">
+                    <span class="block text-2xl font-bold text-blue-700">Ch. 15</span>
+                    <span class="text-sm text-blue-600">Quality Concepts</span>
+                </div>
+                <div class="px-4 py-2 bg-amber-50 rounded-lg border border-amber-100">
+                    <span class="block text-2xl font-bold text-amber-700">Ch. 16</span>
+                    <span class="text-sm text-amber-600">Reviews</span>
+                </div>
+                <div class="px-4 py-2 bg-emerald-50 rounded-lg border border-emerald-100">
+                    <span class="block text-2xl font-bold text-emerald-700">Ch. 17</span>
+                    <span class="text-sm text-emerald-600">Assurance</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-24">
+
+        <!-- SECTION 1: The Cost of Quality (CoQ) -->
+        <section id="cost-quality" class="scroll-mt-24">
+            <div class="grid lg:grid-cols-2 gap-12 items-start">
+                <div>
+                    <h2 class="text-3xl font-bold text-slate-900 mb-4">The Cost of Quality (CoQ)</h2>
+                    <p class="text-lg text-slate-600 mb-6">
+                        Quality isn't free, but the cost of <em>poor</em> quality is often much higher. CoQ includes all costs incurred in the pursuit of quality or in performing activities related to the lack of it.
+                        <br><br>
+                        <strong>The Golden Rule:</strong> Costs increase exponentially as you move through the process. Fixing a bug in the field can cost 100x more than fixing it during design.
+                    </p>
+                    
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="text-lg font-semibold mb-4 text-blue-800">Investment Simulator</h3>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <label class="flex justify-between text-sm font-medium text-slate-700 mb-2">
+                                    <span>Prevention Investment (Training, Planning)</span>
+                                    <span id="prev-val" class="text-blue-600 font-bold">$5,000</span>
+                                </label>
+                                <input type="range" min="0" max="20000" step="1000" value="5000" id="prevention-slider" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                            </div>
+                            
+                            <div>
+                                <label class="flex justify-between text-sm font-medium text-slate-700 mb-2">
+                                    <span>Appraisal Investment (Reviews, Testing)</span>
+                                    <span id="appr-val" class="text-blue-600 font-bold">$10,000</span>
+                                </label>
+                                <input type="range" min="0" max="30000" step="1000" value="10000" id="appraisal-slider" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                            </div>
+
+                            <div class="p-4 bg-slate-50 rounded-lg text-sm text-slate-600">
+                                <p><strong>Scenario:</strong> A project with 100 latent bugs.</p>
+                                <ul class="list-disc ml-5 mt-2 space-y-1">
+                                    <li>Early Fix Cost: <strong>$100</strong>/bug</li>
+                                    <li>Late Fix Cost (External Failure): <strong>$4,000</strong>/bug</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-100 flex flex-col justify-center">
+                    <div class="mb-4 text-center">
+                        <h3 class="text-xl font-bold text-slate-800">Financial Impact Analysis</h3>
+                        <p class="text-sm text-slate-500">Visualizing Prevention vs. Failure Costs</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="coqChart"></canvas>
+                    </div>
+                    <div id="coq-summary" class="mt-4 text-center p-3 bg-red-50 text-red-800 rounded-md font-medium border border-red-100">
+                        Total Project Cost: Calculating...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-slate-200">
+
+        <!-- SECTION 2: Dimensions of Quality -->
+        <section id="dimensions" class="scroll-mt-24">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Garvin's Dimensions of Quality</h2>
+                <p class="text-lg text-slate-600">
+                    Software quality is multidimensional. It's not just about being "bug-free." Explore these cards to understand how quality manifests in a real-world <strong>Ride-Sharing App</strong>.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Cards generated dynamically or static structure -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 card-hover transition-all cursor-pointer group" onclick="toggleCard(this)">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-bold text-slate-800">Performance</h3>
+                        <span class="text-2xl">🚀</span>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-2">Does it deliver specified functions?</p>
+                    <div class="hidden group-active:block md:block mt-3 pt-3 border-t border-slate-100 text-sm text-blue-700">
+                        <strong>App Example:</strong> Successfully matching a rider with a driver and processing payment within seconds.
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 card-hover transition-all cursor-pointer group" onclick="toggleCard(this)">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-bold text-slate-800">Reliability</h3>
+                        <span class="text-2xl">🛡️</span>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-2">Does it fail?</p>
+                    <div class="hidden group-active:block md:block mt-3 pt-3 border-t border-slate-100 text-sm text-blue-700">
+                        <strong>App Example:</strong> The app does not crash during a ride, even if the GPS signal is weak or network switches.
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 card-hover transition-all cursor-pointer group" onclick="toggleCard(this)">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-bold text-slate-800">Features</h3>
+                        <span class="text-2xl">✨</span>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-2">Surprise and delight?</p>
+                    <div class="hidden group-active:block md:block mt-3 pt-3 border-t border-slate-100 text-sm text-blue-700">
+                        <strong>App Example:</strong> Ability to split fares with a friend or share live ETA with family.
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 card-hover transition-all cursor-pointer group" onclick="toggleCard(this)">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-bold text-slate-800">Security</h3>
+                        <span class="text-2xl">🔒</span>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-2">Is data protected?</p>
+                    <div class="hidden group-active:block md:block mt-3 pt-3 border-t border-slate-100 text-sm text-blue-700">
+                        <strong>App Example:</strong> Credit card data is encrypted (PCI-DSS) and user location is private.
+                    </div>
+                </div>
+
+                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 card-hover transition-all cursor-pointer group" onclick="toggleCard(this)">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-bold text-slate-800">Usability</h3>
+                        <span class="text-2xl">👆</span>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-2">Is it easy to use?</p>
+                    <div class="hidden group-active:block md:block mt-3 pt-3 border-t border-slate-100 text-sm text-blue-700">
+                        <strong>App Example:</strong> Large buttons for "Request Ride" that are easy to tap with one thumb.
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 card-hover transition-all cursor-pointer group" onclick="toggleCard(this)">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-bold text-slate-800">Maintainability</h3>
+                        <span class="text-2xl">🔧</span>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-2">Can it be fixed?</p>
+                    <div class="hidden group-active:block md:block mt-3 pt-3 border-t border-slate-100 text-sm text-blue-700">
+                        <strong>App Example:</strong> Code is modular so adding "Scooters" doesn't break "Cars".
+                    </div>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 card-hover transition-all cursor-pointer group" onclick="toggleCard(this)">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-bold text-slate-800">Portability</h3>
+                        <span class="text-2xl">📱</span>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-2">Works on different environments?</p>
+                    <div class="hidden group-active:block md:block mt-3 pt-3 border-t border-slate-100 text-sm text-blue-700">
+                        <strong>App Example:</strong> Works seamlessly on both iOS and Android, and various screen sizes.
+                    </div>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 card-hover transition-all cursor-pointer group" onclick="toggleCard(this)">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-bold text-slate-800">Aesthetics</h3>
+                        <span class="text-2xl">🎨</span>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-2">Elegance of interface?</p>
+                    <div class="hidden group-active:block md:block mt-3 pt-3 border-t border-slate-100 text-sm text-blue-700">
+                        <strong>App Example:</strong> Smooth animations of cars on the map; pleasing color palette.
+                    </div>
+                </div>
+            </div>
+            <p class="text-center text-slate-400 text-sm mt-4 italic md:hidden">(Tap cards to see examples)</p>
+        </section>
+
+        <hr class="border-slate-200">
+
+        <!-- SECTION 3: Reviews & The Filter -->
+        <section id="reviews" class="scroll-mt-24">
+            <div class="grid lg:grid-cols-12 gap-12">
+                <div class="lg:col-span-5 space-y-6">
+                    <h2 class="text-3xl font-bold text-slate-900">Reviews as a Filter</h2>
+                    <p class="text-lg text-slate-600">
+                        Technical reviews are the most effective filter in software engineering. They "purify" the work products (requirements, design, code) before they pass to the next stage.
+                    </p>
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4">
+                        <h4 class="font-bold text-blue-900">Defect Amplification Model</h4>
+                        <p class="text-sm text-blue-800 mt-1">
+                            A defect undetected in requirements can "amplify" into multiple defects in design and code. <br><br>
+                            <em>Example:</em> 1 Requirement Error -> 3 Design Flaws -> 10 Code Bugs.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-slate-800 mb-3">Review Efficiency Simulator</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700">Review Efficiency (Errors Caught)</label>
+                                <input type="range" min="0" max="100" value="0" id="review-efficiency" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                                <div class="flex justify-between text-xs text-slate-500 mt-1">
+                                    <span>No Reviews (0%)</span>
+                                    <span>Formal Reviews (70-90%)</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-slate-50 p-3 rounded">
+                                <span class="font-medium text-slate-700">Total Latent Errors:</span>
+                                <span class="font-bold text-slate-900">50</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7 bg-white p-6 rounded-xl shadow-lg border border-slate-100 flex flex-col justify-center">
+                    <div class="mb-4 flex justify-between items-center">
+                        <h3 class="text-xl font-bold text-slate-800">Defect Containment Analysis</h3>
+                        <span id="dre-score" class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-sm font-bold">DRE: 0%</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="reviewChart"></canvas>
+                    </div>
+                    <p class="text-center text-sm text-slate-500 mt-4">
+                        Comparison of errors found internally (Cheap) vs. errors released to users (Expensive).
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-slate-200">
+
+        <!-- SECTION 4: SQA, Reliability & Safety -->
+        <section id="sqa" class="scroll-mt-24">
+            <h2 class="text-3xl font-bold text-slate-900 mb-8 text-center">Software Quality Assurance & Reliability</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <!-- Reliability Calculator -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="p-2 bg-emerald-100 rounded-lg text-emerald-600 text-xl">⏱️</div>
+                        <h3 class="text-xl font-bold text-slate-900">Reliability Calculator</h3>
+                    </div>
+                    
+                    <div class="space-y-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">MTTF (Mean Time To Failure) in Hours</label>
+                            <input type="number" id="mttf-input" value="1000" class="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">MTTR (Mean Time To Repair) in Hours</label>
+                            <input type="number" id="mttr-input" value="2" class="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-slate-600">MTBF (Cycle Time):</span>
+                            <span id="mtbf-result" class="font-bold text-slate-900">1002 hrs</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-600">Availability:</span>
+                            <span id="avail-result" class="font-bold text-emerald-600 text-lg">99.800%</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-3">
+                        *Reliability is probability of failure-free operation. Availability considers repair time.
+                    </p>
+                </div>
+
+                <!-- Safety vs Reliability -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="p-2 bg-red-100 rounded-lg text-red-600 text-xl">⚠️</div>
+                        <h3 class="text-xl font-bold text-slate-900">Safety vs. Reliability</h3>
+                    </div>
+                    <p class="text-slate-600 mb-4">
+                        They are <strong>not</strong> the same. A system can be reliable (never crashes) but unsafe (causes harm).
+                    </p>
+                    <ul class="space-y-3">
+                        <li class="flex items-start gap-3">
+                            <span class="font-bold text-slate-800 min-w-[80px]">Reliability:</span>
+                            <span class="text-slate-600">The software does what it is supposed to do. (e.g., The robotic arm moves smoothly).</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="font-bold text-slate-800 min-w-[80px]">Safety:</span>
+                            <span class="text-slate-600">The software does <strong>not</strong> do what it is <strong>not</strong> supposed to do. (e.g., The robotic arm never moves when "Stop" is pressed).</span>
+                        </li>
+                    </ul>
+                    <div class="mt-6 p-3 bg-amber-50 text-amber-800 text-sm rounded border border-amber-100">
+                        <strong>Hazard Analysis:</strong> Focuses on identifying potential failures that cause catastrophic loss (life, property) and eliminating them through design (e.g., hardware interlocks).
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistical SQA (Pareto) -->
+            <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+                <div class="md:flex justify-between items-end mb-6">
+                    <div class="max-w-xl">
+                        <h3 class="text-2xl font-bold text-slate-900">Statistical SQA & The Pareto Principle</h3>
+                        <p class="text-slate-600 mt-2">
+                            The 80/20 Rule: 80% of defects are traceable to 20% of causes. 
+                            Use this chart to prioritize which defects to fix first. This is a core component of Six Sigma (DMAIC).
+                        </p>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                            Six Sigma Goal: 3.4 defects / million
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="chart-container mx-auto">
+                    <canvas id="paretoChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center text-slate-500 py-12 border-t border-slate-200">
+            <p class="text-sm mt-2">Interactive Lecture Material</p>
+        </footer>
+
+    </main>
+
+    <script>
+        // --- Shared Chart Config ---
+        Chart.defaults.font.family = "'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'";
+        Chart.defaults.color = '#475569'; // Slate 600
+
+        // --- SECTION 1: Cost of Quality Logic ---
+        const preventionSlider = document.getElementById('prevention-slider');
+        const appraisalSlider = document.getElementById('appraisal-slider');
+        const prevValDisplay = document.getElementById('prev-val');
+        const apprValDisplay = document.getElementById('appr-val');
+        const coqSummary = document.getElementById('coq-summary');
+        
+        // Base Data
+        const TOTAL_BUGS = 100;
+        const COST_FIX_EARLY = 100;
+        const COST_FIX_LATE = 4000;
+
+        let coqChart;
+
+        function initCoQChart() {
+            const ctx = document.getElementById('coqChart').getContext('2d');
+            coqChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Investment Phase', 'Recovery/Failure Phase'],
+                    datasets: [
+                        {
+                            label: 'Prevention & Appraisal',
+                            data: [0, 0],
+                            backgroundColor: '#3b82f6', // blue-500
+                            stack: 'Stack 0',
+                        },
+                        {
+                            label: 'Internal Failure (Fix Early)',
+                            data: [0, 0],
+                            backgroundColor: '#10b981', // emerald-500
+                            stack: 'Stack 0',
+                        },
+                        {
+                            label: 'External Failure (Fix Late)',
+                            data: [0, 0],
+                            backgroundColor: '#ef4444', // red-500
+                            stack: 'Stack 0',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            title: { display: true, text: 'Cost ($)' }
+                        },
+                        x: { stacked: true }
+                    }
+                }
+            });
+            updateCoQ();
+        }
+
+        function updateCoQ() {
+            const pCost = parseInt(preventionSlider.value);
+            const aCost = parseInt(appraisalSlider.value);
+
+            // Logic: More investment = fewer late bugs
+            // A simple decay function simulation
+            const totalInvestment = pCost + aCost;
+            // Base efficiency: 50% catch rate with 0 investment (baseline review)
+            // Max investment ($50k) -> 95% catch rate
+            let catchRate = 0.2 + (totalInvestment / 50000) * 0.75; 
+            if (catchRate > 0.98) catchRate = 0.98; // Always some bugs escape
+
+            const bugsCaughtEarly = Math.round(TOTAL_BUGS * catchRate);
+            const bugsLate = TOTAL_BUGS - bugsCaughtEarly;
+
+            const internalFailCost = bugsCaughtEarly * COST_FIX_EARLY;
+            const externalFailCost = bugsLate * COST_FIX_LATE;
+            const totalCost = totalInvestment + internalFailCost + externalFailCost;
+
+            // Update UI Text
+            prevValDisplay.innerText = `$${pCost.toLocaleString()}`;
+            apprValDisplay.innerText = `$${aCost.toLocaleString()}`;
+            
+            // Update Chart Data
+            // Bar 1: Investment + Internal Fixes (Money spent "Before" shipping)
+            // Bar 2: External Failures (Money lost "After" shipping)
+            // Ideally we show components. Let's stack them nicely.
+            
+            // Re-mapping for visual clarity:
+            // Stack 1 (Good Money): Prevention + Appraisal
+            // Stack 2 (Waste - Good): Internal Failure (Cheaper)
+            // Stack 3 (Waste - Bad): External Failure
+            
+            // Let's put everything on one bar for "Total Cost Composition" to see the ratio
+            // Actually, let's compare "Strategy A" (Current Inputs) vs "No Investment" (Baseline)
+            // But to keep it simple and responsive to sliders, let's show the breakdown of CURRENT selection.
+            
+            coqChart.data.datasets[0].data = [totalInvestment, 0]; // Inv
+            coqChart.data.datasets[1].data = [internalFailCost, 0]; // Int Fix
+            coqChart.data.datasets[2].data = [0, externalFailCost]; // Ext Fix
+            coqChart.update();
+
+            coqSummary.innerHTML = `Total Cost: <strong>$${totalCost.toLocaleString()}</strong> <br> <span class="text-xs text-black font-normal">(Bugs Released: ${bugsLate})</span>`;
+            
+            // Dynamic color for summary
+            if(bugsLate < 5) {
+                coqSummary.className = "mt-4 text-center p-3 bg-emerald-50 text-emerald-800 rounded-md font-medium border border-emerald-100";
+            } else if (bugsLate < 20) {
+                 coqSummary.className = "mt-4 text-center p-3 bg-amber-50 text-amber-800 rounded-md font-medium border border-amber-100";
+            } else {
+                 coqSummary.className = "mt-4 text-center p-3 bg-red-50 text-red-800 rounded-md font-medium border border-red-100";
+            }
+        }
+
+        preventionSlider.addEventListener('input', updateCoQ);
+        appraisalSlider.addEventListener('input', updateCoQ);
+
+
+        // --- SECTION 3: Review Filter Logic ---
+        const reviewEffSlider = document.getElementById('review-efficiency');
+        const dreScoreDisplay = document.getElementById('dre-score');
+        let reviewChart;
+
+        function initReviewChart() {
+            const ctx = document.getElementById('reviewChart').getContext('2d');
+            reviewChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Caught in Review', 'Released to User'],
+                    datasets: [{
+                        label: 'Number of Errors',
+                        data: [0, 50],
+                        backgroundColor: ['#10b981', '#ef4444'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 60 }
+                    }
+                }
+            });
+            updateReviews();
+        }
+
+        function updateReviews() {
+            const efficiency = parseInt(reviewEffSlider.value);
+            const totalErrors = 50;
+            const caught = Math.round(totalErrors * (efficiency / 100));
+            const released = totalErrors - caught;
+
+            // DRE = E / (E + D) -> roughly Caught / Total
+            const dre = (caught / totalErrors * 100).toFixed(1);
+
+            dreScoreDisplay.innerText = `DRE: ${dre}%`;
+            
+            // Color logic for badge
+            if(efficiency > 80) dreScoreDisplay.className = "px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-bold";
+            else if(efficiency > 40) dreScoreDisplay.className = "px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-bold";
+            else dreScoreDisplay.className = "px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-bold";
+
+            reviewChart.data.datasets[0].data = [caught, released];
+            reviewChart.update();
+        }
+
+        reviewEffSlider.addEventListener('input', updateReviews);
+
+
+        // --- SECTION 4: Reliability Logic ---
+        const mttfInput = document.getElementById('mttf-input');
+        const mttrInput = document.getElementById('mttr-input');
+        const mtbfRes = document.getElementById('mtbf-result');
+        const availRes = document.getElementById('avail-result');
+
+        function updateReliability() {
+            const mttf = parseFloat(mttfInput.value) || 0;
+            const mttr = parseFloat(mttrInput.value) || 0;
+            
+            if (mttf === 0) return; // avoid div by zero issues conceptually
+
+            const mtbf = mttf + mttr;
+            const avail = (mttf / mtbf) * 100;
+
+            mtbfRes.innerText = `${mtbf} hrs`;
+            availRes.innerText = `${avail.toFixed(4)}%`;
+        }
+
+        mttfInput.addEventListener('input', updateReliability);
+        mttrInput.addEventListener('input', updateReliability);
+
+
+        // --- SECTION 4: Pareto Chart Logic ---
+        function initParetoChart() {
+            const ctx = document.getElementById('paretoChart').getContext('2d');
+            
+            // Sample Data from Lecture
+            const labels = ['CSS/Styling', 'Typos', 'DB Connection', 'Logic Errors', 'Other'];
+            const dataCounts = [600, 200, 150, 50, 10]; // raw counts
+            
+            // Calculate Cumulative Percentage for Line
+            const total = dataCounts.reduce((a, b) => a + b, 0);
+            let accumulator = 0;
+            const cumulativePerc = dataCounts.map(count => {
+                accumulator += count;
+                return (accumulator / total) * 100;
+            });
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Cumulative %',
+                            data: cumulativePerc,
+                            type: 'line',
+                            borderColor: '#8b5cf6', // purple-500
+                            borderWidth: 2,
+                            yAxisID: 'y1',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Defect Count',
+                            data: dataCounts,
+                            backgroundColor: '#3b82f6', // blue-500
+                            yAxisID: 'y',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'Defect Count' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false, // only want the grid lines for one axis to show up
+                            },
+                            min: 0,
+                            max: 100,
+                            title: { display: true, text: 'Cumulative %' },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + "%"
+                                }
+                            }
+                        },
+                    },
+                    plugins: {
+                         annotation: {
+                            annotations: {
+                                line1: {
+                                    type: 'line',
+                                    yMin: 80,
+                                    yMax: 80,
+                                    borderColor: 'rgb(255, 99, 132)',
+                                    borderWidth: 1,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        content: '80% Cutoff',
+                                        enabled: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+
+        // --- Initialization ---
+        window.addEventListener('load', () => {
+            initCoQChart();
+            initReviewChart();
+            initParetoChart();
+        });
+
+        // --- Utils ---
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Card Toggle function for mobile tap support
+        function toggleCard(element) {
+            // Optional: for mobile only, could expand functionality here
+            // Currently handled by CSS hover/active states
+        }
+
+    </script>
+</body>
+</html>
+
+
+
