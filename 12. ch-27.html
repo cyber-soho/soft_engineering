@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Support & Evolution Strategy Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Chart Container Styling as per requirements */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* Base height */
+            max-height: 400px;
+        }
+        
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Hide scrollbar for clean horizontal scrolling if needed */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Smooth transitions */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals (Stone/Sand) with Teal and Orange accents for a calm, professional, and supportive tone. -->
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans leading-relaxed selection:bg-teal-100 selection:text-teal-900">
+
+    <!-- Application Structure Plan: 
+         1. Header: Simple navigation and title.
+         2. Hero (Context): Sets the stage about "Change" being inevitable.
+         3. Laws of Evolution (Interactive Grid): Explains Lehman's Laws using cards that reveal details/examples on click.
+         4. Maintenance Strategies (Dashboard): 4 Types of maintenance visualization + real-world examples (MediSoft).
+         5. The Toolbox (Tabs): Switches between Reverse Engineering and Refactoring, using code blocks and definitions.
+         6. Decision Support (Calculator): Implementation of Sneed's Model with a reactive Chart.js visual.
+         7. Proactive Support: Summary of AI/Analytics role.
+         Why: This flow moves from Theory (Laws) -> Practice (Maintenance) -> Tools (Refactoring) -> Strategy (Decision Making). 
+    -->
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50 border-b border-stone-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold text-teal-700 tracking-tight">Software Support Strategy</span>
+                </div>
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="#laws" class="text-stone-500 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Evolution Laws</a>
+                    <a href="#maintenance" class="text-stone-500 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Maintenance</a>
+                    <a href="#toolbox" class="text-stone-500 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Toolbox</a>
+                    <a href="#calculator" class="bg-teal-600 text-white hover:bg-teal-700 px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">Cost-Benefit Calc</a>
+                </div>
+                <!-- Mobile menu button placeholder -->
+                <div class="flex items-center md:hidden">
+                    <button id="mobile-menu-btn" class="text-stone-500 hover:text-teal-600 p-2">
+                        <span class="text-2xl">≡</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu (Hidden by default) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-stone-200">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="#laws" class="block px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:bg-stone-100">Evolution Laws</a>
+                <a href="#maintenance" class="block px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:bg-stone-100">Maintenance</a>
+                <a href="#toolbox" class="block px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:bg-stone-100">Toolbox</a>
+                <a href="#calculator" class="block px-3 py-2 rounded-md text-base font-medium text-teal-700 hover:bg-teal-50">Calculator</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="bg-white border-b border-stone-200">
+        <div class="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl tracking-tight font-extrabold text-stone-900 sm:text-5xl md:text-6xl">
+                <span class="block">Change is Inevitable.</span>
+                <span class="block text-teal-600">Evolution is Strategic.</span>
+            </h1>
+            <p class="mt-4 max-w-2xl mx-auto text-xl text-stone-500">
+                Software support isn't just fixing bugs. It's a continuous process of adaptation, enhancement, and reengineering that begins before release and ends only at retirement.
+            </p>
+            <div class="mt-8 flex justify-center gap-4">
+                <div class="bg-stone-100 rounded-full px-6 py-2 text-sm font-semibold text-stone-600 border border-stone-200">
+                    Adaptation
+                </div>
+                <div class="bg-stone-100 rounded-full px-6 py-2 text-sm font-semibold text-stone-600 border border-stone-200">
+                    Correction
+                </div>
+                <div class="bg-stone-100 rounded-full px-6 py-2 text-sm font-semibold text-stone-600 border border-stone-200">
+                    Enhancement
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- SECTION: Lehman's Laws -->
+    <section id="laws" class="py-16 bg-stone-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-base font-semibold text-teal-600 tracking-wide uppercase">The Theory</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-stone-900 sm:text-4xl">
+                    Lehman’s Laws of Software Evolution
+                </p>
+                <p class="mt-4 max-w-2xl text-xl text-stone-500 lg:mx-auto">
+                    Why does maintaining software feel like fighting entropy? Manny Lehman identified 5 key laws that explain the forces at work.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="laws-grid">
+                <!-- Cards generated by JS -->
+            </div>
+            
+            <div class="mt-8 bg-white p-6 rounded-lg shadow-sm border-l-4 border-orange-400">
+                <h3 class="text-lg font-bold text-stone-900 flex items-center">
+                    <span class="mr-2 text-2xl">💡</span> Real-Life Example: "ConnectFast" Bit Rot
+                </h3>
+                <p class="mt-2 text-stone-600">
+                    <strong>Scenario:</strong> A social network adds image filters (Year 2), then video streaming (Year 3), then a marketplace.
+                    <br>
+                    <strong>The Law in Action:</strong> <span class="text-orange-600 font-semibold">Increasing Complexity & Declining Quality.</span> A developer changing the "Marketplace" accidentally breaks "Image Filters" because dependencies became tangled and were never refactored. The user perceives the app as "buggy and slow."
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION: Maintenance Types -->
+    <section id="maintenance" class="py-16 bg-white border-t border-stone-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
+                
+                <!-- Text & Definitions -->
+                <div>
+                    <h2 class="text-3xl font-extrabold text-stone-900 mb-6">The 4 Types of Maintenance</h2>
+                    <p class="text-lg text-stone-500 mb-6">
+                        Maintenance is often misunderstood as just "bug fixing". In reality, corrective work is only a fraction of the effort.
+                    </p>
+
+                    <div class="space-y-4">
+                        <!-- Accordion Items (Interactive) -->
+                        <div class="border border-stone-200 rounded-lg overflow-hidden">
+                            <button class="w-full px-4 py-3 bg-stone-50 hover:bg-stone-100 flex justify-between items-center transition-colors" onclick="toggleAccordion('maint-1')">
+                                <span class="font-bold text-stone-700">1. Corrective Maintenance</span>
+                                <span class="text-teal-600 text-xl">+</span>
+                            </button>
+                            <div id="maint-1" class="hidden px-4 py-3 bg-white border-t border-stone-200">
+                                <p class="text-sm text-stone-600">Reactive modification to correct discovered problems (bugs).</p>
+                                <div class="mt-2 text-xs bg-red-50 text-red-700 p-2 rounded">
+                                    <strong>Example:</strong> "The 'Patient Search' button crashes when the name has a hyphen."
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border border-stone-200 rounded-lg overflow-hidden">
+                            <button class="w-full px-4 py-3 bg-stone-50 hover:bg-stone-100 flex justify-between items-center transition-colors" onclick="toggleAccordion('maint-2')">
+                                <span class="font-bold text-stone-700">2. Adaptive Maintenance</span>
+                                <span class="text-teal-600 text-xl">+</span>
+                            </button>
+                            <div id="maint-2" class="hidden px-4 py-3 bg-white border-t border-stone-200">
+                                <p class="text-sm text-stone-600">Modification to keep software usable in a changed environment (OS, Hardware, Regulation).</p>
+                                <div class="mt-2 text-xs bg-blue-50 text-blue-700 p-2 rounded">
+                                    <strong>Example:</strong> "Hospital switching DB from Oracle to PostgreSQL. Migrate backend."
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border border-stone-200 rounded-lg overflow-hidden">
+                            <button class="w-full px-4 py-3 bg-stone-50 hover:bg-stone-100 flex justify-between items-center transition-colors" onclick="toggleAccordion('maint-3')">
+                                <span class="font-bold text-stone-700">3. Perfective Maintenance</span>
+                                <span class="text-teal-600 text-xl">+</span>
+                            </button>
+                            <div id="maint-3" class="hidden px-4 py-3 bg-white border-t border-stone-200">
+                                <p class="text-sm text-stone-600">Modification to improve performance or maintainability (Enhancements/New Features).</p>
+                                <div class="mt-2 text-xs bg-green-50 text-green-700 p-2 rounded">
+                                    <strong>Example:</strong> "Doctors want a dark mode for night shifts."
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border border-stone-200 rounded-lg overflow-hidden">
+                            <button class="w-full px-4 py-3 bg-stone-50 hover:bg-stone-100 flex justify-between items-center transition-colors" onclick="toggleAccordion('maint-4')">
+                                <span class="font-bold text-stone-700">4. Preventative Maintenance</span>
+                                <span class="text-teal-600 text-xl">+</span>
+                            </button>
+                            <div id="maint-4" class="hidden px-4 py-3 bg-white border-t border-stone-200">
+                                <p class="text-sm text-stone-600">Modification to detect and correct latent faults before they become effective.</p>
+                                <div class="mt-2 text-xs bg-purple-50 text-purple-700 p-2 rounded">
+                                    <strong>Example:</strong> "Refactoring messy billing code before the next audit."
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visualization -->
+                <div class="mt-10 lg:mt-0">
+                    <div class="bg-stone-50 p-6 rounded-xl border border-stone-200">
+                        <h3 class="text-center font-semibold text-stone-700 mb-4">Typical Effort Distribution</h3>
+                        <!-- Visualization & Content Choices: 
+                             Goal: Compare
+                             Method: Doughnut Chart (Chart.js)
+                             Why: Shows that 'fixing bugs' is a small slice compared to enhancements.
+                             No SVG/Mermaid used.
+                        -->
+                        <div class="chart-container">
+                            <canvas id="maintenanceChart"></canvas>
+                        </div>
+                        <p class="text-xs text-center text-stone-400 mt-4 italic">Estimated distribution based on industry heuristics.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION: The Toolbox (Refactoring & Reverse Engineering) -->
+    <section id="toolbox" class="py-16 bg-stone-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-extrabold text-stone-900">The Engineer's Toolbox</h2>
+                <p class="mt-2 text-stone-500">Techniques for understanding and improving legacy systems.</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex justify-center mb-8">
+                <div class="bg-white p-1 rounded-lg border border-stone-200 inline-flex">
+                    <button class="px-6 py-2 text-sm font-medium rounded-md bg-teal-100 text-teal-800" id="tab-btn-reverse" onclick="switchTab('reverse')">Reverse Engineering</button>
+                    <button class="px-6 py-2 text-sm font-medium rounded-md text-stone-500 hover:text-stone-900" id="tab-btn-refactor" onclick="switchTab('refactor')">Refactoring</button>
+                    <button class="px-6 py-2 text-sm font-medium rounded-md text-stone-500 hover:text-stone-900" id="tab-btn-proactive" onclick="switchTab('proactive')">Proactive Support</button>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8 min-h-[400px]">
+                
+                <!-- TAB: Reverse Engineering -->
+                <div id="content-reverse" class="fade-in">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-bold text-stone-800 mb-4">Analyzing the Unknown</h3>
+                            <p class="text-stone-600 mb-4">
+                                Reverse Engineering analyzes a system to identify components and create representations at a higher abstraction level (Design Recovery).
+                            </p>
+                            <ul class="space-y-3">
+                                <li class="flex items-start">
+                                    <span class="bg-teal-100 text-teal-800 text-xs font-bold px-2 py-1 rounded mr-2 mt-1">DATA</span>
+                                    <span class="text-stone-600 text-sm">Understanding DB schemas, inferring keys from code usage.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="bg-teal-100 text-teal-800 text-xs font-bold px-2 py-1 rounded mr-2 mt-1">PROCESS</span>
+                                    <span class="text-stone-600 text-sm">Extracting logic and algorithms from source code.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="bg-teal-100 text-teal-800 text-xs font-bold px-2 py-1 rounded mr-2 mt-1">UI</span>
+                                    <span class="text-stone-600 text-sm">Mapping user behaviors and interface actions.</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="bg-stone-900 rounded-lg p-4 overflow-x-auto text-sm text-stone-100 font-mono">
+                            <div class="flex justify-between text-xs text-stone-500 mb-2">
+                                <span>Python: Data Inference</span>
+                                <span>read-only</span>
+                            </div>
+<pre><code>def reverse_engineer_data(data_object):
+    # Analyze dictionary structure
+    print("Analyzing Data Structure...")
+    
+    for key, value in data_object.items():
+        data_type = type(value).__name__
+        # Infer potential ID keys
+        is_key = "id" in key.lower()
+        
+        print(f"Field: '{key}' | Type: {data_type} | Key?: {is_key}")
+
+# Legacy record found in system
+legacy_record = { "emp_id": 49302, "f_name": "Sarah" }
+reverse_engineer_data(legacy_record)</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: Refactoring -->
+                <div id="content-refactor" class="hidden fade-in">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-bold text-stone-800 mb-4">Improving Structure without Changing Behavior</h3>
+                            <p class="text-stone-600 mb-4">
+                                Refactoring improves the internal structure of code, data, or architecture without altering external behavior.
+                            </p>
+                            <div class="bg-orange-50 border-l-4 border-orange-400 p-4 mb-4">
+                                <p class="text-xs text-orange-800 font-bold uppercase mb-1">Scenario</p>
+                                <p class="text-sm text-orange-900">
+                                    <strong>Before:</strong> Spaghetti code with "magic numbers" (e.g., <code>x * 0.90</code>).<br>
+                                    <strong>After:</strong> Clean functions with constants (<code>price * DISCOUNT_RATE</code>).
+                                </p>
+                            </div>
+                            <p class="text-sm text-stone-500">
+                                <strong>Goal:</strong> Reduce technical debt and improve maintainability for future changes.
+                            </p>
+                        </div>
+                        <div class="bg-stone-900 rounded-lg p-4 overflow-x-auto text-sm text-stone-100 font-mono">
+                            <div class="flex justify-between text-xs text-stone-500 mb-2">
+                                <span>Python: Refactoring Example</span>
+                                <span>read-only</span>
+                            </div>
+<pre><code># --- BEFORE (Obscure) ---
+def calc(x, y, z):
+    if z == True: return x * 0.90 + y
+    else: return x + y
+
+# --- AFTER (Refactored) ---
+def calculate_total(item_price, shipping, has_discount):
+    DISCOUNT_RATE = 0.90
+    final_price = item_price
+    
+    if has_discount:
+        final_price = item_price * DISCOUNT_RATE
+        
+    return final_price + shipping</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: Proactive Support -->
+                <div id="content-proactive" class="hidden fade-in">
+                    <div class="flex flex-col md:flex-row gap-8 items-center">
+                        <div class="md:w-1/2">
+                            <h3 class="text-xl font-bold text-stone-800 mb-4">Moving from Reactive to Proactive</h3>
+                            <p class="text-stone-600 mb-6">
+                                Modern support doesn't wait for the phone to ring. It uses <strong>Software Analytics</strong> and <strong>AI</strong> to predict and prevent failures.
+                            </p>
+                            <div class="space-y-4">
+                                <div class="flex items-center p-3 bg-stone-50 rounded-lg border border-stone-200">
+                                    <div class="h-8 w-8 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center font-bold mr-3">1</div>
+                                    <div class="text-sm"><strong>Probabilistic Reasoning:</strong> Modeling software reliability.</div>
+                                </div>
+                                <div class="flex items-center p-3 bg-stone-50 rounded-lg border border-stone-200">
+                                    <div class="h-8 w-8 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center font-bold mr-3">2</div>
+                                    <div class="text-sm"><strong>Machine Learning:</strong> Predicting defect hotspots based on history.</div>
+                                </div>
+                                <div class="flex items-center p-3 bg-stone-50 rounded-lg border border-stone-200">
+                                    <div class="h-8 w-8 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center font-bold mr-3">3</div>
+                                    <div class="text-sm"><strong>Sentiment Mining:</strong> Scanning social media for early outage reports.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:w-1/2 bg-stone-100 p-6 rounded-xl border-dashed border-2 border-stone-300 text-center">
+                            <div class="text-4xl mb-2">🛡️</div>
+                            <h4 class="font-bold text-stone-700">Antibugging Strategy</h4>
+                            <p class="text-sm text-stone-500 mt-2">
+                                Adding facilities (like comprehensive logging) to code <em>during development</em> to aid future support.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION: Cost-Benefit Calculator (Sneed's Model) -->
+    <section id="calculator" class="py-16 bg-white border-t border-stone-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-extrabold text-stone-900">Decision Support: Reengineer or Maintain?</h2>
+                <p class="mt-2 text-stone-500 max-w-3xl mx-auto">
+                    Based on Sneed's Model (1995). Calculate whether it is financially viable to continue maintaining the legacy system or to invest in reengineering it.
+                </p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Controls -->
+                <div class="lg:col-span-1 bg-stone-50 p-6 rounded-xl border border-stone-200 space-y-4 shadow-inner">
+                    <h3 class="font-bold text-stone-800 border-b border-stone-200 pb-2 mb-4">Input Parameters</h3>
+                    
+                    <!-- Group: Status Quo -->
+                    <div>
+                        <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">Status Quo (Annual)</h4>
+                        <div class="grid grid-cols-1 gap-2">
+                            <label class="text-xs text-stone-600 flex justify-between">
+                                Maintenance Cost (P1)
+                                <input type="number" id="p1" value="100000" class="w-24 text-right border rounded px-1 text-xs">
+                            </label>
+                            <label class="text-xs text-stone-600 flex justify-between">
+                                Ops Cost (P2)
+                                <input type="number" id="p2" value="50000" class="w-24 text-right border rounded px-1 text-xs">
+                            </label>
+                            <label class="text-xs text-stone-600 flex justify-between">
+                                Business Value (P3)
+                                <input type="number" id="p3" value="300000" class="w-24 text-right border rounded px-1 text-xs">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Group: Reengineering -->
+                    <div>
+                        <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">Post-Reengineering (Annual)</h4>
+                        <div class="grid grid-cols-1 gap-2">
+                            <label class="text-xs text-stone-600 flex justify-between">
+                                Predicted Maint. (P4)
+                                <input type="number" id="p4" value="20000" class="w-24 text-right border rounded px-1 text-xs">
+                            </label>
+                            <label class="text-xs text-stone-600 flex justify-between">
+                                Predicted Ops (P5)
+                                <input type="number" id="p5" value="30000" class="w-24 text-right border rounded px-1 text-xs">
+                            </label>
+                            <label class="text-xs text-stone-600 flex justify-between">
+                                Predicted Value (P6)
+                                <input type="number" id="p6" value="350000" class="w-24 text-right border rounded px-1 text-xs">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Group: Project -->
+                    <div>
+                        <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">Project Constraints</h4>
+                        <div class="grid grid-cols-1 gap-2">
+                            <label class="text-xs text-stone-600 flex justify-between">
+                                Reeng. Cost (P7)
+                                <input type="number" id="p7" value="150000" class="w-24 text-right border rounded px-1 text-xs">
+                            </label>
+                            <label class="text-xs text-stone-600 flex justify-between">
+                                Time to Build (P8 Yrs)
+                                <input type="number" id="p8" value="1" step="0.5" class="w-24 text-right border rounded px-1 text-xs">
+                            </label>
+                            <label class="text-xs text-stone-600 flex justify-between">
+                                Risk Factor (P9)
+                                <input type="number" id="p9" value="1.1" step="0.1" class="w-24 text-right border rounded px-1 text-xs">
+                            </label>
+                            <label class="text-xs text-stone-600 flex justify-between">
+                                Expected Life (L Yrs)
+                                <input type="number" id="l" value="5" class="w-24 text-right border rounded px-1 text-xs">
+                            </label>
+                        </div>
+                    </div>
+
+                    <button onclick="calculateSneed()" class="w-full bg-teal-600 text-white rounded py-2 text-sm font-bold hover:bg-teal-700 transition">Recalculate</button>
+                </div>
+
+                <!-- Results & Chart -->
+                <div class="lg:col-span-2 flex flex-col justify-between">
+                    <div class="mb-6">
+                        <div class="grid grid-cols-2 gap-4 text-center mb-6">
+                            <div class="p-4 bg-stone-100 rounded-lg">
+                                <span class="block text-xs text-stone-500 uppercase">Maint. Benefit (Lifetime)</span>
+                                <span id="res-maint" class="text-lg font-bold text-stone-700">$0</span>
+                            </div>
+                            <div class="p-4 bg-teal-50 rounded-lg">
+                                <span class="block text-xs text-teal-600 uppercase">Reeng. Benefit (Lifetime)</span>
+                                <span id="res-reeng" class="text-lg font-bold text-teal-700">$0</span>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-orange-50 rounded-lg text-center border border-orange-200">
+                            <span class="block text-xs text-orange-600 uppercase font-bold">Net Benefit of Reengineering</span>
+                            <span id="res-net" class="text-3xl font-extrabold text-orange-600">$0</span>
+                            <p id="res-verdict" class="text-sm font-medium mt-1 text-orange-800">Recommendation: ...</p>
+                        </div>
+                    </div>
+
+                    <!-- Visualization & Content Choices:
+                         Goal: Change / Compare
+                         Method: Line Chart (Chart.js)
+                         Why: To show the break-even point over time (Cumulative Benefit).
+                    -->
+                    <div class="chart-container bg-white border border-stone-200 rounded-lg p-2">
+                        <canvas id="benefitChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-stone-800 text-stone-400 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-white text-lg font-bold mb-4">A Strategy for Software Support</h3>
+                    <p class="text-sm">
+                        Based on Chapter 27 of Software Engineering. Focusing on the complete lifecycle from requirement gathering to retirement.
+                    </p>
+                </div>
+                <div class="text-sm">
+                    <h4 class="text-white font-bold mb-4">References</h4>
+                    <ul class="space-y-2">
+                        <li>Lehman, M.M. - Laws of Software Evolution</li>
+                        <li>Sneed, H.M. - Reengineering Cost-Benefit Models</li>
+                        <li>Imperial College London</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-stone-700 text-xs text-center">
+                Generated based on Lecture Notes. No external CSS/JS dependencies (CDN only).
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- DATA STORAGE & STATE ---
+        const lawsData = [
+            { title: "Continuing Change", year: "1974", desc: "E-type systems must be continually adapted or they become progressively less satisfactory." },
+            { title: "Increasing Complexity", year: "1974", desc: "As a system evolves, its complexity increases unless work is done to maintain or reduce it." },
+            { title: "Conservation of Familiarity", year: "1980", desc: "Rate of change is self-regulating; developers must maintain mastery of the content." },
+            { title: "Continuing Growth", year: "1980", desc: "Functional content must continually increase to maintain user satisfaction." },
+            { title: "Declining Quality", year: "1996", desc: "Quality appears to decline unless rigorously maintained and adapted." }
+        ];
+
+        // --- RENDER LEHMAN'S LAWS ---
+        function renderLaws() {
+            const container = document.getElementById('laws-grid');
+            container.innerHTML = lawsData.map((law, index) => `
+                <div class="group bg-white p-6 rounded-lg shadow-sm border border-stone-200 hover:border-teal-400 hover:shadow-md transition-all cursor-default">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-lg font-bold text-stone-800 group-hover:text-teal-700 transition-colors">${law.title}</h3>
+                        <span class="text-xs font-mono text-stone-400 bg-stone-100 px-2 py-1 rounded">${law.year}</span>
+                    </div>
+                    <p class="text-stone-600 text-sm leading-relaxed">${law.desc}</p>
+                </div>
+            `).join('');
+        }
+
+        // --- ACCORDION LOGIC ---
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            const parent = content.parentElement;
+            const icon = parent.querySelector('span.text-teal-600');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.textContent = '-';
+                parent.classList.add('ring-2', 'ring-teal-100');
+            } else {
+                content.classList.add('hidden');
+                icon.textContent = '+';
+                parent.classList.remove('ring-2', 'ring-teal-100');
+            }
+        }
+
+        // --- TAB LOGIC ---
+        function switchTab(tabName) {
+            // Hide all content
+            ['reverse', 'refactor', 'proactive'].forEach(t => {
+                document.getElementById(`content-${t}`).classList.add('hidden');
+                const btn = document.getElementById(`tab-btn-${t}`);
+                btn.classList.remove('bg-teal-100', 'text-teal-800');
+                btn.classList.add('text-stone-500', 'hover:text-stone-900');
+            });
+
+            // Show selected
+            document.getElementById(`content-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+            activeBtn.classList.remove('text-stone-500', 'hover:text-stone-900');
+            activeBtn.classList.add('bg-teal-100', 'text-teal-800');
+        }
+
+        // --- CHART.JS INSTANCES ---
+        let maintChart = null;
+        let benefitChart = null;
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderLaws();
+            initMaintChart();
+            calculateSneed(); // Init benefit chart
+            
+            // Mobile Menu Toggle
+            const btn = document.getElementById('mobile-menu-btn');
+            const menu = document.getElementById('mobile-menu');
+            btn.addEventListener('click', () => {
+                menu.classList.toggle('hidden');
+            });
+        });
+
+        // --- MAINTENANCE CHART (Doughnut) ---
+        function initMaintChart() {
+            const ctx = document.getElementById('maintenanceChart').getContext('2d');
+            maintChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Corrective (Fixing)', 'Adaptive (Env)', 'Perfective (Enhance)', 'Preventative (Refactor)'],
+                    datasets: [{
+                        data: [20, 25, 50, 5], // Heuristic values based on "Software Engineering" literature
+                        backgroundColor: [
+                            '#fca5a5', // Red-300
+                            '#93c5fd', // Blue-300
+                            '#86efac', // Green-300
+                            '#d8b4fe'  // Purple-300
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.raw + '% effort';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- SNEED'S CALCULATOR & CHART ---
+        function calculateSneed() {
+            // Get inputs
+            const P1 = parseFloat(document.getElementById('p1').value);
+            const P2 = parseFloat(document.getElementById('p2').value);
+            const P3 = parseFloat(document.getElementById('p3').value);
+            const P4 = parseFloat(document.getElementById('p4').value);
+            const P5 = parseFloat(document.getElementById('p5').value);
+            const P6 = parseFloat(document.getElementById('p6').value);
+            const P7 = parseFloat(document.getElementById('p7').value);
+            const P8 = parseFloat(document.getElementById('p8').value);
+            const P9 = parseFloat(document.getElementById('p9').value);
+            const L = parseFloat(document.getElementById('l').value);
+
+            // Calculate Totals for display
+            // Formula Source: Lecture Notes text & Python Example
+            // Cmaint = [P3 - (P1 + P2)] * L
+            const c_maint = (P3 - (P1 + P2)) * L;
+
+            // Creeng = P6 - (P4 + P5) * (L - P8) - (P7 * P9)
+            // Note: Implementing strictly as per text source python example provided in prompt history
+            // However, visually we want to show Cumulative Benefit over years for the Chart
+            // so we will break this down year by year.
+            
+            // Wait, for the static calculation let's use the bracketed logic for annual consistency 
+            // to avoid illogical results (P6 standing alone vs P4 multiplied by years).
+            // Interpreting formula: Total Benefit = (Annual_Rev - Annual_Cost) * Duration - Fixed_Cost
+            const annual_profit_reeng = P6 - (P4 + P5);
+            const duration_reeng = L - P8;
+            const risk_adj_cost = P7 * P9;
+            const c_reeng = (annual_profit_reeng * duration_reeng) - risk_adj_cost;
+
+            const net_benefit = c_reeng - c_maint;
+
+            // Update DOM text
+            const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+            document.getElementById('res-maint').innerText = formatter.format(c_maint);
+            document.getElementById('res-reeng').innerText = formatter.format(c_reeng);
+            const netEl = document.getElementById('res-net');
+            netEl.innerText = formatter.format(net_benefit);
+            netEl.className = net_benefit > 0 ? "text-3xl font-extrabold text-teal-600" : "text-3xl font-extrabold text-red-600";
+            
+            document.getElementById('res-verdict').innerText = net_benefit > 0 
+                ? "Recommendation: PROCEED WITH REENGINEERING" 
+                : "Recommendation: MAINTAIN STATUS QUO";
+
+            updateBenefitChart(L, P8, (P3 - (P1 + P2)), annual_profit_reeng, risk_adj_cost);
+        }
+
+        function updateBenefitChart(years, buildTime, annualProfitMaint, annualProfitReeng, reengCost) {
+            const ctx = document.getElementById('benefitChart').getContext('2d');
+            
+            // Generate Year Labels (0 to L)
+            const labels = [];
+            const dataMaint = [];
+            const dataReeng = [];
+
+            let cumMaint = 0;
+            let cumReeng = -reengCost; // Start in debt due to project cost
+
+            for (let i = 0; i <= years; i++) {
+                labels.push('Year ' + i);
+                
+                // Maint: Linear accumulation
+                if (i > 0) cumMaint += annualProfitMaint;
+                dataMaint.push(cumMaint);
+
+                // Reeng: No profit during build time (P8), then profit kicks in
+                if (i > buildTime) {
+                    // If partial year? Assuming integer steps for simplicity or linear interpolation
+                    cumReeng += annualProfitReeng;
+                }
+                dataReeng.push(cumReeng);
+            }
+
+            if (benefitChart) benefitChart.destroy();
+
+            benefitChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Status Quo (Maintenance)',
+                            data: dataMaint,
+                            borderColor: '#78716c', // Stone-500
+                            backgroundColor: '#78716c',
+                            borderWidth: 2,
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Reengineering Project',
+                            data: dataReeng,
+                            borderColor: '#0d9488', // Teal-600
+                            backgroundColor: '#0d9488',
+                            borderWidth: 2,
+                            borderDash: [5, 5], // Dashed to show it's a "Project"
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: { color: '#f5f5f4' },
+                            ticks: {
+                                callback: function(value) { return '$' + value / 1000 + 'k'; }
+                            }
+                        },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.raw);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+    </script>
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</body>
+</html>
+
+
+
+
