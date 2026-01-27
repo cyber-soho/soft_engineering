@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE400 Final Exam Review</title>
+    <style>
+        /* --- SOLARIZED THEME VARIABLES --- */
+        :root {
+            /* Solarized Palette */
+            --base03: #002b36;
+            --base02: #073642;
+            --base01: #586e75;
+            --base00: #657b83;
+            --base0: #839496;
+            --base1: #93a1a1;
+            --base2: #eee8d5;
+            --base3: #fdf6e3;
+            --yellow: #b58900;
+            --orange: #cb4b16;
+            --red: #dc322f;
+            --magenta: #d33682;
+            --violet: #6c71c4;
+            --blue: #268bd2;
+            --cyan: #2aa198;
+            --green: #859900;
+
+            /* Light Theme Default Assignments */
+            --bg-body: var(--base3);
+            --bg-card: var(--base2);
+            --bg-nav: var(--base2);
+            --text-main: var(--base00);
+            --text-heading: var(--base01);
+            --border: var(--base1);
+            --accent: var(--blue);
+            --accent-hover: var(--cyan);
+            --shadow: rgba(0,0,0,0.1);
+            --code-bg: rgba(255,255,255,0.5);
+        }
+
+        [data-theme="dark"] {
+            /* Dark Theme Assignments */
+            --bg-body: var(--base03);
+            --bg-card: var(--base02);
+            --bg-nav: var(--base02);
+            --text-main: var(--base0);
+            --text-heading: var(--base1);
+            --border: var(--base01);
+            --accent: var(--blue);
+            --accent-hover: var(--violet);
+            --shadow: rgba(0,0,0,0.3);
+            --code-bg: rgba(0,0,0,0.2);
+        }
+
+        /* --- GLOBAL RESET & TYPOGRAPHY --- */
+        * { box-sizing: border-box; transition: background-color 0.3s ease, color 0.3s ease; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            line-height: 1.6;
+        }
+        h1, h2, h3 { color: var(--text-heading); font-weight: 700; }
+        a { color: var(--accent); text-decoration: none; font-weight: bold; }
+        a:hover { color: var(--accent-hover); text-decoration: underline; }
+
+        /* --- STICKY NAVIGATION --- */
+        nav {
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-nav);
+            border-bottom: 2px solid var(--accent);
+            padding: 1rem 2rem;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .nav-btn:hover { background-color: var(--shadow); color: var(--accent); }
+        .nav-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+        
+        /* Toggle Switch */
+        .theme-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .theme-switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--base01);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: var(--base3);
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--yellow); }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        /* --- SECTIONS GENERAL --- */
+        section { padding: 3rem 2rem; max-width: 1200px; margin: 0 auto; display: none; opacity: 0; animation: fadeIn 0.5s forwards; }
+        section.active-section { display: block; }
+
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        /* --- DASHBOARD --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .stat-card {
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: 8px;
+            border-left: 5px solid var(--accent);
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+        .welcome-hero {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--base02), var(--base03));
+            color: var(--base1);
+            padding: 3rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .welcome-hero h1 { color: var(--yellow); margin-top: 0; }
+
+        /* --- COURSE REVIEW (VISUALS) --- */
+        .concept-block {
+            background-color: var(--bg-card);
+            margin-bottom: 2rem;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+        .diagram-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+            padding: 1rem;
+            background-color: var(--bg-body);
+            border-radius: 8px;
+            border: 1px dashed var(--border);
+        }
+        /* Simple CSS Diagrams */
+        .flow-diagram { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; }
+        .flow-step {
+            background-color: var(--blue);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            position: relative;
+        }
+        .flow-arrow { color: var(--text-main); font-size: 1.5rem; }
+        
+        /* V-Model SVG Styling */
+        svg text { fill: var(--text-main); font-family: sans-serif; font-size: 12px; }
+        svg path, svg rect { stroke: var(--text-main); stroke-width: 2; fill: none; }
+        .box-fill { fill: var(--bg-card); stroke: var(--accent); }
+
+        /* --- 50 QUESTIONS SECTION --- */
+        .filter-controls {
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            background-color: var(--bg-card);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .filter-btn.active { background-color: var(--accent); color: white; }
+
+        .qa-grid { display: flex; flex-direction: column; gap: 1rem; }
+        
+        .qa-card {
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px var(--shadow);
+            border-left: 4px solid var(--green); /* Default border */
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .qa-card:hover { transform: translateX(5px); }
+        
+        .qa-header {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .qa-title { font-weight: 600; font-size: 1.1rem; color: var(--text-main); }
+        .qa-meta {
+            font-size: 0.8rem;
+            background-color: var(--base02);
+            color: var(--base1);
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+        .icon-state { font-size: 1.5rem; color: var(--accent); transition: transform 0.3s; }
+        
+        .qa-body {
+            max-height: 0;
+            overflow: hidden;
+            background-color: var(--bg-body);
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+            padding: 0 1.5rem;
+            border-top: 1px solid transparent;
+        }
+        
+        .qa-card.open .qa-body {
+            max-height: 500px; /* Arbitrary large height */
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .qa-card.open .icon-state { transform: rotate(180deg); }
+        .qa-card.open { border-left-color: var(--magenta); }
+
+        /* Chapter Specific Colors for Borders */
+        .ch-7 { border-left-color: var(--yellow); }
+        .ch-8 { border-left-color: var(--orange); }
+        .ch-15 { border-left-color: var(--red); }
+        .ch-22 { border-left-color: var(--violet); }
+        .ch-27 { border-left-color: var(--blue); }
+
+        /* Helper for external links */
+        .resource-links {
+            margin-top: 10px;
+            font-size: 0.9em;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+
+    </style>
+</head>
+<body data-theme="light">
+
+    <!-- Top Navigation -->
+    <nav>
+        <div class="brand">
+            <span style="color: var(--yellow); font-weight:900; font-size: 1.5rem;">SE400</span> Review
+        </div>
+        <div class="nav-links">
+            <button class="nav-btn active" onclick="showSection('dashboard')">Dashboard</button>
+            <button class="nav-btn" onclick="showSection('review')">Course Review</button>
+            <button class="nav-btn" onclick="showSection('questions')">50 Questions</button>
+        </div>
+        <label class="theme-switch">
+            <input type="checkbox" id="themeToggle">
+            <span class="slider"></span>
+        </label>
+    </nav>
+
+    <!-- SECTION 1: DASHBOARD -->
+    <section id="dashboard" class="active-section">
+        <div class="dashboard-grid">
+            <div class="welcome-hero">
+                <h1>Final Exam Preparation</h1>
+                <p>Interactive Review for Software Engineering</p>
+                <p style="font-size: 0.9rem; margin-top: 1rem; color: var(--base1);">
+                    Covering: Testing, Deployment, Quality, SCM, and Evolution
+                </p>
+                <button onclick="showSection('questions')" style="margin-top:20px; padding:10px 20px; background:var(--yellow); border:none; color:white; font-weight:bold; cursor:pointer; border-radius:4px;">Start Quiz</button>
+            </div>
+
+            <div class="stat-card">
+                <h3><span style="color:var(--orange)">&#9881;</span> Core Topics</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li>&#10003; Ch 7: Testing Strategies</li>
+                    <li>&#10003; Ch 8: Deployment & CI</li>
+                    <li>&#10003; Ch 15-17: Quality Assurance</li>
+                    <li>&#10003; Ch 22: Configuration Management</li>
+                    <li>&#10003; Ch 27: Support & Evolution</li>
+                </ul>
+            </div>
+
+            <div class="stat-card">
+                <h3><span style="color:var(--blue)">&#128202;</span> Study Stats</h3>
+                <div style="font-size: 3rem; font-weight: bold; color: var(--magenta);">50</div>
+                <div>Review Questions Available</div>
+                <div style="margin-top: 10px; font-size: 0.8rem; color: var(--base01);">
+                    Click "50 Questions" to begin flipping cards.
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h3><span style="color:var(--green)">&#128279;</span> Important Standards</h3>
+                <div style="display:flex; flex-wrap:wrap; gap:10px;">
+                    <a href="https://iso25000.com/en/iso-25000-standards/iso-25010" target="_blank" style="font-size:0.8rem; border:1px solid var(--border); padding:5px;">ISO 25010</a>
+                    <a href="https://www.pmi.org" target="_blank" style="font-size:0.8rem; border:1px solid var(--border); padding:5px;">PMI</a>
+                    <a href="https://www.atlassian.com/continuous-delivery" target="_blank" style="font-size:0.8rem; border:1px solid var(--border); padding:5px;">Atlassian CI/CD</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: COURSE REVIEW (VISUALS) -->
+    <section id="review">
+        <h2>Comprehensive Course Review</h2>
+        <p>Visualizing the key concepts from the uploaded lecture notes.</p>
+
+        <!-- Concept 1: Testing -->
+        <div class="concept-block">
+            <h3 style="color: var(--yellow);">1. The V-Model (Testing Strategy)</h3>
+            <p>From <strong>Chapter 7</strong>: Testing is not just "one thing". It mirrors the development process.</p>
+            <div class="diagram-container">
+                <svg width="600" height="300" viewBox="0 0 600 300">
+                    <!-- Left side (Dev) -->
+                    <rect x="50" y="20" width="100" height="40" class="box-fill" /> <text x="65" y="45">Requirements</text>
+                    <rect x="100" y="70" width="100" height="40" class="box-fill" /> <text x="115" y="95">Architecture</text>
+                    <rect x="150" y="120" width="100" height="40" class="box-fill" /> <text x="165" y="145">Component Des</text>
+                    <rect x="200" y="170" width="100" height="40" class="box-fill" /> <text x="220" y="195">Code Gen</text>
+                    
+                    <!-- Right side (Test) -->
+                    <rect x="300" y="170" width="100" height="40" class="box-fill" style="stroke:var(--orange)" /> <text x="320" y="195">Unit Test</text>
+                    <rect x="350" y="120" width="100" height="40" class="box-fill" style="stroke:var(--orange)" /> <text x="360" y="145">Integration Test</text>
+                    <rect x="400" y="70" width="100" height="40" class="box-fill" style="stroke:var(--orange)" /> <text x="420" y="95">System Test</text>
+                    <rect x="450" y="20" width="100" height="40" class="box-fill" style="stroke:var(--orange)" /> <text x="460" y="45">Acceptance Test</text>
+
+                    <!-- Connections -->
+                    <path d="M100 60 L100 90 M150 110 L150 140 M200 160 L200 190 M250 210 L300 210" style="stroke-dasharray: 4;" />
+                    <!-- Verification Links -->
+                    <path d="M150 40 L450 40" style="stroke:var(--base1); stroke-width:1; stroke-dasharray:2" />
+                    <text x="270" y="35" style="fill:var(--base1)">Validation</text>
+                </svg>
+            </div>
+            <p><strong>Key Takeaway:</strong> Verification is "Are we building the product right?" (White Box). Validation is "Are we building the right product?" (Black Box).</p>
+        </div>
+
+        <!-- Concept 2: SCM -->
+        <div class="concept-block">
+            <h3 style="color: var(--violet);">2. Software Configuration Management (SCM)</h3>
+            <p>From <strong>Chapter 22</strong>: Managing change to prevent chaos (entropy).</p>
+            <div class="diagram-container" style="flex-direction: column; align-items: center;">
+                <div class="flow-diagram">
+                    <div class="flow-step" style="background:var(--base01)">Identification</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step" style="background:var(--cyan)">Version Control</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step" style="background:var(--violet)">Change Control</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step" style="background:var(--magenta)">Auditing</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step" style="background:var(--green)">Reporting</div>
+                </div>
+                <p style="margin-top:1rem; font-style:italic;">"The First Law of System Engineering: The system will change."</p>
+            </div>
+        </div>
+
+        <!-- Concept 3: Cost of Quality -->
+        <div class="concept-block">
+            <h3 style="color: var(--red);">3. The Cost of Change Curve</h3>
+            <p>From <strong>Chapters 15-17</strong>: Why we do reviews and QA.</p>
+            <div class="diagram-container">
+                <svg width="400" height="200">
+                    <!-- Axes -->
+                    <line x1="20" y1="180" x2="380" y2="180" stroke="var(--text-main)" stroke-width="2" />
+                    <line x1="20" y1="180" x2="20" y2="20" stroke="var(--text-main)" stroke-width="2" />
+                    <text x="350" y="195">Time</text>
+                    <text x="10" y="15" style="writing-mode: tb;">Cost ($)</text>
+
+                    <!-- Curve -->
+                    <path d="M 20 170 Q 150 160 380 20" stroke="var(--red)" stroke-width="3" fill="none" />
+                    
+                    <!-- Labels -->
+                    <text x="30" y="160">Design</text>
+                    <text x="100" y="140">Coding</text>
+                    <text x="200" y="100">Testing</text>
+                    <text x="300" y="40">Post-Release</text>
+                </svg>
+            </div>
+            <p>Finding a bug in <strong>Design</strong> costs $1. Finding it <strong>Post-Release</strong> costs $100+. This is why FTR (Formal Technical Reviews) are critical.</p>
+        </div>
+
+    </section>
+
+    <!-- SECTION 3: 50 QUESTIONS -->
+    <section id="questions">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2>50 Review Questions</h2>
+            <div class="filter-controls" id="filterContainer">
+                <!-- JS will populate filters here -->
+            </div>
+        </div>
+        <p>Click a question to flip the card and reveal the answer. Opening a new question closes others.</p>
+        
+        <div class="qa-grid" id="qaContainer">
+            <!-- Questions injected via JS -->
+        </div>
+    </section>
+
+    <script>
+        // --- DATA: 50 QUESTIONS ---
+        const qaData = [
+            // CHAPTER 7: TESTING
+            { ch: "Ch 7", q: "What is the primary goal of the Independent Test Group (ITG)?", a: "To remove the inherent conflict of interest. A developer tries to prove their code works; an ITG tries to find where it fails." },
+            { ch: "Ch 7", q: "Define Verification vs. Validation.", a: "<strong>Verification:</strong> 'Are we building the product right?' (Conforming to specs).<br><strong>Validation:</strong> 'Are we building the right product?' (Meeting user needs)." },
+            { ch: "Ch 7", q: "What is a 'Stub' in Unit Testing?", a: "A 'dummy' program that simulates a module <em>called by</em> the module being tested. It replaces missing lower-level code." },
+            { ch: "Ch 7", q: "What is a 'Driver' in Unit Testing?", a: "A main program that accepts test case data and passes it <em>to</em> the module being tested. It simulates a missing higher-level caller." },
+            { ch: "Ch 7", q: "Explain Top-Down Integration.", a: "Testing begins at the main control module. Stubs are used for lower levels. <br><em>Pros:</em> Finds major control errors early. <br><em>Cons:</em> IO functions (low level) are hard to test effectively." },
+            { ch: "Ch 7", q: "Explain Bottom-Up Integration.", a: "Testing begins at the atomic modules (low level). Drivers are used to trigger them. <br><em>Pros:</em> Easier test case creation. <br><em>Cons:</em> Major system control isn't seen until the very end." },
+            { ch: "Ch 7", q: "What is Regression Testing?", a: "Re-executing a subset of tests to ensure that changes (bug fixes/features) have not introduced unintended side effects (regressions)." },
+            { ch: "Ch 7", q: "What is Smoke Testing?", a: "A rolling integration test run daily (usually in CI). It exposes the project to a 'smoke' test to ensure the build doesn't 'catch fire' (crash immediately)." },
+            { ch: "Ch 7", q: "What is Basis Path Testing (White Box)?", a: "A technique to ensure every statement in the program has been executed at least once by calculating the Cyclomatic Complexity." },
+            { ch: "Ch 7", q: "What is Boundary Value Analysis (BVA)?", a: "A Black-Box technique. Errors lurk at the edges of input domains. If input is 1-100, test 0, 1, 100, and 101." },
+
+            // CHAPTER 8: DEPLOYMENT
+            { ch: "Ch 8", q: "What is the 'Big Bang' deployment strategy?", a: "Updating the entire system at once. High risk—if it fails, everyone is down." },
+            { ch: "Ch 8", q: "What is 'Phased Deployment'?", a: "Rolling out software to users in increments (e.g., by region or department). Reduces risk impact." },
+            { ch: "Ch 8", q: "Define Continuous Integration (CI).", a: "Developers merge code to a shared repository frequently (daily). Automated builds and tests run to detect errors early." },
+            { ch: "Ch 8", q: "What is Continuous Delivery (CD)?", a: "An extension of CI where the release to production is automated, requiring manual approval only at the final step (or fully automated in Continuous Deployment)." },
+            { ch: "Ch 8", q: "Which ISO standard relates to Software Quality Models?", a: "<strong>ISO/IEC 25010</strong>." },
+
+            // CHAPTER 15, 16, 17: QUALITY
+            { ch: "Ch 15", q: "What is the difference between QC and QA?", a: "<strong>QC (Control):</strong> Inspections/Tests on the product itself (Find defects).<br><strong>QA (Assurance):</strong> Auditing the <em>process</em> to ensure quality standards are met (Prevent defects)." },
+            { ch: "Ch 15", q: "What is the 'Good Enough' software argument?", a: "The belief that users tolerate bugs if the software provides novel value or is first to market. However, this is risky in safety-critical systems." },
+            { ch: "Ch 16", q: "What is an FTR?", a: "<strong>Formal Technical Review</strong> (Walkthrough/Inspection). A meeting to uncover errors in function, logic, or implementation." },
+            { ch: "Ch 16", q: "What is the Pareto Principle in Software Defects?", a: "80% of the defects are traced to 20% of the modules." },
+            { ch: "Ch 16", q: "What is 'Poka-Yoke'?", a: "Mistake-proofing. A mechanism that makes it impossible (or very hard) to make a specific error." },
+            { ch: "Ch 17", q: "What is SQA?", a: "Software Quality Assurance: The infrastructure (plans, procedures, audits) that ensures software quality." },
+            { ch: "Ch 17", q: "What is Six Sigma?", a: "A methodology driven by data to eliminate defects. <br><strong>DMAIC:</strong> Define, Measure, Analyze, Improve, Control." },
+            { ch: "Ch 17", q: "What is Total Quality Management (TQM)?", a: "A management approach to long-term success through customer satisfaction, involving all members of the organization." },
+            { ch: "Ch 17", q: "What is Statistical SQA?", a: "Categorizing errors to calculate the cost/frequency and targeting the vital few causes (Pareto) for improvement." },
+            { ch: "Ch 17", q: "Why is the 'Cost of Change' non-linear?", a: "An error amplifies over time. A requirement error affects design, which affects code, which affects tests. Fixing it later requires reworking all those steps." },
+
+            // CHAPTER 21: SYSTEM DOCUMENTATION
+            { ch: "Ch 21", q: "User Documentation vs. System Documentation?", a: "<strong>User Doc:</strong> For end-users (Tutorials, Manuals).<br><strong>System Doc:</strong> For developers (API references, Architecture diagrams, Code comments)." },
+            { ch: "Ch 21", q: "What makes documentation 'Passive'?", a: "When it is separate from the code (e.g., a PDF) and requires manual effort to keep updated. It often becomes obsolete." },
+            { ch: "Ch 21", q: "What is the best way to ensure documentation stays current?", a: "Keep it close to the code (e.g., Javadoc, Swagger/OpenAPI) or automate its generation." },
+            
+            // CHAPTER 22: SCM (Software Configuration Management)
+            { ch: "Ch 22", q: "What are the four primary elements of SCM?", a: "1. Identification (Naming/Baselines)<br>2. Control (Change requests)<br>3. Auditing (Verifying implementation)<br>4. Reporting (Status accounting)" },
+            { ch: "Ch 22", q: "What is a 'Baseline'?", a: "A specification or product that has been formally reviewed and agreed upon, serving as the basis for further development. It can only be changed via formal procedures." },
+            { ch: "Ch 22", q: "Explain 'Check-in' and 'Check-out'.", a: "<strong>Check-out:</strong> Locking/copying a file to modify it.<br><strong>Check-in:</strong> Saving the modified file back to the repository, unlocking it for others." },
+            { ch: "Ch 22", q: "What is 'Branching' in SCM?", a: "Creating a parallel line of development (e.g., for a specific feature or bug fix) without affecting the main 'trunk' or 'master' code." },
+            { ch: "Ch 22", q: "What is the role of the CCA (Change Control Authority)?", a: "A person or group that approves or rejects Change Requests based on impact, cost, and risk." },
+            { ch: "Ch 22", q: "What is Version Control?", a: "The process of managing multiple variations of the same configuration object (e.g., v1.0, v1.1)." },
+            { ch: "Ch 22", q: "What triggers a Change Request?", a: "Bugs, new market requirements, legislation changes, or internal improvements." },
+            { ch: "Ch 22", q: "Agile vs. Traditional SCM?", a: "Agile SCM is lightweight (developer-centric, automated). Traditional SCM (safety-critical) is rigorous (audits, formal boards)." },
+            { ch: "Ch 22", q: "What is a Configuration Item (SCI)?", a: "Fundamental unit of SCM (e.g., a source file, a design document, a test suite)." },
+            { ch: "Ch 22", q: "Why is SCM an 'Umbrella Activity'?", a: "It occurs throughout the entire software process, from requirements gathering to maintenance." },
+
+            // CHAPTER 27: SUPPORT & EVOLUTION
+            { ch: "Ch 27", q: "State Lehman's First Law (Continuing Change).", a: "A system must be continually adapted or it becomes progressively less satisfactory." },
+            { ch: "Ch 27", q: "State Lehman's Second Law (Increasing Complexity/Entropy).", a: "As a system evolves, its complexity increases unless work is done to maintain or reduce it (Refactoring)." },
+            { ch: "Ch 27", q: "What are the four types of Maintenance?", a: "1. <strong>Corrective:</strong> Fixing bugs.<br>2. <strong>Adaptive:</strong> Moving to new OS/Hardware.<br>3. <strong>Perfective:</strong> Enhancing features (User request).<br>4. <strong>Preventative:</strong> Refactoring/Cleaning up." },
+            { ch: "Ch 27", q: "What is Reverse Engineering?", a: "Analyzing a program to create a higher-level abstraction (e.g., Code -> Design/Specs). Often used on Legacy systems." },
+            { ch: "Ch 27", q: "What is Forward Engineering?", a: "The traditional process of moving from high-level abstractions (Specs) to physical implementation (Code)." },
+            { ch: "Ch 27", q: "What is Refactoring?", a: "Changing the internal structure of code without changing its external behavior (Cleanup)." },
+            { ch: "Ch 27", q: "What defines a 'Legacy System'?", a: "Older software that is critical to business but difficult to maintain due to obsolete technology or poor documentation." },
+            { ch: "Ch 27", q: "What is 'Software Reengineering'?", a: "The examination and alteration of a system to reconstitute it in a new form (Reverse Eng -> Restructure -> Forward Eng)." },
+            { ch: "Ch 27", q: "What is the 'Iceberg' analogy in support?", a: "Users only see the GUI/Features (tip), but support involves the massive complexity below (Logic, Data, Infrastructure)." },
+            { ch: "Ch 27", q: "When should you retire a system?", a: "When the cost of maintenance exceeds the value it provides, or when a replacement offers significantly higher ROI." }
+        ];
+
+        // --- DOM MANIPULATION ---
+
+        const qaContainer = document.getElementById('qaContainer');
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        // 1. Render Questions
+        function renderQuestions() {
+            qaContainer.innerHTML = ''; // clear
+            
+            qaData.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = `qa-card ${item.ch.toLowerCase().replace(' ','-')}`;
+                card.dataset.index = index;
+                
+                // HTML Structure
+                card.innerHTML = `
+                    <div class="qa-header">
+                        <div style="display:flex; align-items:center;">
+                            <span class="qa-title">${index + 1}. ${item.q}</span>
+                            <span class="qa-meta">${item.ch}</span>
+                        </div>
+                        <span class="icon-state">&#9662;</span>
+                    </div>
+                    <div class="qa-body">
+                        <div style="margin-bottom:10px;"><strong>Answer:</strong></div>
+                        ${item.a}
+                    </div>
+                `;
+
+                // Interaction Logic (Flip/Accordion)
+                card.addEventListener('click', () => {
+                    toggleCard(card);
+                });
+
+                qaContainer.appendChild(card);
+            });
+        }
+
+        // 2. Toggle Logic (One open at a time)
+        function toggleCard(clickedCard) {
+            const isOpen = clickedCard.classList.contains('open');
+            
+            // Close ALL cards first (Accordion style)
+            const allCards = document.querySelectorAll('.qa-card');
+            allCards.forEach(c => c.classList.remove('open'));
+
+            // If it wasn't open, open it now. If it WAS open, it stays closed (flip back).
+            if (!isOpen) {
+                clickedCard.classList.add('open');
+            }
+        }
+
+        // 3. Navigation Logic
+        window.showSection = function(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('section').forEach(sec => {
+                sec.classList.remove('active-section');
+            });
+            // Show target
+            document.getElementById(sectionId).classList.add('active-section');
+            
+            // Update Nav Buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.getAttribute('onclick').includes(sectionId)) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Scroll to top
+            window.scrollTo(0,0);
+        }
+
+        // 4. Theme Logic
+        themeToggle.addEventListener('change', () => {
+            if(themeToggle.checked) {
+                body.setAttribute('data-theme', 'dark');
+            } else {
+                body.setAttribute('data-theme', 'light');
+            }
+        });
+
+        // Initialize
+        renderQuestions();
+
+    </script>
+</body>
+</html>
+
+
+

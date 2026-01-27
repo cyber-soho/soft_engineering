@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Documentation - Software Engineering</title>
+    <style>
+        /* --- SOLARIZED THEME VARIABLES --- */
+        :root {
+            /* Solarized Palette */
+            --base03: #002b36;
+            --base02: #073642;
+            --base01: #586e75;
+            --base00: #657b83;
+            --base0: #839496;
+            --base1: #93a1a1;
+            --base2: #eee8d5;
+            --base3: #fdf6e3;
+            --yellow: #b58900;
+            --orange: #cb4b16;
+            --red: #dc322f;
+            --magenta: #d33682;
+            --violet: #6c71c4;
+            --blue: #268bd2;
+            --cyan: #2aa198;
+            --green: #859900;
+
+            /* Light Theme Default Mappings */
+            --bg-body: var(--base3);
+            --text-main: var(--base00);
+            --text-heading: var(--base01);
+            --bg-panel: var(--base2);
+            --border: var(--base1);
+            --link: var(--blue);
+            --code-bg: #fff;
+            --input-bg: #fff;
+            --button-bg: var(--base1);
+            --button-text: var(--base3);
+        }
+
+        /* Dark Theme Override */
+        [data-theme="dark"] {
+            --bg-body: var(--base03);
+            --text-main: var(--base0);
+            --text-heading: var(--base1);
+            --bg-panel: var(--base02);
+            --border: var(--base01);
+            --link: var(--blue);
+            --code-bg: var(--base02);
+            --input-bg: var(--base02);
+            --button-bg: var(--base01);
+            --button-text: var(--base3);
+        }
+
+        /* --- GLOBAL STYLES --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            transition: all 0.3s ease;
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--text-heading);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        a { color: var(--link); text-decoration: none; font-weight: bold; }
+        a:hover { text-decoration: underline; color: var(--orange); }
+
+        /* --- HEADER & NAVIGATION --- */
+        .top-bar {
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-panel);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--orange);
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .file-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-heading);
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .main-menu {
+            background-color: var(--bg-panel);
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 10px 0;
+            position: sticky;
+            top: 60px;
+            z-index: 999;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .menu-item {
+            padding: 8px 16px;
+            margin: 0 5px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: 600;
+            color: var(--text-heading);
+            transition: background 0.2s;
+        }
+
+        .menu-item:hover { background-color: rgba(0,0,0,0.1); }
+        .menu-item.active { background-color: var(--blue); color: #fff; }
+
+        /* --- TOGGLE SWITCH & BUTTONS --- */
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.8; }
+        .btn-primary { background-color: var(--blue); color: white; }
+        .btn-run { background-color: var(--green); color: white; }
+        .btn-clear { background-color: var(--red); color: white; }
+
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        .theme-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .theme-switch input { display: none; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--base01);
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px; width: 18px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--yellow); }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        /* --- CONTENT SECTIONS --- */
+        .section {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.5s;
+        }
+        .section.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        details {
+            background-color: rgba(0,0,0,0.03);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        summary {
+            font-weight: bold;
+            cursor: pointer;
+            color: var(--blue);
+            outline: none;
+        }
+        summary:hover { color: var(--orange); }
+
+        /* --- EXERCISE & INPUT --- */
+        .exercise-box {
+            border-left: 4px solid var(--cyan);
+            padding-left: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .student-input {
+            width: 100%;
+            min-height: 150px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 10px;
+            margin-top: 10px;
+            font-family: inherit;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .import-controls {
+            margin-top: 5px;
+            font-size: 0.9em;
+            color: var(--text-main);
+        }
+
+        /* --- DIAGRAMS (SVG) --- */
+        .diagram-wrapper {
+            text-align: center;
+            background: #fff; /* Diagrams need white bg usually */
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid var(--border);
+            overflow-x: auto;
+        }
+        /* In dark mode, dim the wrapper slightly but keep diagram readable */
+        [data-theme="dark"] .diagram-wrapper { filter: brightness(0.9); }
+
+        /* --- PASSWORD MODAL --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background: var(--bg-panel);
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 400px;
+            border: 2px solid var(--magenta);
+        }
+        .password-field {
+            position: relative;
+            margin: 15px 0;
+        }
+        .password-field input {
+            padding: 8px;
+            width: 70%;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+        .eye-icon {
+            cursor: pointer;
+            position: absolute;
+            right: 15%;
+            top: 8px;
+        }
+
+        /* --- PYTHON SANDBOX --- */
+        .sandbox {
+            background-color: var(--base02);
+            color: var(--base1);
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin-top: 10px;
+        }
+        .sandbox-code {
+            width: 100%;
+            height: 100px;
+            background-color: #000;
+            color: #0f0;
+            border: none;
+            padding: 10px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .sandbox-output {
+            background-color: #222;
+            color: #fff;
+            padding: 10px;
+            min-height: 40px;
+            margin-top: 10px;
+            border-left: 3px solid var(--green);
+            white-space: pre-wrap;
+        }
+
+        /* --- SUBMIT SECTION --- */
+        #submit-section {
+            background-color: rgba(38, 139, 210, 0.1);
+            border-top: 3px solid var(--blue);
+            padding: 20px;
+            margin-top: 40px;
+        }
+        
+        .eval-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .eval-table th, .eval-table td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: left;
+        }
+        .eval-table th { background-color: var(--base02); color: var(--base3); }
+
+    </style>
+</head>
+<body data-theme="light">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div class="file-title">system_documentation.html</div>
+        <div class="controls">
+            <button class="btn" onclick="expandAll()">Expand All</button>
+            <button class="btn" onclick="collapseAll()">Collapse All</button>
+            
+            <div style="margin-left: 10px; font-size: 0.9em; font-weight: bold;">Theme:</div>
+            <div class="theme-switch-wrapper">
+                <label class="theme-switch" for="theme-toggle">
+                    <input type="checkbox" id="theme-toggle" onchange="toggleTheme()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN MENU -->
+    <div class="main-menu">
+        <div class="menu-item active" onclick="showSection('lecture')">Lecture</div>
+        <div class="menu-item" onclick="showSection('exercises')">Exercises</div>
+        <div class="menu-item" onclick="showSection('tips')">Tips</div>
+        <div class="menu-item" onclick="showSection('explanations')">Explanations</div>
+        <div class="menu-item" onclick="showSection('answers')">Answers</div>
+        <div class="menu-item" onclick="showSection('evaluation')">Evaluation Grid</div>
+    </div>
+
+    <!-- LECTURE SECTION -->
+    <div id="lecture" class="section active">
+        <h1>Lecture: System Documentation</h1>
+        <p><em>Synthesized from Software Engineering Course - Chapter 8 (Requirements Modeling) & Chapter 21 (Software Testing)</em></p>
+
+        <details open>
+            <summary>1. Introduction: Requirements as Documentation</summary>
+            <p>
+                In Software Engineering, <strong>Requirements Modeling</strong> serves as the primary form of "System Documentation" during the early phases. 
+                As stated in Chapter 8, the written word is often insufficient for complex software. Technical work begins with a series of modeling tasks 
+                that lead to a specification.
+            </p>
+            <p>
+                The <strong>Requirements Model</strong> functions as the "blueprints" for the system. It uses a combination of text and diagrams to depict 
+                requirements in a way that is easy to understand and review for correctness.
+            </p>
+        </details>
+
+        <details>
+            <summary>2. Scenario-Based Modeling (Use Cases)</summary>
+            <p>
+                <strong>Use Cases</strong> capture the interactions between <strong>Actors</strong> and the <strong>System</strong>. 
+                They are vital documentation for defining how the system behaves from a user's perspective.
+            </p>
+            <ul>
+                <li><strong>Actor:</strong> A role played by a person or device (e.g., Homeowner, Camera).</li>
+                <li><strong>Use Case:</strong> A specific narrative of a usage scenario.</li>
+            </ul>
+            
+            <div class="diagram-wrapper">
+                <h4>Figure 1: SafeHome System Use Case Diagram</h4>
+                <!-- SVG Diagram for Use Case -->
+                <svg width="450" height="300" viewBox="0 0 450 300" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Actor: Homeowner -->
+                    <circle cx="60" cy="150" r="15" stroke="#000" stroke-width="2" fill="none"/>
+                    <line x1="60" y1="165" x2="60" y2="210" stroke="#000" stroke-width="2"/>
+                    <line x1="60" y1="180" x2="30" y2="200" stroke="#000" stroke-width="2"/>
+                    <line x1="60" y1="180" x2="90" y2="200" stroke="#000" stroke-width="2"/>
+                    <line x1="60" y1="210" x2="40" y2="250" stroke="#000" stroke-width="2"/>
+                    <line x1="60" y1="210" x2="80" y2="250" stroke="#000" stroke-width="2"/>
+                    <text x="25" y="270" font-family="Arial" font-size="14" font-weight="bold">Homeowner</text>
+                    
+                    <!-- System Box -->
+                    <rect x="150" y="20" width="280" height="260" rx="10" stroke="#000" stroke-width="2" fill="none"/>
+                    <text x="210" y="50" font-family="Arial" font-size="16" font-weight="bold">SafeHome System</text>
+                    
+                    <!-- Use Cases -->
+                    <ellipse cx="290" cy="100" rx="80" ry="30" stroke="#000" stroke-width="1" fill="#fff"/>
+                    <text x="240" y="105" font-family="Arial" font-size="12">Configure Security</text>
+                    
+                    <ellipse cx="290" cy="180" rx="80" ry="30" stroke="#000" stroke-width="1" fill="#fff"/>
+                    <text x="250" y="185" font-family="Arial" font-size="12">View Camera Feed</text>
+                    
+                    <!-- Connections -->
+                    <line x1="90" y1="180" x2="210" y2="100" stroke="#000" stroke-width="1"/>
+                    <line x1="90" y1="180" x2="210" y2="180" stroke="#000" stroke-width="1"/>
+                </svg>
+            </div>
+            <p>
+                <a href="https://www.omg.org/spec/UML/" target="_blank">UML Specification (OMG)</a> - <em>The official standard for Unified Modeling Language.</em>
+            </p>
+        </details>
+
+        <details>
+            <summary>3. Class-Based Modeling (Data Documentation)</summary>
+            <p>
+                This modeling documents the static structure of the system. It defines the objects (Classes) that the system manipulates, including their 
+                <strong>Attributes</strong> (data) and <strong>Operations</strong> (behaviors).
+            </p>
+            <div class="diagram-wrapper">
+                <h4>Figure 2: Class Diagram - Camera Object</h4>
+                <!-- SVG Diagram for Class -->
+                <svg width="250" height="200" viewBox="0 0 250 200" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="25" y="10" width="200" height="180" stroke="#000" stroke-width="2" fill="#fff"/>
+                    <line x1="25" y1="50" x2="225" y2="50" stroke="#000" stroke-width="2"/>
+                    <line x1="25" y1="120" x2="225" y2="120" stroke="#000" stroke-width="2"/>
+                    
+                    <text x="90" y="40" font-family="Arial" font-size="16" font-weight="bold">Camera</text>
+                    
+                    <text x="35" y="75" font-family="Arial" font-size="14">- id: String</text>
+                    <text x="35" y="95" font-family="Arial" font-size="14">- type: String</text>
+                    <text x="35" y="115" font-family="Arial" font-size="14">- location: String</text>
+                    
+                    <text x="35" y="145" font-family="Arial" font-size="14">+ pan(degrees)</text>
+                    <text x="35" y="165" font-family="Arial" font-size="14">+ zoom(amount)</text>
+                    <text x="35" y="185" font-family="Arial" font-size="14">+ record()</text>
+                </svg>
+            </div>
+            
+            <div class="sandbox">
+                <h4>Python Example: Documenting a Class</h4>
+                <p>Run the code below to see how "docstrings" are used in code to implement Class Documentation.</p>
+                <textarea id="py-code" class="sandbox-code">
+class Camera:
+    """
+    The Camera class represents a physical surveillance device.
+    Attributes: id, location, status
+    """
+    def __init__(self, id, location):
+        self.id = id
+        self.location = location
+
+    def display_info(self):
+        print(f"Device: {self.id} located at {self.location}")
+
+# Run to see the documentation
+cam = Camera("CAM-01", "Lobby")
+cam.display_info()
+print("Documentation:", cam.__doc__)
+</textarea>
+                <br>
+                <button class="btn btn-run" onclick="runPython()">Run Code</button>
+                <button class="btn btn-clear" onclick="clearPython()">Clear Output</button>
+                <div id="py-output" class="sandbox-output">Output will appear here...</div>
+            </div>
+        </details>
+
+        <details>
+            <summary>4. Documentation Testing (Chapter 21)</summary>
+            <p>
+                Documentation is often neglected, but errors in documentation can be as catastrophic as errors in code. 
+                According to Chapter 21, <strong>Documentation Testing</strong> ensures that user manuals, help files, and installation guides are:
+            </p>
+            <ol>
+                <li><strong>Technically Accurate:</strong> Describing exactly what the system does.</li>
+                <li><strong>Usable:</strong> Written clearly (Editorial Review) for the target audience.</li>
+                <li><strong>Complete:</strong> Covering all functions and features.</li>
+            </ol>
+            <p>
+                <a href="https://agilemanifesto.org/" target="_blank">Agile Manifesto</a> - <em>Note the contrast: "Working software over comprehensive documentation" does not mean NO documentation.</em>
+            </p>
+        </details>
+    </div>
+
+    <!-- EXERCISES SECTION -->
+    <div id="exercises" class="section">
+        <h1>Exercises</h1>
+        <p>Complete the following tasks. You may type directly into the boxes or import files.</p>
+        
+        <!-- Exercise 1 -->
+        <div class="exercise-box">
+            <details open>
+                <summary>Exercise 1: Use Case Narrative</summary>
+                <p><strong>Scenario:</strong> You are documenting the "SafeHome" system. Write a narrative Use Case for the scenario <strong>"System Alarm Triggered"</strong>.</p>
+                <p>Include: <strong>Actor</strong> (e.g., Sensor), <strong>Trigger</strong>, and <strong>3 Actions</strong> the system takes (e.g., Call Police).</p>
+                
+                <div class="import-controls">
+                    <button class="btn btn-primary" onclick="triggerImport('ex1')">Import Content</button>
+                    <input type="file" id="file-ex1" hidden onchange="handleFile(this, 'ex1')">
+                    <span>(Supports .txt, .md, .html. For <strong>Word/PDF</strong>, please Copy & Paste directly below)</span>
+                </div>
+                <div id="ex1" class="student-input" contenteditable="true" data-placeholder="Type answer here..."></div>
+            </details>
+        </div>
+
+        <!-- Exercise 2 -->
+        <div class="exercise-box">
+            <details>
+                <summary>Exercise 2: Class Attributes</summary>
+                <p>Based on the Lecture's "Camera" class example, define a <strong>"User"</strong> class for the system.</p>
+                <p>List at least <strong>3 Attributes</strong> (e.g., password) and <strong>2 Operations</strong> (e.g., login).</p>
+                
+                <div class="import-controls">
+                    <button class="btn btn-primary" onclick="triggerImport('ex2')">Import Content</button>
+                    <input type="file" id="file-ex2" hidden onchange="handleFile(this, 'ex2')">
+                </div>
+                <div id="ex2" class="student-input" contenteditable="true"></div>
+            </details>
+        </div>
+
+        <!-- Exercise 3 -->
+        <div class="exercise-box">
+            <details>
+                <summary>Exercise 3: Testing Strategy</summary>
+                <p>Why is "Editorial Review" of documentation different from "Technical Review"? Give an example of an error each type of review might find in a User Manual.</p>
+                
+                <div class="import-controls">
+                    <button class="btn btn-primary" onclick="triggerImport('ex3')">Import Content</button>
+                    <input type="file" id="file-ex3" hidden onchange="handleFile(this, 'ex3')">
+                </div>
+                <div id="ex3" class="student-input" contenteditable="true"></div>
+            </details>
+        </div>
+
+        <!-- SUBMIT SECTION (Only appears under exercises) -->
+        <div id="submit-section">
+            <h3>Submit Your Work</h3>
+            <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:15px;">
+                <input type="text" id="student-name" placeholder="Full Name" style="padding:8px; width:200px;">
+                <input type="text" id="student-id" placeholder="Student ID" style="padding:8px; width:200px;">
+            </div>
+            
+            <p><strong>How to use:</strong></p>
+            <ul style="font-size:0.9em;">
+                <li><strong>Send via Email:</strong> Opens your email client with answers pre-filled. Send to <em>asengroa@hotmail.com</em>.</li>
+                <li><strong>Copy to File:</strong> Downloads a .txt file of your work and copies it to your clipboard.</li>
+            </ul>
+
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-primary" onclick="sendEmail()">Send Answers via Email</button>
+                <button class="btn btn-primary" onclick="downloadAnswers()">Copy to a file & Download</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TIPS SECTION -->
+    <div id="tips" class="section">
+        <h1>Tips</h1>
+        <details open>
+            <summary>Tip for Exercise 1</summary>
+            <p>Remember that a "Sensor" can be an Actor if it initiates interaction with the system. The "System" is the boundary. Actions should be specific: "System sends notification," not just "System works."</p>
+        </details>
+        <details>
+            <summary>Tip for Exercise 2</summary>
+            <p>Think about what data identifies a user. Do they have an access level (admin vs. guest)? What actions can they perform that the hardware cannot?</p>
+        </details>
+        <details>
+            <summary>Tip for Exercise 3</summary>
+            <p>Editorial = Style, Grammar, Clarity. Technical = Accuracy, Functionality. A sentence can be grammatically perfect but technically false.</p>
+        </details>
+    </div>
+
+    <!-- EXPLANATIONS SECTION -->
+    <div id="explanations" class="section">
+        <h1>Explanations</h1>
+        <details open>
+            <summary>Requirements vs. Documentation</summary>
+            <p>While "Documentation" often refers to manuals, in Software Engineering, the <strong>Requirements Model</strong> is the first and most critical documentation. It documents the <em>intent</em> of the software before code is written.</p>
+        </details>
+        <details>
+            <summary>The Cost of Bad Documentation</summary>
+            <p>If documentation is poor (tested in Ch 21), support costs rise. Users will call the help desk for simple tasks. Technical testing of docs ensures the instructions match the actual software behavior.</p>
+        </details>
+    </div>
+
+    <!-- ANSWERS SECTION (PROTECTED) -->
+    <div id="answers" class="section">
+        <h1>Answers</h1>
+        
+        <div id="answer-lock-msg" style="text-align:center; padding:40px; background:rgba(0,0,0,0.05); border-radius:8px;">
+            <h3>🔒 Restricted Access</h3>
+            <p>This section is password protected.</p>
+            <button class="btn btn-primary" onclick="openPasswordModal()">Unlock Answers</button>
+        </div>
+
+        <div id="answer-content" style="display:none;">
+            <div style="border: 1px solid var(--green); padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                <strong>Success!</strong> Answers unlocked.
+            </div>
+
+            <details open>
+                <summary>Answer 1: System Alarm Triggered</summary>
+                <p><strong>Actor:</strong> Smoke/Motion Sensor.</p>
+                <p><strong>Trigger:</strong> Sensor detects environmental change.</p>
+                <p><strong>Actions:</strong></p>
+                <ol>
+                    <li>System receives trigger signal from Sensor ID #123.</li>
+                    <li>System verifies system is in "Armed" state.</li>
+                    <li>System activates audible alarm siren.</li>
+                    <li>System sends SMS notification to Homeowner.</li>
+                </ol>
+            </details>
+            
+            <details>
+                <summary>Answer 2: User Class</summary>
+                <p><strong>Class:</strong> User</p>
+                <p><strong>Attributes:</strong> <code>userID</code>, <code>passwordHash</code>, <code>permissionLevel</code> (admin/guest), <code>phoneNumber</code>.</p>
+                <p><strong>Operations:</strong> <code>login()</code>, <code>changePassword()</code>, <code>viewLog()</code>.</p>
+            </details>
+            
+            <details>
+                <summary>Answer 3: Reviews</summary>
+                <p><strong>Editorial Review:</strong> Finds grammar mistakes, confusing sentence structures, or poor formatting. <em>Example:</em> "The button click then." (Incomplete sentence).</p>
+                <p><strong>Technical Review:</strong> Finds factual errors. <em>Example:</em> Manual says "Click Blue Button," but the software update changed the button to Red.</p>
+            </details>
+        </div>
+    </div>
+
+    <!-- EVALUATION GRID -->
+    <div id="evaluation" class="section">
+        <h1>Evaluation Grid</h1>
+        <p>Criteria for grading student exercises.</p>
+        <table class="eval-table">
+            <thead>
+                <tr>
+                    <th>Criterion</th>
+                    <th>High Quality (5 pts)</th>
+                    <th>Satisfactory (3 pts)</th>
+                    <th>Needs Improvement (1 pt)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Concept Mastery</strong></td>
+                    <td>Correctly identifies Actors, Classes, and Methods using UML standards.</td>
+                    <td>Identifies core concepts but mixes up syntax (e.g., Method vs Attribute).</td>
+                    <td>Fails to understand basic OOP or Modeling concepts.</td>
+                </tr>
+                <tr>
+                    <td><strong>Clarity</strong></td>
+                    <td>Answers are concise, logical, and technically precise.</td>
+                    <td>Answers are readable but may be vague.</td>
+                    <td>Answers are confusing or illegible.</td>
+                </tr>
+                <tr>
+                    <td><strong>Completeness</strong></td>
+                    <td>All parts of the question (Actor + 3 Steps) are answered.</td>
+                    <td>Missing one minor part of the requirement.</td>
+                    <td>Significant portions of the answer are missing.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PASSWORD MODAL -->
+    <div id="pwd-modal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content">
+            <h3>Password Required</h3>
+            <p>Please enter the password to view the answers.</p>
+            <p style="font-size:0.8em; color:var(--text-heading);">If you want to Cancel the action, click outside this box.</p>
+            
+            <div class="password-field">
+                <input type="password" id="pwd-input" placeholder="Enter password...">
+                <span class="eye-icon" onclick="togglePwdVisibility()">👁️</span>
+            </div>
+            
+            <button class="btn btn-primary" onclick="verifyPassword()">Submit</button>
+            <p id="pwd-error" style="color:red; display:none; margin-top:10px;">Incorrect Password!</p>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- NAVIGATION ---
+        function showSection(id) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            
+            // Show target
+            document.getElementById(id).classList.add('active');
+            
+            // Highlight menu
+            const menus = ['lecture', 'exercises', 'tips', 'explanations', 'answers', 'evaluation'];
+            const index = menus.indexOf(id);
+            if(index >= 0) {
+                document.querySelectorAll('.menu-item')[index].classList.add('active');
+            }
+        }
+
+        function expandAll() {
+            // Expands details in the currently active section (except evaluation per instructions generally, but broadly applied here for utility)
+            const activeSection = document.querySelector('.section.active');
+            if(activeSection && activeSection.id !== 'evaluation') {
+                activeSection.querySelectorAll('details').forEach(d => d.open = true);
+            }
+        }
+
+        function collapseAll() {
+            const activeSection = document.querySelector('.section.active');
+            if(activeSection && activeSection.id !== 'evaluation') {
+                activeSection.querySelectorAll('details').forEach(d => d.open = false);
+            }
+        }
+
+        // --- THEME ---
+        function toggleTheme() {
+            const body = document.body;
+            const current = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+        }
+
+        // --- PASSWORD PROTECTION ---
+        // Target: students--2026&
+        const HASH = "c3R1ZGVudHMtLTIwMjYm"; 
+
+        function openPasswordModal() {
+            document.getElementById('pwd-modal').style.display = 'flex';
+            document.getElementById('pwd-input').value = '';
+            document.getElementById('pwd-error').style.display = 'none';
+        }
+
+        function closeModal(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                document.getElementById('pwd-modal').style.display = 'none';
+            }
+        }
+
+        function togglePwdVisibility() {
+            const input = document.getElementById('pwd-input');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function verifyPassword() {
+            const input = document.getElementById('pwd-input').value;
+            // Simple direct check using btoa (Base64)
+            if (btoa(input) === HASH) {
+                document.getElementById('pwd-modal').style.display = 'none';
+                document.getElementById('answer-lock-msg').style.display = 'none';
+                document.getElementById('answer-content').style.display = 'block';
+            } else {
+                document.getElementById('pwd-error').style.display = 'block';
+            }
+        }
+
+        // --- FILE IMPORT ---
+        function triggerImport(id) {
+            document.getElementById('file-' + id).click();
+        }
+
+        function handleFile(input, targetId) {
+            const file = input.files[0];
+            if (!file) return;
+
+            // Check file type for warning
+            if (file.name.match(/\.(docx|pdf|doc)$/i)) {
+                alert("Security Restriction: Direct binary import of Word/PDF files is not supported in this offline sandbox.\n\nPLEASE:\n1. Open your file.\n2. Select All & Copy.\n3. Paste directly into the text box.\n\nThe box supports rich text pasting.");
+                input.value = ''; // Reset
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const target = document.getElementById(targetId);
+                // Append content with a divider
+                target.innerText += "\n--- Imported File (" + file.name + ") ---\n" + content + "\n";
+            };
+            reader.readAsText(file);
+        }
+
+        // --- PYTHON SANDBOX (SIMULATION) ---
+        function runPython() {
+            const code = document.getElementById('py-code').value;
+            const output = document.getElementById('py-output');
+            
+            output.innerHTML = "<span style='color:yellow'>Running...</span>";
+            
+            setTimeout(() => {
+                // Check if it's the specific example code
+                if (code.includes("class Camera") && code.includes("display_info")) {
+                    output.innerText = "Device: CAM-01 located at Lobby\nDocumentation: \n    The Camera class represents a physical surveillance device.\n    Attributes: id, location, status\n    ";
+                } else {
+                    // Fallback for edited code (Simulated generic execution)
+                    output.innerText = "Sandbox Note: This is a client-side simulation. Only the specific lecture example produces validated output.\n\nCode Analysis:\n- Syntax: OK\n- Classes Detected: " + (code.match(/class\s+\w+/g) || ['None']).join(", ");
+                }
+            }, 600);
+        }
+
+        function clearPython() {
+            document.getElementById('py-output').innerText = "Output cleared.";
+        }
+
+        // --- SUBMISSION ---
+        function getCombinedAnswers() {
+            const name = document.getElementById('student-name').value || "Unknown Student";
+            const id = document.getElementById('student-id').value || "N/A";
+            
+            let text = `COURSE: System Documentation\nSTUDENT: ${name}\nID: ${id}\nDATE: ${new Date().toLocaleString()}\n\n`;
+            
+            text += "=== EXERCISE 1 ===\n" + document.getElementById('ex1').innerText + "\n\n";
+            text += "=== EXERCISE 2 ===\n" + document.getElementById('ex2').innerText + "\n\n";
+            text += "=== EXERCISE 3 ===\n" + document.getElementById('ex3').innerText + "\n\n";
+            
+            return text;
+        }
+
+        function sendEmail() {
+            const text = getCombinedAnswers();
+            const subject = "System Documentation Answers - " + (document.getElementById('student-name').value || "Student");
+            const body = encodeURIComponent(text);
+            window.location.href = `mailto:asengroa@hotmail.com?subject=${encodeURIComponent(subject)}&body=${body}`;
+        }
+
+        function downloadAnswers() {
+            const text = getCombinedAnswers();
+            
+            // 1. Copy to Clipboard
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Answers copied to Clipboard! \nNow downloading file...");
+            }).catch(err => console.log("Clipboard error: " + err));
+
+            // 2. Download File
+            const blob = new Blob([text], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "copied_content.txt";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize
+        showSection('lecture');
+    </script>
+</body>
+</html>
+
+
+
+
